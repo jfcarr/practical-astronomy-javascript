@@ -14,7 +14,7 @@ npm install practical-astronomy-javascript
 
 ### Date/Time
 
-- [ ] Calculate -> Date of Easter
+- [x] Calculate -> Date of Easter
 - [ ] Convert -> Civil Date to Day Number
 - [ ] Convert -> Civil Time <-> Decimal Hours
 - [ ] Extract -> Hour, Minutes, and Seconds parts of Decimal Hours
