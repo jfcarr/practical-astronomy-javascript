@@ -10,6 +10,30 @@ If you're interested in this topic, please buy the book! It provides far more de
 npm install practical-astronomy-javascript
 ```
 
+## Usage
+
+Example: Calculate date of Easter for 2024.
+
+Create client.js:
+
+```javascript
+const pa = require('practical-astronomy-javascript');
+
+console.log(pa.paDateTime.getDateOfEaster(2024));
+```
+
+Run it:
+
+```bash
+node client.js
+```
+
+Result:
+
+```
+[ 3, 31, 2024 ]
+```
+
 ## Library Functions - Status
 
 ### Date/Time
