@@ -38,3 +38,11 @@ test('Hour, Minutes, and Seconds parts of Decimal Hours', () => {
 
     expect(paMacros.decimalHoursSecond(18.52416667)).toBe(27);
 });
+
+test('Local Civil Time to Universal Time', () => {
+    expect(paDateTime.localCivilTimeToUniversalTime(3, 37, 0, true, 4, 1, 7, 2013)).toStrictEqual([22, 37, 0, 30, 6, 2013]);
+});
+
+test('Universal Time to Local Civil Time', () => {
+    expect(paDateTime.universalTimeToLocalCivilTime(22, 37, 0, true, 4, 30, 6, 2013)).toStrictEqual([3, 37, 0, 1, 7, 2013]);
+});
