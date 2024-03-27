@@ -55,3 +55,11 @@ test('Universal Time to Greenwich Sidereal Time', () => {
 test('Greenwich Sidereal Time to Universal Time', () => {
     expect(paDateTime.greenwichSiderealTimeToUniversalTime(4, 40, 5.23, 22, 4, 1980)).toStrictEqual([14, 36, 51.67, paTypes.WarningFlag.OK]);
 });
+
+test('Greenwich Sidereal Time to Local Sidereal Time', () => {
+    expect(paDateTime.greenwichSiderealTimeToLocalSiderealTime(4, 40, 5.23, -64)).toStrictEqual([0, 24, 5.23]);
+});
+
+test('Local Sidereal Time to Greenwich Sidereal Time', () => {
+    expect(paDateTime.localSiderealTimeToGreenwichSiderealTime(0, 24, 5.23, -64)).toStrictEqual([4, 40, 5.23]);
+});
