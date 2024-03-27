@@ -44,7 +44,7 @@ Result:
 - [x] Extract -> Hour, Minutes, and Seconds parts of Decimal Hours
 - [x] Convert -> Local Civil Time <-> Universal Time
 - [x] Convert -> Universal Time <-> Greenwich Sidereal Time
-- [ ] Convert -> Greenwich Sidereal Time <-> Local Sidereal Time
+- [x] Convert -> Greenwich Sidereal Time <-> Local Sidereal Time
 
 ### Coordinates
 

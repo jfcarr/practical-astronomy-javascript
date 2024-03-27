@@ -163,6 +163,39 @@ function greenwichSiderealTimeToUniversalTime(gstHours, gstMinutes, gstSeconds, 
     return [utHours, utMinutes, utSeconds, warningFlag];
 }
 
+/**
+ * Convert Greenwich Sidereal Time to Local Sidereal Time
+ */
+function greenwichSiderealTimeToLocalSiderealTime(gstHours, gstMinutes, gstSeconds, geographicalLongitude) {
+    var gst = paMacros.HMStoDH(gstHours, gstMinutes, gstSeconds);
+    var offset = geographicalLongitude / 15;
+    var lstHours1 = gst + offset;
+    var lstHours2 = lstHours1 - (24 * Math.floor(lstHours1 / 24));
+
+    var lstHours = paMacros.decimalHoursHour(lstHours2);
+    var lstMinutes = paMacros.decimalHoursMinute(lstHours2);
+    var lstSeconds = paMacros.decimalHoursSecond(lstHours2);
+
+    return [lstHours, lstMinutes, lstSeconds];
+}
+
+/**
+ * Convert Local Sidereal Time to Greenwich Sidereal Time
+ */
+function localSiderealTimeToGreenwichSiderealTime(lstHours, lstMinutes, lstSeconds, geographicalLongitude) {
+    var gst = paMacros.HMStoDH(lstHours, lstMinutes, lstSeconds);
+    var longHours = geographicalLongitude / 15;
+    var gst1 = gst - longHours;
+    var gst2 = gst1 - (24 * Math.floor(gst1 / 24));
+
+    var gstHours = paMacros.decimalHoursHour(gst2);
+    var gstMinutes = paMacros.decimalHoursMinute(gst2);
+    var gstSeconds = paMacros.decimalHoursSecond(gst2);
+
+    return [gstHours, gstMinutes, gstSeconds];
+}
+
+
 module.exports = {
     getDateOfEaster,
     civilDateToDayNumber,
@@ -171,5 +204,7 @@ module.exports = {
     localCivilTimeToUniversalTime,
     universalTimeToLocalCivilTime,
     universalTimeToGreenwichSiderealTime,
-    greenwichSiderealTimeToUniversalTime
+    greenwichSiderealTimeToUniversalTime,
+    greenwichSiderealTimeToLocalSiderealTime,
+    localSiderealTimeToGreenwichSiderealTime
 };
