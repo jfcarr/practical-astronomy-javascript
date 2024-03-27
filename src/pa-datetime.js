@@ -1,4 +1,5 @@
 const paMacros = require('./pa-macros.js');
+const paTypes = require('./pa-types.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -118,11 +119,57 @@ function universalTimeToLocalCivilTime(utHours, utMinutes, utSeconds, isDaylight
     ];
 }
 
+/**
+ * Convert Universal Time to Greenwich Sidereal Time
+ */
+function universalTimeToGreenwichSiderealTime(utHours, utMinutes, utSeconds, gwDay, gwMonth, gwYear) {
+    var jd = paMacros.civilDateToJulianDate(gwDay, gwMonth, gwYear);
+    var s = jd - 2451545;
+    var t = s / 36525;
+    var t01 = 6.697374558 + (2400.051336 * t) + (0.000025862 * t * t);
+    var t02 = t01 - (24.0 * Math.floor(t01 / 24));
+    var ut = paMacros.HMStoDH(utHours, utMinutes, utSeconds);
+    var a = ut * 1.002737909;
+    var gst1 = t02 + a;
+    var gst2 = gst1 - (24.0 * Math.floor(gst1 / 24));
+
+    var gstHours = paMacros.decimalHoursHour(gst2);
+    var gstMinutes = paMacros.decimalHoursMinute(gst2);
+    var gstSeconds = paMacros.decimalHoursSecond(gst2);
+
+    return [gstHours, gstMinutes, gstSeconds];
+}
+
+/**
+ * Convert Greenwich Sidereal Time to Universal Time
+ */
+function greenwichSiderealTimeToUniversalTime(gstHours, gstMinutes, gstSeconds, gwDay, gwMonth, gwYear) {
+    var jd = paMacros.civilDateToJulianDate(gwDay, gwMonth, gwYear);
+    var s = jd - 2451545;
+    var t = s / 36525;
+    var t01 = 6.697374558 + (2400.051336 * t) + (0.000025862 * t * t);
+    var t02 = t01 - (24 * Math.floor(t01 / 24));
+    var gstHours1 = paMacros.HMStoDH(gstHours, gstMinutes, gstSeconds);
+
+    var a = gstHours1 - t02;
+    var b = a - (24 * Math.floor(a / 24));
+    var ut = b * 0.9972695663;
+    var utHours = paMacros.decimalHoursHour(ut);
+    var utMinutes = paMacros.decimalHoursMinute(ut);
+    var utSeconds = paMacros.decimalHoursSecond(ut);
+
+    var warningFlag = (ut < 0.065574) ? paTypes.WarningFlag.Warning : paTypes.WarningFlag.OK;
+
+    return [utHours, utMinutes, utSeconds, warningFlag];
+}
+
 module.exports = {
     getDateOfEaster,
     civilDateToDayNumber,
     civilTimeToDecimalHours,
     decimalHoursToCivilTime,
     localCivilTimeToUniversalTime,
-    universalTimeToLocalCivilTime
+    universalTimeToLocalCivilTime,
+    universalTimeToGreenwichSiderealTime,
+    greenwichSiderealTimeToUniversalTime
 };
