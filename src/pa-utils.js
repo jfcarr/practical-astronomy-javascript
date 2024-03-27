@@ -14,6 +14,16 @@ function isLeapYear(inputYear) {
         return false;
 }
 
+/**
+ * Round a number (value) to specified number of decimal places (precision)
+ */
+function round(value, precision) {
+    var multiplier = Math.pow(10, precision || 0);
+
+    return Math.round(value * multiplier) / multiplier;
+}
+
 module.exports = {
-    isLeapYear
+    isLeapYear,
+    round
 };

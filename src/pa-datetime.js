@@ -1,3 +1,4 @@
+const paMacros = require('./pa-macros.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -44,7 +45,27 @@ function civilDateToDayNumber(month, day, year) {
     return month + day;
 }
 
+/**
+ * Convert a Civil Time (hours,minutes,seconds) to Decimal Hours
+ */
+function civilTimeToDecimalHours(hours, minutes, seconds) {
+    return paMacros.HMStoDH(hours, minutes, seconds);
+}
+
+/**
+ * Convert Decimal Hours to Civil Time
+ */
+function decimalHoursToCivilTime(decimalHours) {
+    var hours = paMacros.decimalHoursHour(decimalHours);
+    var minutes = paMacros.decimalHoursMinute(decimalHours);
+    var seconds = paMacros.decimalHoursSecond(decimalHours);
+
+    return [hours, minutes, seconds];
+}
+
 module.exports = {
     getDateOfEaster,
-    civilDateToDayNumber
+    civilDateToDayNumber,
+    civilTimeToDecimalHours,
+    decimalHoursToCivilTime
 };
