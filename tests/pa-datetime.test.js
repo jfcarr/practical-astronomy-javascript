@@ -1,4 +1,5 @@
 const paDateTime = require('../src/pa-datetime.js');
+const paUtils = require('../src/pa-utils.js');
 
 test('Calculate date of Easter', () => {
     let [month, day, year] = paDateTime.getDateOfEaster(2003);
@@ -19,4 +20,12 @@ test('Civil Date to Day Number', () => {
     expect(paDateTime.civilDateToDayNumber(6, 1, 2003)).toBe(152);
 
     expect(paDateTime.civilDateToDayNumber(11, 27, 2009)).toBe(331);
+});
+
+test('Civil Time to Decimal Hours', () => {
+    expect(paUtils.round(paDateTime.civilTimeToDecimalHours(18, 31, 27), 8)).toBe(18.52416667);
+});
+
+test('Decimal Hours to Civil Time', () => {
+    expect(paDateTime.decimalHoursToCivilTime(18.52416667)).toStrictEqual([18, 31, 27]);
 });
