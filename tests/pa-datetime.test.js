@@ -1,4 +1,5 @@
 const paDateTime = require('../src/pa-datetime.js');
+const paMacros = require('../src/pa-macros.js');
 const paUtils = require('../src/pa-utils.js');
 
 test('Calculate date of Easter', () => {
@@ -28,4 +29,12 @@ test('Civil Time to Decimal Hours', () => {
 
 test('Decimal Hours to Civil Time', () => {
     expect(paDateTime.decimalHoursToCivilTime(18.52416667)).toStrictEqual([18, 31, 27]);
+});
+
+test('Hour, Minutes, and Seconds parts of Decimal Hours', () => {
+    expect(paMacros.decimalHoursHour(18.52416667)).toBe(18);
+
+    expect(paMacros.decimalHoursMinute(18.52416667)).toBe(31);
+
+    expect(paMacros.decimalHoursSecond(18.52416667)).toBe(27);
 });
