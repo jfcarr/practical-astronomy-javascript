@@ -1,3 +1,8 @@
+const paUtils = require('./pa-utils.js');
+
+/**
+ * Gets the date of Easter for the year specified.
+ */
 function getDateOfEaster(inputYear) {
     var year = inputYear;
 
@@ -22,6 +27,24 @@ function getDateOfEaster(inputYear) {
     return [month, day, year];
 }
 
+/**
+ * Calculate day number for a date.
+ */
+function civilDateToDayNumber(month, day, year) {
+    if (month <= 2) {
+        month = month - 1;
+        month = (paUtils.isLeapYear(year)) ? month * 62 : month * 63;
+        month = Math.floor(month / 2);
+    }
+    else {
+        month = Math.floor((month + 1) * 30.6);
+        month = (paUtils.isLeapYear(year)) ? month - 62 : month - 63;
+    }
+
+    return month + day;
+}
+
 module.exports = {
-    getDateOfEaster
+    getDateOfEaster,
+    civilDateToDayNumber
 };
