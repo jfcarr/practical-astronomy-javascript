@@ -42,7 +42,7 @@ Result:
 - [x] Convert -> Civil Date to Day Number
 - [x] Convert -> Civil Time <-> Decimal Hours
 - [x] Extract -> Hour, Minutes, and Seconds parts of Decimal Hours
-- [ ] Convert -> Local Civil Time <-> Universal Time
+- [x] Convert -> Local Civil Time <-> Universal Time
 - [ ] Convert -> Universal Time <-> Greenwich Sidereal Time
 - [ ] Convert -> Greenwich Sidereal Time <-> Local Sidereal Time
 

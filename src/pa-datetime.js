@@ -63,9 +63,66 @@ function decimalHoursToCivilTime(decimalHours) {
     return [hours, minutes, seconds];
 }
 
+/**
+ * Convert local Civil Time to Universal Time
+ */
+function localCivilTimeToUniversalTime(lctHours, lctMinutes, lctSeconds, isDaylightSavings, zoneCorrection, localDay, localMonth, localYear) {
+    var lct = civilTimeToDecimalHours(lctHours, lctMinutes, lctSeconds);
+
+    var daylightSavingsOffset = (isDaylightSavings) ? 1 : 0;
+
+    var utInterim = lct - daylightSavingsOffset - zoneCorrection;
+    var gdayInterim = localDay + (utInterim / 24);
+
+    var jd = paMacros.civilDateToJulianDate(gdayInterim, localMonth, localYear);
+
+    var gDay = paMacros.julianDateDay(jd);
+    var gMonth = paMacros.julianDateMonth(jd);
+    var gYear = paMacros.julianDateYear(jd);
+
+    var ut = 24 * (gDay - Math.floor(gDay));
+
+    return [
+        paMacros.decimalHoursHour(ut),
+        paMacros.decimalHoursMinute(ut),
+        paMacros.decimalHoursSecond(ut),
+        Math.floor(gDay),
+        gMonth,
+        gYear
+    ];
+}
+
+/**
+ * Convert Universal Time to local Civil Time
+ */
+function universalTimeToLocalCivilTime(utHours, utMinutes, utSeconds, isDaylightSavings, zoneCorrection, gwDay, gwMonth, gwYear) {
+    var dstValue = (isDaylightSavings) ? 1 : 0;
+    var ut = paMacros.HMStoDH(utHours, utMinutes, utSeconds);
+    var zoneTime = ut + zoneCorrection;
+    var localTime = zoneTime + dstValue;
+    var localJDPlusLocalTime = paMacros.civilDateToJulianDate(gwDay, gwMonth, gwYear) + (localTime / 24);
+    var localDay = paMacros.julianDateDay(localJDPlusLocalTime);
+    var integerDay = Math.floor(localDay);
+    var localMonth = paMacros.julianDateMonth(localJDPlusLocalTime);
+    var localYear = paMacros.julianDateYear(localJDPlusLocalTime);
+
+    var lct = 24 * (localDay - integerDay);
+
+    return [
+        paMacros.decimalHoursHour(lct),
+        paMacros.decimalHoursMinute(lct),
+        paMacros.decimalHoursSecond(lct),
+        integerDay,
+        localMonth,
+        localYear
+    ];
+}
+
 module.exports = {
     getDateOfEaster,
     civilDateToDayNumber,
     civilTimeToDecimalHours,
-    decimalHoursToCivilTime
+    decimalHoursToCivilTime,
+    localCivilTimeToUniversalTime,
+    universalTimeToLocalCivilTime
 };
