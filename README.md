@@ -49,7 +49,7 @@ Result:
 ### Coordinates
 
 - [x] Convert -> Angle <-> Decimal Degrees
-- [ ] Convert -> Right Ascension <-> Hour Angle
+- [x] Convert -> Right Ascension <-> Hour Angle
 - [ ] Convert -> Equatorial Coordinates <-> Horizon Coordinates
 - [ ] Calculate -> Obliquity of the Ecliptic
 - [ ] Convert -> Ecliptic Coordinates <-> Equatorial Coordinates

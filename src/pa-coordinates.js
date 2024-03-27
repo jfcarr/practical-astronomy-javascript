@@ -1,3 +1,4 @@
+const paMacros = require('./pa-macros.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -28,7 +29,40 @@ function decimalDegreesToAngle(decimalDegrees) {
     return [signedDegrees, minutes, Math.floor(correctedSeconds)];
 }
 
+/**
+ * Convert Right Ascension to Hour Angle
+ */
+function rightAscensionToHourAngle(raHours, raMinutes, raSeconds, lctHours, lctMinutes, lctSeconds, isDaylightSavings, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude) {
+    var daylightSaving = (isDaylightSavings) ? 1 : 0;
+
+    var hourAngle = paMacros.rightAscensionToHourAngle(raHours, raMinutes, raSeconds, lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude);
+
+    var hourAngleHours = paMacros.decimalHoursHour(hourAngle);
+    var hourAngleMinutes = paMacros.decimalHoursMinute(hourAngle);
+    var hourAngleSeconds = paMacros.decimalHoursSecond(hourAngle);
+
+    return [hourAngleHours, hourAngleMinutes, hourAngleSeconds];
+}
+
+/**
+ * Convert Hour Angle to Right Ascension
+ */
+function hourAngleToRightAscension(hourAngleHours, hourAngleMinutes, hourAngleSeconds, lctHours, lctMinutes, lctSeconds, isDaylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var rightAscension = paMacros.hourAngleToRightAscension(hourAngleHours, hourAngleMinutes, hourAngleSeconds, lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude);
+
+    var rightAscensionHours = paMacros.decimalHoursHour(rightAscension);
+    var rightAscensionMinutes = paMacros.decimalHoursMinute(rightAscension);
+    var rightAscensionSeconds = paMacros.decimalHoursSecond(rightAscension);
+
+    return [rightAscensionHours, rightAscensionMinutes, rightAscensionSeconds];
+}
+
+
 module.exports = {
     angleToDecimalDegrees,
-    decimalDegreesToAngle
+    decimalDegreesToAngle,
+    rightAscensionToHourAngle,
+    hourAngleToRightAscension
 };
