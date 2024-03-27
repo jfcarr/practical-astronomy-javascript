@@ -1,5 +1,6 @@
 const paDateTime = require('../src/pa-datetime.js');
 const paMacros = require('../src/pa-macros.js');
+const paTypes = require('../src/pa-types.js');
 const paUtils = require('../src/pa-utils.js');
 
 test('Calculate date of Easter', () => {
@@ -45,4 +46,12 @@ test('Local Civil Time to Universal Time', () => {
 
 test('Universal Time to Local Civil Time', () => {
     expect(paDateTime.universalTimeToLocalCivilTime(22, 37, 0, true, 4, 30, 6, 2013)).toStrictEqual([3, 37, 0, 1, 7, 2013]);
+});
+
+test('Universal Time to Greenwich Sidereal Time', () => {
+    expect(paDateTime.universalTimeToGreenwichSiderealTime(14, 36, 51.67, 22, 4, 1980)).toStrictEqual([4, 40, 5.23]);
+});
+
+test('Greenwich Sidereal Time to Universal Time', () => {
+    expect(paDateTime.greenwichSiderealTimeToUniversalTime(4, 40, 5.23, 22, 4, 1980)).toStrictEqual([14, 36, 51.67, paTypes.WarningFlag.OK]);
 });
