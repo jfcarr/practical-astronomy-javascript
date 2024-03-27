@@ -157,6 +157,133 @@ function julianDateYear(julianDate) {
   return returnValue;
 }
 
+/**
+ * Convert Right Ascension to Hour Angle
+ * 
+ * Original macro name: RAHA
+ */
+function rightAscensionToHourAngle(raHours, raMinutes, raSeconds, lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude) {
+  var a = localCivilTimeToUniversalTime(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var b = localCivilTimeGreenwichDay(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var c = localCivilTimeGreenwichMonth(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var d = localCivilTimeGreenwichYear(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var e = universalTimeToGreenwichSiderealTime(a, 0, 0, b, c, d);
+  var f = greenwichSiderealTimeToLocalSiderealTime(e, 0, 0, geographicalLongitude);
+  var g = HMStoDH(raHours, raMinutes, raSeconds);
+  var h = f - g;
+
+  return (h < 0) ? 24 + h : h;
+}
+
+/**
+ * Convert Hour Angle to Right Ascension
+ * 
+ * Original macro name: HARA
+ */
+function hourAngleToRightAscension(hourAngleHours, hourAngleMinutes, hourAngleSeconds, lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude) {
+  var a = localCivilTimeToUniversalTime(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var b = localCivilTimeGreenwichDay(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var c = localCivilTimeGreenwichMonth(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var d = localCivilTimeGreenwichYear(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+  var e = universalTimeToGreenwichSiderealTime(a, 0, 0, b, c, d);
+  var f = greenwichSiderealTimeToLocalSiderealTime(e, 0, 0, geographicalLongitude);
+  var g = HMStoDH(hourAngleHours, hourAngleMinutes, hourAngleSeconds);
+  var h = f - g;
+
+  return (h < 0) ? 24 + h : h;
+}
+
+/**
+ * Convert Local Civil Time to Universal Time
+ * 
+ * Original macro name: LctUT
+ */
+function localCivilTimeToUniversalTime(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear) {
+  var a = HMStoDH(lctHours, lctMinutes, lctSeconds);
+  var b = a - daylightSaving - zoneCorrection;
+  var c = localDay + (b / 24);
+  var d = civilDateToJulianDate(c, localMonth, localYear);
+  var e = julianDateDay(d);
+  var e1 = Math.floor(e);
+
+  return 24 * (e - e1);
+}
+
+/**
+ * Determine Greenwich Day for Local Time
+ * 
+ * Original macro name: LctGDay
+ */
+function localCivilTimeGreenwichDay(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear) {
+  var a = HMStoDH(lctHours, lctMinutes, lctSeconds);
+  var b = a - daylightSaving - zoneCorrection;
+  var c = localDay + (b / 24);
+  var d = civilDateToJulianDate(c, localMonth, localYear);
+  var e = julianDateDay(d);
+
+  return Math.floor(e);
+}
+
+/**
+ * Determine Greenwich Month for Local Time
+ * 
+ * Original macro name: LctGMonth
+ */
+function localCivilTimeGreenwichMonth(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear) {
+  var a = HMStoDH(lctHours, lctMinutes, lctSeconds);
+  var b = a - daylightSaving - zoneCorrection;
+  var c = localDay + (b / 24);
+  var d = civilDateToJulianDate(c, localMonth, localYear);
+
+  return julianDateMonth(d);
+}
+
+/**
+ * Determine Greenwich Year for Local Time
+ * 
+ * Original macro name: LctGYear
+ */
+function localCivilTimeGreenwichYear(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear) {
+  var a = HMStoDH(lctHours, lctMinutes, lctSeconds);
+  var b = a - daylightSaving - zoneCorrection;
+  var c = localDay + (b / 24);
+  var d = civilDateToJulianDate(c, localMonth, localYear);
+
+  return julianDateYear(d);
+}
+
+/**
+ * Convert Universal Time to Greenwich Sidereal Time
+ * 
+ * Original macro name: UTGST
+ */
+function universalTimeToGreenwichSiderealTime(uHours, uMinutes, uSeconds, greenwichDay, greenwichMonth, greenwichYear) {
+  var a = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear);
+  var b = a - 2451545;
+  var c = b / 36525;
+  var d = 6.697374558 + (2400.051336 * c) + (0.000025862 * c * c);
+  var e = d - (24 * Math.floor(d / 24));
+  var f = HMStoDH(uHours, uMinutes, uSeconds);
+  var g = f * 1.002737909;
+  var h = e + g;
+
+  return h - (24 * Math.floor(h / 24));
+}
+
+/**
+ * Convert Greenwich Sidereal Time to Local Sidereal Time
+ * 
+ * Original macro name: GSTLST
+ */
+function greenwichSiderealTimeToLocalSiderealTime(greenwichHours, greenwichMinutes, greenwichSeconds, geographicalLongitude) {
+  var a = HMStoDH(greenwichHours, greenwichMinutes, greenwichSeconds);
+  var b = geographicalLongitude / 15;
+  var c = a + b;
+
+  return c - (24 * Math.floor(c / 24));
+}
+
+
 module.exports = {
   HMStoDH,
   decimalHoursHour,
@@ -165,5 +292,13 @@ module.exports = {
   civilDateToJulianDate,
   julianDateDay,
   julianDateMonth,
-  julianDateYear
+  julianDateYear,
+  rightAscensionToHourAngle,
+  hourAngleToRightAscension,
+  localCivilTimeToUniversalTime,
+  localCivilTimeGreenwichDay,
+  localCivilTimeGreenwichMonth,
+  localCivilTimeGreenwichYear,
+  universalTimeToGreenwichSiderealTime,
+  greenwichSiderealTimeToLocalSiderealTime
 };
