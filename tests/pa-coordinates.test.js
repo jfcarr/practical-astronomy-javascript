@@ -53,3 +53,7 @@ test('Angle Between Two Objects', () => {
 test('Rising and Setting', () => {
     expect(paCoord.risingAndSetting(23, 39, 20, 21, 42, 0, 24, 8, 2010, 64, 30, 0.5667)).toStrictEqual([paTypes.RiseSetStatus.OK, 14, 16, 4, 10, 64.36, 295.64]);
 });
+
+test('Correct For Precession', () => {
+    expect(paCoord.correctForPrecession(9, 10, 43, 14, 23, 25, 0.923, 1, 1950, 1, 6, 1979)).toStrictEqual([9, 12, 20.18, 14, 16, 9.12]);
+});

@@ -289,6 +289,31 @@ function risingAndSetting(raHours, raMinutes, raSeconds, decDeg, decMin, decSec,
     return [riseSetStatus, utRiseHour, utRiseMin, utSetHour, utSetMin, azRise, azSet];
 }
 
+/**
+ * Calculate precession (corrected coordinates between two epochs)
+ */
+function correctForPrecession(raHour, raMinutes, raSeconds, decDeg, decMinutes, decSeconds, epoch1Day, epoch1Month, epoch1Year, epoch2Day, epoch2Month, epoch2Year) {
+    var ra1Rad = paUtils.degreesToRadians(paMacros.degreeHoursToDecimalDegrees(paMacros.HMStoDH(raHour, raMinutes, raSeconds)));
+    var dec1Rad = paUtils.degreesToRadians(paMacros.degreesMinutesSecondsToDecimalDegrees(decDeg, decMinutes, decSeconds));
+    var tCenturies = (paMacros.civilDateToJulianDate(epoch1Day, epoch1Month, epoch1Year) - 2415020) / 36525;
+    var mSec = 3.07234 + (0.00186 * tCenturies);
+    var nArcsec = 20.0468 - (0.0085 * tCenturies);
+    var nYears = (paMacros.civilDateToJulianDate(epoch2Day, epoch2Month, epoch2Year) - paMacros.civilDateToJulianDate(epoch1Day, epoch1Month, epoch1Year)) / 365.25;
+    var s1Hours = ((mSec + (nArcsec * Math.sin(ra1Rad) * Math.tan(dec1Rad) / 15)) * nYears) / 3600;
+    var ra2Hours = paMacros.HMStoDH(raHour, raMinutes, raSeconds) + s1Hours;
+    var s2Deg = (nArcsec * Math.cos(ra1Rad) * nYears) / 3600;
+    var dec2Deg = paMacros.degreesMinutesSecondsToDecimalDegrees(decDeg, decMinutes, decSeconds) + s2Deg;
+
+    var correctedRAHour = paMacros.decimalHoursHour(ra2Hours);
+    var correctedRAMinutes = paMacros.decimalHoursMinute(ra2Hours);
+    var correctedRASeconds = paMacros.decimalHoursSecond(ra2Hours);
+    var correctedDecDeg = paMacros.decimalDegreesDegrees(dec2Deg);
+    var correctedDecMinutes = paMacros.decimalDegreesMinutes(dec2Deg);
+    var correctedDecSeconds = paMacros.decimalDegreesSeconds(dec2Deg);
+
+    return [correctedRAHour, correctedRAMinutes, correctedRASeconds, correctedDecDeg, correctedDecMinutes, correctedDecSeconds];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -303,5 +328,6 @@ module.exports = {
     equatorialCoordinateToGalacticCoordinate,
     galacticCoordinateToEquatorialCoordinate,
     angleBetweenTwoObjects,
-    risingAndSetting
+    risingAndSetting,
+    correctForPrecession
 };
