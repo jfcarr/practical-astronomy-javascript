@@ -36,3 +36,11 @@ test('Ecliptic Coordinate to Equatorial Coordinate', () => {
 test('Equatorial Coordinate to Ecliptic Coordinate', () => {
     expect(paCoord.equatorialCoordinateToEclipticCoordinate(9, 34, 53.4, 19, 32, 8.52, 6, 7, 2009)).toStrictEqual([139, 41, 9.97, 4, 52, 30.99]);
 });
+
+test('Equatorial Coordinate to Galactic Coordinate', () => {
+    expect(paCoord.equatorialCoordinateToGalacticCoordinate(10, 21, 0, 10, 3, 11)).toStrictEqual([232, 14, 52.38, 51, 7, 20.16]);
+});
+
+test('Galactic Coordinate to Equatorial Coordinate', () => {
+    expect(paCoord.galacticCoordinateToEquatorialCoordinate(232, 14, 52.38, 51, 7, 20.16)).toStrictEqual([10, 21, 0, 10, 3, 11]);
+});

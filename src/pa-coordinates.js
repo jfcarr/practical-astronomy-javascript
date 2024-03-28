@@ -169,6 +169,61 @@ function equatorialCoordinateToEclipticCoordinate(raHours, raMinutes, raSeconds,
     return [outEclLongDeg, outEclLongMin, outEclLongSec, outEclLatDeg, outEclLatMin, outEclLatSec];
 }
 
+/**
+ * 
+ * Convert Equatorial Coordinates to Galactic Coordinates
+ */
+function equatorialCoordinateToGalacticCoordinate(raHours, raMinutes, raSeconds, decDegrees, decMinutes, decSeconds) {
+    var raDeg = paMacros.degreeHoursToDecimalDegrees(paMacros.HMStoDH(raHours, raMinutes, raSeconds));
+    var decDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(decDegrees, decMinutes, decSeconds);
+    var raRad = paUtils.degreesToRadians(raDeg);
+    var decRad = paUtils.degreesToRadians(decDeg);
+    var sinB = Math.cos(decRad) * Math.cos(paUtils.degreesToRadians(27.4)) * Math.cos(raRad - paUtils.degreesToRadians(192.25)) + Math.sin(decRad) * Math.sin(paUtils.degreesToRadians(27.4));
+    var bRadians = Math.asin(sinB);
+    var bDeg = paMacros.degrees(bRadians);
+    var y = Math.sin(decRad) - sinB * Math.sin(paUtils.degreesToRadians(27.4));
+    var x = Math.cos(decRad) * Math.sin(raRad - paUtils.degreesToRadians(192.25)) * Math.cos(paUtils.degreesToRadians(27.4));
+    var longDeg1 = paMacros.degrees(Math.atan2(y, x)) + 33;
+    var longDeg2 = longDeg1 - 360 * Math.floor(longDeg1 / 360);
+
+    var galLongDeg = paMacros.decimalDegreesDegrees(longDeg2);
+    var galLongMin = paMacros.decimalDegreesMinutes(longDeg2);
+    var galLongSec = paMacros.decimalDegreesSeconds(longDeg2);
+    var galLatDeg = paMacros.decimalDegreesDegrees(bDeg);
+    var galLatMin = paMacros.decimalDegreesMinutes(bDeg);
+    var galLatSec = paMacros.decimalDegreesSeconds(bDeg);
+
+    return [galLongDeg, galLongMin, galLongSec, galLatDeg, galLatMin, galLatSec];
+}
+
+/**
+ * Convert Galactic Coordinates to Equatorial Coordinates
+ */
+function galacticCoordinateToEquatorialCoordinate(galLongDeg, galLongMin, galLongSec, galLatDeg, galLatMin, galLatSec) {
+    var glongDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(galLongDeg, galLongMin, galLongSec);
+    var glatDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(galLatDeg, galLatMin, galLatSec);
+    var glongRad = paUtils.degreesToRadians(glongDeg);
+    var glatRad = paUtils.degreesToRadians(glatDeg);
+    var sinDec = Math.cos(glatRad) * Math.cos(paUtils.degreesToRadians(27.4)) * Math.sin(glongRad - paUtils.degreesToRadians(33.0)) + Math.sin(glatRad) * Math.sin(paUtils.degreesToRadians(27.4));
+    var decRadians = Math.asin(sinDec);
+    var decDeg = paMacros.degrees(decRadians);
+    var y = Math.cos(glatRad) * Math.cos(glongRad - paUtils.degreesToRadians(33.0));
+    var x = Math.sin(glatRad) * Math.cos(paUtils.degreesToRadians(27.4)) - Math.cos(glatRad) * Math.sin(paUtils.degreesToRadians(27.4)) * Math.sin(glongRad - paUtils.degreesToRadians(33.0));
+
+    var raDeg1 = paMacros.degrees(Math.atan2(y, x)) + 192.25;
+    var raDeg2 = raDeg1 - 360 * Math.floor(raDeg1 / 360);
+    var raHours1 = paMacros.decimalDegreesToDegreeHours(raDeg2);
+
+    var raHours = paMacros.decimalHoursHour(raHours1);
+    var raMinutes = paMacros.decimalHoursMinute(raHours1);
+    var raSeconds = paMacros.decimalHoursSecond(raHours1);
+    var decDegrees = paMacros.decimalDegreesDegrees(decDeg);
+    var decMinutes = paMacros.decimalDegreesMinutes(decDeg);
+    var decSeconds = paMacros.decimalDegreesSeconds(decDeg);
+
+    return [raHours, raMinutes, raSeconds, decDegrees, decMinutes, decSeconds];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -179,5 +234,7 @@ module.exports = {
     horizonCoordinatesToEquatorialCoordinates,
     meanObliquityOfTheEcliptic,
     eclipticCoordinateToEquatorialCoordinate,
-    equatorialCoordinateToEclipticCoordinate
+    equatorialCoordinateToEclipticCoordinate,
+    equatorialCoordinateToGalacticCoordinate,
+    galacticCoordinateToEquatorialCoordinate
 };
