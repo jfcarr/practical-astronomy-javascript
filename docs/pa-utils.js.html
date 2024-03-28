@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pa-utils.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pa-utils.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Determine if year is a leap year.
+ */
+function isLeapYear(inputYear) {
+    var year = inputYear;
+
+    if (year % 4 == 0) {
+        if (year % 100 == 0)
+            return (year % 400 == 0) ? true : false;
+        else
+            return true;
+    }
+    else
+        return false;
+}
+
+/**
+ * Round a number (value) to specified number of decimal places (precision)
+ */
+function round(value, precision) {
+    var multiplier = Math.pow(10, precision || 0);
+
+    return Math.round(value * multiplier) / multiplier;
+}
+
+/**
+ * Convert radians to degrees.
+ */
+function radiansToDegrees(radians) {
+    return radians * Math.PI / 180;
+}
+
+/**
+ * Convert degrees to radians.
+ */
+function degreesToRadians(degrees) {
+    return degrees * (Math.PI / 180);
+}
+
+
+module.exports = {
+    isLeapYear,
+    round,
+    radiansToDegrees,
+    degreesToRadians
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#HMStoDH">HMStoDH</a></li><li><a href="global.html#WarningFlag">WarningFlag</a></li><li><a href="global.html#angleToDecimalDegrees">angleToDecimalDegrees</a></li><li><a href="global.html#civilDateToDayNumber">civilDateToDayNumber</a></li><li><a href="global.html#civilDateToJulianDate">civilDateToJulianDate</a></li><li><a href="global.html#civilTimeToDecimalHours">civilTimeToDecimalHours</a></li><li><a href="global.html#decimalDegreesDegrees">decimalDegreesDegrees</a></li><li><a href="global.html#decimalDegreesMinutes">decimalDegreesMinutes</a></li><li><a href="global.html#decimalDegreesSeconds">decimalDegreesSeconds</a></li><li><a href="global.html#decimalDegreesToAngle">decimalDegreesToAngle</a></li><li><a href="global.html#decimalDegreesToDegreeHours">decimalDegreesToDegreeHours</a></li><li><a href="global.html#decimalHoursHour">decimalHoursHour</a></li><li><a href="global.html#decimalHoursMinute">decimalHoursMinute</a></li><li><a href="global.html#decimalHoursSecond">decimalHoursSecond</a></li><li><a href="global.html#decimalHoursToCivilTime">decimalHoursToCivilTime</a></li><li><a href="global.html#degreeHoursToDecimalDegrees">degreeHoursToDecimalDegrees</a></li><li><a href="global.html#degrees">degrees</a></li><li><a href="global.html#degreesMinutesSecondsToDecimalDegrees">degreesMinutesSecondsToDecimalDegrees</a></li><li><a href="global.html#degreesToRadians">degreesToRadians</a></li><li><a href="global.html#equatorialCoordinatesToAltitude">equatorialCoordinatesToAltitude</a></li><li><a href="global.html#equatorialCoordinatesToAzimuth">equatorialCoordinatesToAzimuth</a></li><li><a href="global.html#equatorialCoordinatesToHorizonCoordinates">equatorialCoordinatesToHorizonCoordinates</a></li><li><a href="global.html#getDateOfEaster">getDateOfEaster</a></li><li><a href="global.html#greenwichSiderealTimeToLocalSiderealTime">greenwichSiderealTimeToLocalSiderealTime</a></li><li><a href="global.html#greenwichSiderealTimeToUniversalTime">greenwichSiderealTimeToUniversalTime</a></li><li><a href="global.html#horizonCoordinatesToDeclination">horizonCoordinatesToDeclination</a></li><li><a href="global.html#horizonCoordinatesToEquatorialCoordinates">horizonCoordinatesToEquatorialCoordinates</a></li><li><a href="global.html#horizonCoordinatesToHourAngle">horizonCoordinatesToHourAngle</a></li><li><a href="global.html#hourAngleToRightAscension">hourAngleToRightAscension</a></li><li><a href="global.html#isLeapYear">isLeapYear</a></li><li><a href="global.html#julianDateDay">julianDateDay</a></li><li><a href="global.html#julianDateMonth">julianDateMonth</a></li><li><a href="global.html#julianDateYear">julianDateYear</a></li><li><a href="global.html#localCivilTimeGreenwichDay">localCivilTimeGreenwichDay</a></li><li><a href="global.html#localCivilTimeGreenwichMonth">localCivilTimeGreenwichMonth</a></li><li><a href="global.html#localCivilTimeGreenwichYear">localCivilTimeGreenwichYear</a></li><li><a href="global.html#localCivilTimeToUniversalTime">localCivilTimeToUniversalTime</a></li><li><a href="global.html#localSiderealTimeToGreenwichSiderealTime">localSiderealTimeToGreenwichSiderealTime</a></li><li><a href="global.html#radiansToDegrees">radiansToDegrees</a></li><li><a href="global.html#rightAscensionToHourAngle">rightAscensionToHourAngle</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#universalTimeToGreenwichSiderealTime">universalTimeToGreenwichSiderealTime</a></li><li><a href="global.html#universalTimeToLocalCivilTime">universalTimeToLocalCivilTime</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Mar 27 2024 21:15:26 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

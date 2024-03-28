@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>practical-astronomy-javascript</h1>
+<p>Algorithms from &quot;<a href="https://www.amazon.com/Practical-Astronomy-your-Calculator-Spreadsheet/dp/1108436072">Practical Astronomy with your Calculator or Spreadsheet</a>&quot; by Peter Duffett-Smith, implemented in JavaScript.</p>
+<p>If you're interested in this topic, please buy the book! It provides far more detail and context.</p>
+<h2>Installation</h2>
+<pre class="prettyprint source lang-bash"><code>npm install practical-astronomy-javascript
+</code></pre>
+<h2>Usage</h2>
+<p>Example: Calculate date of Easter for 2024.</p>
+<p>Create client.js:</p>
+<pre class="prettyprint source lang-javascript"><code>const pa = require('practical-astronomy-javascript');
+
+console.log(pa.paDateTime.getDateOfEaster(2024));
+</code></pre>
+<p>Run it:</p>
+<pre class="prettyprint source lang-bash"><code>node client.js
+</code></pre>
+<p>Result:</p>
+<pre class="prettyprint source"><code>[ 3, 31, 2024 ]
+</code></pre>
+<h2>Library Functions - Status</h2>
+<h3>Date/Time</h3>
+<ul>
+<li>[x] Calculate -&gt; Date of Easter</li>
+<li>[x] Convert -&gt; Civil Date to Day Number</li>
+<li>[x] Convert -&gt; Civil Time &lt;-&gt; Decimal Hours</li>
+<li>[x] Extract -&gt; Hour, Minutes, and Seconds parts of Decimal Hours</li>
+<li>[x] Convert -&gt; Local Civil Time &lt;-&gt; Universal Time</li>
+<li>[x] Convert -&gt; Universal Time &lt;-&gt; Greenwich Sidereal Time</li>
+<li>[x] Convert -&gt; Greenwich Sidereal Time &lt;-&gt; Local Sidereal Time</li>
+</ul>
+<h3>Coordinates</h3>
+<ul>
+<li>[x] Convert -&gt; Angle &lt;-&gt; Decimal Degrees</li>
+<li>[x] Convert -&gt; Right Ascension &lt;-&gt; Hour Angle</li>
+<li>[x] Convert -&gt; Equatorial Coordinates &lt;-&gt; Horizon Coordinates</li>
+<li>[ ] Calculate -&gt; Obliquity of the Ecliptic</li>
+<li>[ ] Convert -&gt; Ecliptic Coordinates &lt;-&gt; Equatorial Coordinates</li>
+<li>[ ] Convert -&gt; Equatorial Coordinates &lt;-&gt; Galactic Coordinates</li>
+<li>[ ] Calculate -&gt; Angle between two objects</li>
+<li>[ ] Calculate -&gt; Rising and Setting times for an object</li>
+<li>[ ] Calculate -&gt; Precession (corrected coordinates between two epochs)</li>
+<li>[ ] Calculate -&gt; Nutation (in ecliptic longitude and obliquity) for a Greenwich date</li>
+<li>[ ] Calculate -&gt; Effects of aberration for ecliptic coordinates</li>
+<li>[ ] Calculate -&gt; RA and Declination values, corrected for atmospheric refraction</li>
+<li>[ ] Calculate -&gt; RA and Declination values, corrected for geocentric parallax</li>
+<li>[ ] Calculate -&gt; Heliographic coordinates</li>
+<li>[ ] Calculate -&gt; Carrington rotation number</li>
+<li>[ ] Calculate -&gt; Selenographic (lunar) coordinates (sub-Earth and sub-Solar)</li>
+</ul>
+<h3>The Sun</h3>
+<ul>
+<li>[ ] Calculate -&gt; Approximate and precise positions of the Sun</li>
+<li>[ ] Calculate -&gt; Sun's distance and angular size</li>
+<li>[ ] Calculate -&gt; Local sunrise and sunset</li>
+<li>[ ] Calculate -&gt; Morning and evening twilight</li>
+<li>[ ] Calculate -&gt; Equation of time</li>
+<li>[ ] Calculate -&gt; Solar elongation</li>
+</ul>
+<h3>Planets</h3>
+<ul>
+<li>[ ] Calculate -&gt; Approximate position of planet</li>
+<li>[ ] Calculate -&gt; Precise position of planet</li>
+<li>[ ] Calculate -&gt; Visual aspects of planet (distance, angular diameter, phase, light time, position angle of bright limb, and apparent magnitude)</li>
+<li>[ ] Calculate -&gt; Position of comet (elliptical and parabolic)</li>
+<li>[ ] Calculate -&gt; Binary star orbit data</li>
+</ul>
+<h3>The Moon</h3>
+<ul>
+<li>[ ] Calculate -&gt; Approximate and precise position of Moon</li>
+<li>[ ] Calculate -&gt; Moon phase and position angle of bright limb</li>
+<li>[ ] Calculate -&gt; Times of new Moon and full Moon</li>
+<li>[ ] Calculate -&gt; Moon's distance, angular diameter, and horizontal parallax</li>
+<li>[ ] Calculate -&gt; Local moonrise and moonset</li>
+</ul>
+<h3>Eclipses</h3>
+<ul>
+<li>[ ] Calculate -&gt; Lunar eclipse occurrence and circumstances</li>
+<li>[ ] Calculate -&gt; Solar eclipse occurrence and circumstances</li>
+</ul></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#HMStoDH">HMStoDH</a></li><li><a href="global.html#WarningFlag">WarningFlag</a></li><li><a href="global.html#angleToDecimalDegrees">angleToDecimalDegrees</a></li><li><a href="global.html#civilDateToDayNumber">civilDateToDayNumber</a></li><li><a href="global.html#civilDateToJulianDate">civilDateToJulianDate</a></li><li><a href="global.html#civilTimeToDecimalHours">civilTimeToDecimalHours</a></li><li><a href="global.html#decimalDegreesDegrees">decimalDegreesDegrees</a></li><li><a href="global.html#decimalDegreesMinutes">decimalDegreesMinutes</a></li><li><a href="global.html#decimalDegreesSeconds">decimalDegreesSeconds</a></li><li><a href="global.html#decimalDegreesToAngle">decimalDegreesToAngle</a></li><li><a href="global.html#decimalDegreesToDegreeHours">decimalDegreesToDegreeHours</a></li><li><a href="global.html#decimalHoursHour">decimalHoursHour</a></li><li><a href="global.html#decimalHoursMinute">decimalHoursMinute</a></li><li><a href="global.html#decimalHoursSecond">decimalHoursSecond</a></li><li><a href="global.html#decimalHoursToCivilTime">decimalHoursToCivilTime</a></li><li><a href="global.html#degreeHoursToDecimalDegrees">degreeHoursToDecimalDegrees</a></li><li><a href="global.html#degrees">degrees</a></li><li><a href="global.html#degreesMinutesSecondsToDecimalDegrees">degreesMinutesSecondsToDecimalDegrees</a></li><li><a href="global.html#degreesToRadians">degreesToRadians</a></li><li><a href="global.html#equatorialCoordinatesToAltitude">equatorialCoordinatesToAltitude</a></li><li><a href="global.html#equatorialCoordinatesToAzimuth">equatorialCoordinatesToAzimuth</a></li><li><a href="global.html#equatorialCoordinatesToHorizonCoordinates">equatorialCoordinatesToHorizonCoordinates</a></li><li><a href="global.html#getDateOfEaster">getDateOfEaster</a></li><li><a href="global.html#greenwichSiderealTimeToLocalSiderealTime">greenwichSiderealTimeToLocalSiderealTime</a></li><li><a href="global.html#greenwichSiderealTimeToUniversalTime">greenwichSiderealTimeToUniversalTime</a></li><li><a href="global.html#horizonCoordinatesToDeclination">horizonCoordinatesToDeclination</a></li><li><a href="global.html#horizonCoordinatesToEquatorialCoordinates">horizonCoordinatesToEquatorialCoordinates</a></li><li><a href="global.html#horizonCoordinatesToHourAngle">horizonCoordinatesToHourAngle</a></li><li><a href="global.html#hourAngleToRightAscension">hourAngleToRightAscension</a></li><li><a href="global.html#isLeapYear">isLeapYear</a></li><li><a href="global.html#julianDateDay">julianDateDay</a></li><li><a href="global.html#julianDateMonth">julianDateMonth</a></li><li><a href="global.html#julianDateYear">julianDateYear</a></li><li><a href="global.html#localCivilTimeGreenwichDay">localCivilTimeGreenwichDay</a></li><li><a href="global.html#localCivilTimeGreenwichMonth">localCivilTimeGreenwichMonth</a></li><li><a href="global.html#localCivilTimeGreenwichYear">localCivilTimeGreenwichYear</a></li><li><a href="global.html#localCivilTimeToUniversalTime">localCivilTimeToUniversalTime</a></li><li><a href="global.html#localSiderealTimeToGreenwichSiderealTime">localSiderealTimeToGreenwichSiderealTime</a></li><li><a href="global.html#radiansToDegrees">radiansToDegrees</a></li><li><a href="global.html#rightAscensionToHourAngle">rightAscensionToHourAngle</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#universalTimeToGreenwichSiderealTime">universalTimeToGreenwichSiderealTime</a></li><li><a href="global.html#universalTimeToLocalCivilTime">universalTimeToLocalCivilTime</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Mar 27 2024 21:15:26 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

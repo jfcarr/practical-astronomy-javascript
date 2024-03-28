@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pa-coordinates.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pa-coordinates.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const paMacros = require('./pa-macros.js');
+const paUtils = require('./pa-utils.js');
+
+/**
+ * Convert an Angle (degrees, minutes, and seconds) to Decimal Degrees
+ */
+function angleToDecimalDegrees(degrees, minutes, seconds) {
+    var a = Math.abs(seconds) / 60;
+    var b = (Math.abs(minutes) + a) / 60;
+    var c = Math.abs(degrees) + b;
+    var d = (degrees &lt; 0 || minutes &lt; 0 || seconds &lt; 0) ? -c : c;
+
+    return d;
+}
+
+/**
+ * Convert Decimal Degrees to an Angle (degrees, minutes, and seconds)
+ */
+function decimalDegreesToAngle(decimalDegrees) {
+    var unsignedDecimal = Math.abs(decimalDegrees);
+    var totalSeconds = unsignedDecimal * 3600;
+    var seconds2DP = paUtils.round(totalSeconds % 60, 2);
+    var correctedSeconds = (seconds2DP == 60) ? 0 : seconds2DP;
+    var correctedRemainder = (seconds2DP == 60) ? totalSeconds + 60 : totalSeconds;
+    var minutes = Math.floor(correctedRemainder / 60) % 60;
+    var unsignedDegrees = Math.floor(correctedRemainder / 3600);
+    var signedDegrees = (decimalDegrees &lt; 0) ? -1 * unsignedDegrees : unsignedDegrees;
+
+    return [signedDegrees, minutes, Math.floor(correctedSeconds)];
+}
+
+/**
+ * Convert Right Ascension to Hour Angle
+ */
+function rightAscensionToHourAngle(raHours, raMinutes, raSeconds, lctHours, lctMinutes, lctSeconds, isDaylightSavings, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude) {
+    var daylightSaving = (isDaylightSavings) ? 1 : 0;
+
+    var hourAngle = paMacros.rightAscensionToHourAngle(raHours, raMinutes, raSeconds, lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude);
+
+    var hourAngleHours = paMacros.decimalHoursHour(hourAngle);
+    var hourAngleMinutes = paMacros.decimalHoursMinute(hourAngle);
+    var hourAngleSeconds = paMacros.decimalHoursSecond(hourAngle);
+
+    return [hourAngleHours, hourAngleMinutes, hourAngleSeconds];
+}
+
+/**
+ * Convert Hour Angle to Right Ascension
+ */
+function hourAngleToRightAscension(hourAngleHours, hourAngleMinutes, hourAngleSeconds, lctHours, lctMinutes, lctSeconds, isDaylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var rightAscension = paMacros.hourAngleToRightAscension(hourAngleHours, hourAngleMinutes, hourAngleSeconds, lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear, geographicalLongitude);
+
+    var rightAscensionHours = paMacros.decimalHoursHour(rightAscension);
+    var rightAscensionMinutes = paMacros.decimalHoursMinute(rightAscension);
+    var rightAscensionSeconds = paMacros.decimalHoursSecond(rightAscension);
+
+    return [rightAscensionHours, rightAscensionMinutes, rightAscensionSeconds];
+}
+
+/**
+ * Convert Equatorial Coordinates to Horizon Coordinates
+ */
+function equatorialCoordinatesToHorizonCoordinates(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude) {
+    var azimuthInDecimalDegrees = paMacros.equatorialCoordinatesToAzimuth(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude);
+
+    var altitudeInDecimalDegrees = paMacros.equatorialCoordinatesToAltitude(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude);
+
+    var azimuthDegrees = paMacros.decimalDegreesDegrees(azimuthInDecimalDegrees);
+    var azimuthMinutes = paMacros.decimalDegreesMinutes(azimuthInDecimalDegrees);
+    var azimuthSeconds = paMacros.decimalDegreesSeconds(azimuthInDecimalDegrees);
+
+    var altitudeDegrees = paMacros.decimalDegreesDegrees(altitudeInDecimalDegrees);
+    var altitudeMinutes = paMacros.decimalDegreesMinutes(altitudeInDecimalDegrees);
+    var altitudeSeconds = paMacros.decimalDegreesSeconds(altitudeInDecimalDegrees);
+
+    return [azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds];
+}
+
+/**
+ * Convert Horizon Coordinates to Equatorial Coordinates
+ */
+function horizonCoordinatesToEquatorialCoordinates(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude) {
+    var hourAngleInDecimalDegrees = paMacros.horizonCoordinatesToHourAngle(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude);
+
+    var declinationInDecimalDegrees = paMacros.horizonCoordinatesToDeclination(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude);
+
+    var hourAngleHours = paMacros.decimalHoursHour(hourAngleInDecimalDegrees);
+    var hourAngleMinutes = paMacros.decimalHoursMinute(hourAngleInDecimalDegrees);
+    var hourAngleSeconds = paMacros.decimalHoursSecond(hourAngleInDecimalDegrees);
+
+    var declinationDegrees = paMacros.decimalDegreesDegrees(declinationInDecimalDegrees);
+    var declinationMinutes = paMacros.decimalDegreesMinutes(declinationInDecimalDegrees);
+    var declinationSeconds = paMacros.decimalDegreesSeconds(declinationInDecimalDegrees);
+
+    return [hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds];
+}
+
+
+module.exports = {
+    angleToDecimalDegrees,
+    decimalDegreesToAngle,
+    rightAscensionToHourAngle,
+    hourAngleToRightAscension,
+    equatorialCoordinatesToHorizonCoordinates,
+    horizonCoordinatesToEquatorialCoordinates
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#HMStoDH">HMStoDH</a></li><li><a href="global.html#WarningFlag">WarningFlag</a></li><li><a href="global.html#angleToDecimalDegrees">angleToDecimalDegrees</a></li><li><a href="global.html#civilDateToDayNumber">civilDateToDayNumber</a></li><li><a href="global.html#civilDateToJulianDate">civilDateToJulianDate</a></li><li><a href="global.html#civilTimeToDecimalHours">civilTimeToDecimalHours</a></li><li><a href="global.html#decimalDegreesDegrees">decimalDegreesDegrees</a></li><li><a href="global.html#decimalDegreesMinutes">decimalDegreesMinutes</a></li><li><a href="global.html#decimalDegreesSeconds">decimalDegreesSeconds</a></li><li><a href="global.html#decimalDegreesToAngle">decimalDegreesToAngle</a></li><li><a href="global.html#decimalDegreesToDegreeHours">decimalDegreesToDegreeHours</a></li><li><a href="global.html#decimalHoursHour">decimalHoursHour</a></li><li><a href="global.html#decimalHoursMinute">decimalHoursMinute</a></li><li><a href="global.html#decimalHoursSecond">decimalHoursSecond</a></li><li><a href="global.html#decimalHoursToCivilTime">decimalHoursToCivilTime</a></li><li><a href="global.html#degreeHoursToDecimalDegrees">degreeHoursToDecimalDegrees</a></li><li><a href="global.html#degrees">degrees</a></li><li><a href="global.html#degreesMinutesSecondsToDecimalDegrees">degreesMinutesSecondsToDecimalDegrees</a></li><li><a href="global.html#degreesToRadians">degreesToRadians</a></li><li><a href="global.html#equatorialCoordinatesToAltitude">equatorialCoordinatesToAltitude</a></li><li><a href="global.html#equatorialCoordinatesToAzimuth">equatorialCoordinatesToAzimuth</a></li><li><a href="global.html#equatorialCoordinatesToHorizonCoordinates">equatorialCoordinatesToHorizonCoordinates</a></li><li><a href="global.html#getDateOfEaster">getDateOfEaster</a></li><li><a href="global.html#greenwichSiderealTimeToLocalSiderealTime">greenwichSiderealTimeToLocalSiderealTime</a></li><li><a href="global.html#greenwichSiderealTimeToUniversalTime">greenwichSiderealTimeToUniversalTime</a></li><li><a href="global.html#horizonCoordinatesToDeclination">horizonCoordinatesToDeclination</a></li><li><a href="global.html#horizonCoordinatesToEquatorialCoordinates">horizonCoordinatesToEquatorialCoordinates</a></li><li><a href="global.html#horizonCoordinatesToHourAngle">horizonCoordinatesToHourAngle</a></li><li><a href="global.html#hourAngleToRightAscension">hourAngleToRightAscension</a></li><li><a href="global.html#isLeapYear">isLeapYear</a></li><li><a href="global.html#julianDateDay">julianDateDay</a></li><li><a href="global.html#julianDateMonth">julianDateMonth</a></li><li><a href="global.html#julianDateYear">julianDateYear</a></li><li><a href="global.html#localCivilTimeGreenwichDay">localCivilTimeGreenwichDay</a></li><li><a href="global.html#localCivilTimeGreenwichMonth">localCivilTimeGreenwichMonth</a></li><li><a href="global.html#localCivilTimeGreenwichYear">localCivilTimeGreenwichYear</a></li><li><a href="global.html#localCivilTimeToUniversalTime">localCivilTimeToUniversalTime</a></li><li><a href="global.html#localSiderealTimeToGreenwichSiderealTime">localSiderealTimeToGreenwichSiderealTime</a></li><li><a href="global.html#radiansToDegrees">radiansToDegrees</a></li><li><a href="global.html#rightAscensionToHourAngle">rightAscensionToHourAngle</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#universalTimeToGreenwichSiderealTime">universalTimeToGreenwichSiderealTime</a></li><li><a href="global.html#universalTimeToLocalCivilTime">universalTimeToLocalCivilTime</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Mar 27 2024 21:15:26 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
