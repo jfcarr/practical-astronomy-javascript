@@ -437,6 +437,122 @@ function degreeHoursToDecimalDegrees(degreeHours) {
   return degreeHours * 15;
 }
 
+/**
+ * Obliquity of the Ecliptic for a Greenwich Date
+ * 
+ * Original macro name: Obliq
+ */
+function obliq(greenwichDay, greenwichMonth, greenwichYear) {
+  var a = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear);
+  var b = a - 2415020;
+  var c = (b / 36525) - 1;
+  var d = c * (46.815 + c * (0.0006 - (c * 0.00181)));
+  var e = d / 3600;
+
+  return 23.43929167 - e + nutatObl(greenwichDay, greenwichMonth, greenwichYear);
+}
+
+/**
+ * Nutation amount to be added in ecliptic longitude, in degrees.
+ * 
+ * Original macro name: NutatLong
+ */
+function nutatLong(gd, gm, gy) {
+  var dj = civilDateToJulianDate(gd, gm, gy) - 2415020;
+  var t = dj / 36525;
+  var t2 = t * t;
+
+  var a = 100.0021358 * t;
+  var b = 360 * (a - Math.floor(a));
+
+  var l1 = 279.6967 + 0.000303 * t2 + b;
+  var l2 = 2 * paUtils.degreesToRadians(l1);
+
+  a = 1336.855231 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var d1 = 270.4342 - 0.001133 * t2 + b;
+  var d2 = 2 * paUtils.degreesToRadians(d1);
+
+  a = 99.99736056 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var m1 = 358.4758 - 0.00015 * t2 + b;
+  m1 = paUtils.degreesToRadians(m1);
+
+  a = 1325.552359 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var m2 = 296.1046 + 0.009192 * t2 + b;
+  m2 = paUtils.degreesToRadians(m2);
+
+  a = 5.372616667 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var n1 = 259.1833 + 0.002078 * t2 - b;
+  n1 = paUtils.degreesToRadians(n1);
+
+  var n2 = 2.0 * n1;
+
+  var dp = (-17.2327 - 0.01737 * t) * Math.sin(n1);
+  dp = dp + (-1.2729 - 0.00013 * t) * Math.sin(l2) + 0.2088 * Math.sin(n2);
+  dp = dp - 0.2037 * Math.sin(d2) + (0.1261 - 0.00031 * t) * Math.sin(m1);
+  dp = dp + 0.0675 * Math.sin(m2) - (0.0497 - 0.00012 * t) * Math.sin(l2 + m1);
+  dp = dp - 0.0342 * Math.sin(d2 - n1) - 0.0261 * Math.sin(d2 + m2);
+  dp = dp + 0.0214 * Math.sin(l2 - m1) - 0.0149 * Math.sin(l2 - d2 + m2);
+  dp = dp + 0.0124 * Math.sin(l2 - n1) + 0.0114 * Math.sin(d2 - m2);
+
+  return dp / 3600;
+}
+
+/**
+ * Nutation of Obliquity
+ * 
+ * Original macro name: NutatObl
+ */
+function nutatObl(greenwichDay, greenwichMonth, greenwichYear) {
+  var dj = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear) - 2415020;
+  var t = dj / 36525;
+  var t2 = t * t;
+
+  var a = 100.0021358 * t;
+  var b = 360 * (a - Math.floor(a));
+
+  var l1 = 279.6967 + 0.000303 * t2 + b;
+  var l2 = 2 * paUtils.degreesToRadians(l1);
+
+  a = 1336.855231 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var d1 = 270.4342 - 0.001133 * t2 + b;
+  var d2 = 2 * paUtils.degreesToRadians(d1);
+
+  a = 99.99736056 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var m1 = paUtils.degreesToRadians(358.4758 - 0.00015 * t2 + b);
+
+  a = 1325.552359 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var m2 = paUtils.degreesToRadians(296.1046 + 0.009192 * t2 + b);
+
+  a = 5.372616667 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var n1 = paUtils.degreesToRadians(259.1833 + 0.002078 * t2 - b);
+
+  var n2 = 2 * n1;
+
+  var ddo = (9.21 + 0.00091 * t) * Math.cos(n1);
+  ddo = ddo + (0.5522 - 0.00029 * t) * Math.cos(l2) - 0.0904 * Math.cos(n2);
+  ddo = ddo + 0.0884 * Math.cos(d2) + 0.0216 * Math.cos(l2 + m1);
+  ddo = ddo + 0.0183 * Math.cos(d2 - n1) + 0.0113 * Math.cos(d2 + m2);
+  ddo = ddo - 0.0093 * Math.cos(l2 - m1) - 0.0066 * Math.cos(l2 - n1);
+
+  return ddo / 3600;
+}
+
 
 module.exports = {
   HMStoDH,
@@ -465,5 +581,8 @@ module.exports = {
   horizonCoordinatesToDeclination,
   horizonCoordinatesToHourAngle,
   decimalDegreesToDegreeHours,
-  degreeHoursToDecimalDegrees
+  degreeHoursToDecimalDegrees,
+  obliq,
+  nutatLong,
+  nutatObl
 };
