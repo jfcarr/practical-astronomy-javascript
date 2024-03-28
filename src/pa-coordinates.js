@@ -59,10 +59,50 @@ function hourAngleToRightAscension(hourAngleHours, hourAngleMinutes, hourAngleSe
     return [rightAscensionHours, rightAscensionMinutes, rightAscensionSeconds];
 }
 
+/**
+ * Convert Equatorial Coordinates to Horizon Coordinates
+ */
+function equatorialCoordinatesToHorizonCoordinates(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude) {
+    var azimuthInDecimalDegrees = paMacros.equatorialCoordinatesToAzimuth(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude);
+
+    var altitudeInDecimalDegrees = paMacros.equatorialCoordinatesToAltitude(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude);
+
+    var azimuthDegrees = paMacros.decimalDegreesDegrees(azimuthInDecimalDegrees);
+    var azimuthMinutes = paMacros.decimalDegreesMinutes(azimuthInDecimalDegrees);
+    var azimuthSeconds = paMacros.decimalDegreesSeconds(azimuthInDecimalDegrees);
+
+    var altitudeDegrees = paMacros.decimalDegreesDegrees(altitudeInDecimalDegrees);
+    var altitudeMinutes = paMacros.decimalDegreesMinutes(altitudeInDecimalDegrees);
+    var altitudeSeconds = paMacros.decimalDegreesSeconds(altitudeInDecimalDegrees);
+
+    return [azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds];
+}
+
+/**
+ * Convert Horizon Coordinates to Equatorial Coordinates
+ */
+function horizonCoordinatesToEquatorialCoordinates(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude) {
+    var hourAngleInDecimalDegrees = paMacros.horizonCoordinatesToHourAngle(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude);
+
+    var declinationInDecimalDegrees = paMacros.horizonCoordinatesToDeclination(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude);
+
+    var hourAngleHours = paMacros.decimalHoursHour(hourAngleInDecimalDegrees);
+    var hourAngleMinutes = paMacros.decimalHoursMinute(hourAngleInDecimalDegrees);
+    var hourAngleSeconds = paMacros.decimalHoursSecond(hourAngleInDecimalDegrees);
+
+    var declinationDegrees = paMacros.decimalDegreesDegrees(declinationInDecimalDegrees);
+    var declinationMinutes = paMacros.decimalDegreesMinutes(declinationInDecimalDegrees);
+    var declinationSeconds = paMacros.decimalDegreesSeconds(declinationInDecimalDegrees);
+
+    return [hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
     decimalDegreesToAngle,
     rightAscensionToHourAngle,
-    hourAngleToRightAscension
+    hourAngleToRightAscension,
+    equatorialCoordinatesToHorizonCoordinates,
+    horizonCoordinatesToEquatorialCoordinates
 };

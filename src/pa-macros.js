@@ -283,6 +283,160 @@ function greenwichSiderealTimeToLocalSiderealTime(greenwichHours, greenwichMinut
   return c - (24 * Math.floor(c / 24));
 }
 
+/**
+ * Convert Equatorial Coordinates to Azimuth (in decimal degrees)
+ * 
+ * Original macro name: EQAz
+ */
+function equatorialCoordinatesToAzimuth(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude) {
+  var a = HMStoDH(hourAngleHours, hourAngleMinutes, hourAngleSeconds);
+  var b = a * 15;
+  var c = paUtils.degreesToRadians(b);
+  var d = degreesMinutesSecondsToDecimalDegrees(declinationDegrees, declinationMinutes, declinationSeconds);
+  var e = paUtils.degreesToRadians(d);
+  var f = paUtils.degreesToRadians(geographicalLatitude);
+  var g = Math.sin(e) * Math.sin(f) + Math.cos(e) * Math.cos(f) * Math.cos(c);
+  var h = -Math.cos(e) * Math.cos(f) * Math.sin(c);
+  var i = Math.sin(e) - (Math.sin(f) * g);
+  var j = degrees(Math.atan2(h, i));
+
+  return j - 360.0 * Math.floor(j / 360);
+}
+
+/**
+ * Convert Equatorial Coordinates to Altitude (in decimal degrees)
+ * 
+ * Original macro name: EQAlt
+ */
+function equatorialCoordinatesToAltitude(hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds, geographicalLatitude) {
+  var a = HMStoDH(hourAngleHours, hourAngleMinutes, hourAngleSeconds);
+  var b = a * 15;
+  var c = paUtils.degreesToRadians(b);
+  var d = degreesMinutesSecondsToDecimalDegrees(declinationDegrees, declinationMinutes, declinationSeconds);
+  var e = paUtils.degreesToRadians(d);
+  var f = paUtils.degreesToRadians(geographicalLatitude);
+  var g = Math.sin(e) * Math.sin(f) + Math.cos(e) * Math.cos(f) * Math.cos(c);
+
+  return degrees(Math.asin(g));
+}
+
+/**
+ * Convert Degrees Minutes Seconds to Decimal Degrees
+ * 
+ * Original macro name: DMSDD
+ */
+function degreesMinutesSecondsToDecimalDegrees(degrees, minutes, seconds) {
+  var a = Math.abs(seconds) / 60;
+  var b = (Math.abs(minutes) + a) / 60;
+  var c = Math.abs(degrees) + b;
+
+  return (degrees < 0 || minutes < 0 || seconds < 0) ? -c : c;
+}
+
+/**
+ * Convert W to Degrees
+ * 
+ * Original macro name: Degrees
+ */
+function degrees(w) {
+  return w * 57.29577951;
+}
+
+/**
+ * Return Degrees part of Decimal Degrees
+ * 
+ * Original macro name: DDDeg
+ */
+function decimalDegreesDegrees(decimalDegrees) {
+  var a = Math.abs(decimalDegrees);
+  var b = a * 3600;
+  var c = paUtils.round(b - 60 * Math.floor(b / 60), 2);
+  var e = (c == 60) ? 60 : b;
+
+  return (decimalDegrees < 0) ? -(Math.floor(e / 3600)) : Math.floor(e / 3600);
+}
+
+/**
+ * Return Minutes part of Decimal Degrees
+ * 
+ * Original macro name: DDMin
+ */
+function decimalDegreesMinutes(decimalDegrees) {
+  var a = Math.abs(decimalDegrees);
+  var b = a * 3600;
+  var c = paUtils.round(b - 60 * Math.floor(b / 60), 2);
+  var e = (c == 60) ? b + 60 : b;
+
+  return Math.floor(e / 60) % 60;
+}
+
+/**
+ * Return Seconds part of Decimal Degrees
+ * 
+ * Original macro name: DDSec
+ */
+function decimalDegreesSeconds(decimalDegrees) {
+  var a = Math.abs(decimalDegrees);
+  var b = a * 3600;
+  var c = paUtils.round(b - 60 * Math.floor(b / 60), 2);
+  var d = (c == 60) ? 0 : c;
+
+  return d;
+}
+
+/**
+ * Convert Horizon Coordinates to Declination (in decimal degrees)
+ * 
+ * Original macro name: HORDec
+ */
+function horizonCoordinatesToDeclination(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude) {
+  var a = degreesMinutesSecondsToDecimalDegrees(azimuthDegrees, azimuthMinutes, azimuthSeconds);
+  var b = degreesMinutesSecondsToDecimalDegrees(altitudeDegrees, altitudeMinutes, altitudeSeconds);
+  var c = paUtils.degreesToRadians(a);
+  var d = paUtils.degreesToRadians(b);
+  var e = paUtils.degreesToRadians(geographicalLatitude);
+  var f = Math.sin(d) * Math.sin(e) + Math.cos(d) * Math.cos(e) * Math.cos(c);
+
+  return degrees(Math.asin(f));
+}
+
+/**
+ * Convert Horizon Coordinates to Hour Angle (in decimal degrees)
+ * 
+ * Original macro name: HORHa
+ */
+function horizonCoordinatesToHourAngle(azimuthDegrees, azimuthMinutes, azimuthSeconds, altitudeDegrees, altitudeMinutes, altitudeSeconds, geographicalLatitude) {
+  var a = degreesMinutesSecondsToDecimalDegrees(azimuthDegrees, azimuthMinutes, azimuthSeconds);
+  var b = degreesMinutesSecondsToDecimalDegrees(altitudeDegrees, altitudeMinutes, altitudeSeconds);
+  var c = paUtils.degreesToRadians(a);
+  var d = paUtils.degreesToRadians(b);
+  var e = paUtils.degreesToRadians(geographicalLatitude);
+  var f = Math.sin(d) * Math.sin(e) + Math.cos(d) * Math.cos(e) * Math.cos(c);
+  var g = -Math.cos(d) * Math.cos(e) * Math.sin(c);
+  var h = Math.sin(d) - Math.sin(e) * f;
+  var i = decimalDegreesToDegreeHours(degrees(Math.atan2(g, h)));
+
+  return i - 24 * Math.floor(i / 24);
+}
+
+/**
+ * Convert Decimal Degrees to Degree-Hours
+ * 
+ * Original macro name: DDDH
+ */
+function decimalDegreesToDegreeHours(decimalDegrees) {
+  return decimalDegrees / 15;
+}
+
+/**
+ * Convert Degree-Hours to Decimal Degrees
+ * 
+ * Original macro name: DHDD
+ */
+function degreeHoursToDecimalDegrees(degreeHours) {
+  return degreeHours * 15;
+}
+
 
 module.exports = {
   HMStoDH,
@@ -300,5 +454,16 @@ module.exports = {
   localCivilTimeGreenwichMonth,
   localCivilTimeGreenwichYear,
   universalTimeToGreenwichSiderealTime,
-  greenwichSiderealTimeToLocalSiderealTime
+  greenwichSiderealTimeToLocalSiderealTime,
+  equatorialCoordinatesToAzimuth,
+  equatorialCoordinatesToAltitude,
+  degreesMinutesSecondsToDecimalDegrees,
+  degrees,
+  decimalDegreesDegrees,
+  decimalDegreesMinutes,
+  decimalDegreesSeconds,
+  horizonCoordinatesToDeclination,
+  horizonCoordinatesToHourAngle,
+  decimalDegreesToDegreeHours,
+  degreeHoursToDecimalDegrees
 };
