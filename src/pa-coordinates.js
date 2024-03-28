@@ -253,6 +253,42 @@ function angleBetweenTwoObjects(raLong1HourDeg, raLong1Min, raLong1Sec, decLat1D
     return [angleDeg, angleMin, angleSec];
 }
 
+/**
+ * Calculate rising and setting times for an object.
+ */
+function risingAndSetting(raHours, raMinutes, raSeconds, decDeg, decMin, decSec, gwDateDay, gwDateMonth, gwDateYear, geogLongDeg, geogLatDeg, vertShiftDeg) {
+    var raHours1 = paMacros.HMStoDH(raHours, raMinutes, raSeconds);
+    var decRad = paUtils.degreesToRadians(paMacros.degreesMinutesSecondsToDecimalDegrees(decDeg, decMin, decSec));
+    var verticalDisplRadians = paUtils.degreesToRadians(vertShiftDeg);
+    var geoLatRadians = paUtils.degreesToRadians(geogLatDeg);
+    var cosH = -(Math.sin(verticalDisplRadians) + Math.sin(geoLatRadians) * Math.sin(decRad)) / (Math.cos(geoLatRadians) * Math.cos(decRad));
+    var hHours = paMacros.decimalDegreesToDegreeHours(paMacros.degrees(Math.acos(cosH)));
+    var lstRiseHours = (raHours1 - hHours) - 24 * Math.floor((raHours1 - hHours) / 24);
+    var lstSetHours = (raHours1 + hHours) - 24 * Math.floor((raHours1 + hHours) / 24);
+    var aDeg = paMacros.degrees(Math.acos((Math.sin(decRad) + Math.sin(verticalDisplRadians) * Math.sin(geoLatRadians)) / (Math.cos(verticalDisplRadians) * Math.cos(geoLatRadians))));
+    var azRiseDeg = aDeg - 360 * Math.floor(aDeg / 360);
+    var azSetDeg = (360 - aDeg) - 360 * Math.floor((360 - aDeg) / 360);
+    var utRiseHours1 = paMacros.greenwichSiderealTimeToUniversalTime(paMacros.localSiderealTimeToGreenwichSiderealTime(lstRiseHours, 0, 0, geogLongDeg), 0, 0, gwDateDay, gwDateMonth, gwDateYear);
+    var utSetHours1 = paMacros.greenwichSiderealTimeToUniversalTime(paMacros.localSiderealTimeToGreenwichSiderealTime(lstSetHours, 0, 0, geogLongDeg), 0, 0, gwDateDay, gwDateMonth, gwDateYear);
+    var utRiseAdjustedHours = utRiseHours1 + 0.008333;
+    var utSetAdjustedHours = utSetHours1 + 0.008333;
+
+    var riseSetStatus = paTypes.RiseSetStatus.OK;
+    if (cosH > 1)
+        riseSetStatus = paTypes.RiseSetStatus.NeverRises;
+    if (cosH < -1)
+        riseSetStatus = paTypes.RiseSetStatus.Circumpolar;
+
+    var utRiseHour = (riseSetStatus == paTypes.RiseSetStatus.OK) ? paMacros.decimalHoursHour(utRiseAdjustedHours) : 0;
+    var utRiseMin = (riseSetStatus == paTypes.RiseSetStatus.OK) ? paMacros.decimalHoursMinute(utRiseAdjustedHours) : 0;
+    var utSetHour = (riseSetStatus == paTypes.RiseSetStatus.OK) ? paMacros.decimalHoursHour(utSetAdjustedHours) : 0;
+    var utSetMin = (riseSetStatus == paTypes.RiseSetStatus.OK) ? paMacros.decimalHoursMinute(utSetAdjustedHours) : 0;
+    var azRise = (riseSetStatus == paTypes.RiseSetStatus.OK) ? paUtils.round(azRiseDeg, 2) : 0;
+    var azSet = (riseSetStatus == paTypes.RiseSetStatus.OK) ? paUtils.round(azSetDeg, 2) : 0;
+
+    return [riseSetStatus, utRiseHour, utRiseMin, utSetHour, utSetMin, azRise, azSet];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -266,5 +302,6 @@ module.exports = {
     equatorialCoordinateToEclipticCoordinate,
     equatorialCoordinateToGalacticCoordinate,
     galacticCoordinateToEquatorialCoordinate,
-    angleBetweenTwoObjects
+    angleBetweenTwoObjects,
+    risingAndSetting
 };

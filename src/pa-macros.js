@@ -553,6 +553,37 @@ function nutatObl(greenwichDay, greenwichMonth, greenwichYear) {
   return ddo / 3600;
 }
 
+/**
+ * Convert Greenwich Sidereal Time to Universal Time
+ * 
+ * Original macro name: GSTUT
+ */
+function greenwichSiderealTimeToUniversalTime(greenwichSiderealHours, greenwichSiderealMinutes, greenwichSiderealSeconds, greenwichDay, greenwichMonth, greenwichYear) {
+  var a = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear);
+  var b = a - 2451545;
+  var c = b / 36525;
+  var d = 6.697374558 + (2400.051336 * c) + (0.000025862 * c * c);
+  var e = d - (24 * Math.floor(d / 24));
+  var f = HMStoDH(greenwichSiderealHours, greenwichSiderealMinutes, greenwichSiderealSeconds);
+  var g = f - e;
+  var h = g - (24 * Math.floor(g / 24));
+
+  return h * 0.9972695663;
+}
+
+/**
+ * Convert Local Sidereal Time to Greenwich Sidereal Time
+ * 
+ * Original macro name: LSTGST
+ */
+function localSiderealTimeToGreenwichSiderealTime(localHours, localMinutes, localSeconds, longitude) {
+  var a = HMStoDH(localHours, localMinutes, localSeconds);
+  var b = longitude / 15;
+  var c = a - b;
+
+  return c - (24 * Math.floor(c / 24));
+}
+
 
 module.exports = {
   HMStoDH,
@@ -584,5 +615,7 @@ module.exports = {
   degreeHoursToDecimalDegrees,
   obliq,
   nutatLong,
-  nutatObl
+  nutatObl,
+  greenwichSiderealTimeToUniversalTime,
+  localSiderealTimeToGreenwichSiderealTime
 };

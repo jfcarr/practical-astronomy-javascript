@@ -6,6 +6,12 @@ const AngleMeasure = {
     Hours: 'Hours'
 };
 
+const RiseSetStatus = {
+    OK: 'OK',
+    NeverRises: 'NeverRises',
+    Circumpolar: 'Circumpolar'
+};
+
 /**
  * Warning flags for calculation results
  */
@@ -16,5 +22,6 @@ const WarningFlag = {
 
 module.exports = {
     AngleMeasure,
+    RiseSetStatus,
     WarningFlag
 };
