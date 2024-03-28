@@ -1,4 +1,5 @@
 const paMacros = require('./pa-macros.js');
+const paTypes = require('./pa-types.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -224,6 +225,34 @@ function galacticCoordinateToEquatorialCoordinate(galLongDeg, galLongMin, galLon
     return [raHours, raMinutes, raSeconds, decDegrees, decMinutes, decSeconds];
 }
 
+/**
+ * Calculate the angle between two celestial objects
+ */
+function angleBetweenTwoObjects(raLong1HourDeg, raLong1Min, raLong1Sec, decLat1Deg, decLat1Min, decLat1Sec, raLong2HourDeg, raLong2Min, raLong2Sec, decLat2Deg, decLat2Min, decLat2Sec, hourOrDegree) {
+    var raLong1Decimal = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.HMStoDH(raLong1HourDeg, raLong1Min, raLong1Sec) : paMacros.degreesMinutesSecondsToDecimalDegrees(raLong1HourDeg, raLong1Min, raLong1Sec);
+    var raLong1Deg = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.degreeHoursToDecimalDegrees(raLong1Decimal) : raLong1Decimal;
+
+    var raLong1Rad = paUtils.degreesToRadians(raLong1Deg);
+    var decLat1Deg1 = paMacros.degreesMinutesSecondsToDecimalDegrees(decLat1Deg, decLat1Min, decLat1Sec);
+    var decLat1Rad = paUtils.degreesToRadians(decLat1Deg1);
+
+    var raLong2Decimal = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.HMStoDH(raLong2HourDeg, raLong2Min, raLong2Sec) : paMacros.degreesMinutesSecondsToDecimalDegrees(raLong2HourDeg, raLong2Min, raLong2Sec);
+    var raLong2Deg = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.degreeHoursToDecimalDegrees(raLong2Decimal) : raLong2Decimal;
+    var raLong2Rad = paUtils.degreesToRadians(raLong2Deg);
+    var decLat2Deg1 = paMacros.degreesMinutesSecondsToDecimalDegrees(decLat2Deg, decLat2Min, decLat2Sec);
+    var decLat2Rad = paUtils.degreesToRadians(decLat2Deg1);
+
+    var cosD = Math.sin(decLat1Rad) * Math.sin(decLat2Rad) + Math.cos(decLat1Rad) * Math.cos(decLat2Rad) * Math.cos(raLong1Rad - raLong2Rad);
+    var dRad = Math.acos(cosD);
+    var dDeg = paMacros.degrees(dRad);
+
+    var angleDeg = paMacros.decimalDegreesDegrees(dDeg);
+    var angleMin = paMacros.decimalDegreesMinutes(dDeg);
+    var angleSec = paMacros.decimalDegreesSeconds(dDeg);
+
+    return [angleDeg, angleMin, angleSec];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -236,5 +265,6 @@ module.exports = {
     eclipticCoordinateToEquatorialCoordinate,
     equatorialCoordinateToEclipticCoordinate,
     equatorialCoordinateToGalacticCoordinate,
-    galacticCoordinateToEquatorialCoordinate
+    galacticCoordinateToEquatorialCoordinate,
+    angleBetweenTwoObjects
 };
