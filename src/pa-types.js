@@ -1,4 +1,12 @@
 /**
+ * Angle measurement units
+ */
+const AngleMeasure = {
+    Degrees: 'Degrees',
+    Hours: 'Hours'
+};
+
+/**
  * Warning flags for calculation results
  */
 const WarningFlag = {
@@ -7,5 +15,6 @@ const WarningFlag = {
 };
 
 module.exports = {
+    AngleMeasure,
     WarningFlag
 };

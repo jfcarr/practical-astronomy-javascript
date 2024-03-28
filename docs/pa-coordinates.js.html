@@ -27,6 +27,7 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>const paMacros = require('./pa-macros.js');
+const paTypes = require('./pa-types.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -252,6 +253,34 @@ function galacticCoordinateToEquatorialCoordinate(galLongDeg, galLongMin, galLon
     return [raHours, raMinutes, raSeconds, decDegrees, decMinutes, decSeconds];
 }
 
+/**
+ * Calculate the angle between two celestial objects
+ */
+function angleBetweenTwoObjects(raLong1HourDeg, raLong1Min, raLong1Sec, decLat1Deg, decLat1Min, decLat1Sec, raLong2HourDeg, raLong2Min, raLong2Sec, decLat2Deg, decLat2Min, decLat2Sec, hourOrDegree) {
+    var raLong1Decimal = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.HMStoDH(raLong1HourDeg, raLong1Min, raLong1Sec) : paMacros.degreesMinutesSecondsToDecimalDegrees(raLong1HourDeg, raLong1Min, raLong1Sec);
+    var raLong1Deg = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.degreeHoursToDecimalDegrees(raLong1Decimal) : raLong1Decimal;
+
+    var raLong1Rad = paUtils.degreesToRadians(raLong1Deg);
+    var decLat1Deg1 = paMacros.degreesMinutesSecondsToDecimalDegrees(decLat1Deg, decLat1Min, decLat1Sec);
+    var decLat1Rad = paUtils.degreesToRadians(decLat1Deg1);
+
+    var raLong2Decimal = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.HMStoDH(raLong2HourDeg, raLong2Min, raLong2Sec) : paMacros.degreesMinutesSecondsToDecimalDegrees(raLong2HourDeg, raLong2Min, raLong2Sec);
+    var raLong2Deg = (hourOrDegree == paTypes.AngleMeasure.Hours) ? paMacros.degreeHoursToDecimalDegrees(raLong2Decimal) : raLong2Decimal;
+    var raLong2Rad = paUtils.degreesToRadians(raLong2Deg);
+    var decLat2Deg1 = paMacros.degreesMinutesSecondsToDecimalDegrees(decLat2Deg, decLat2Min, decLat2Sec);
+    var decLat2Rad = paUtils.degreesToRadians(decLat2Deg1);
+
+    var cosD = Math.sin(decLat1Rad) * Math.sin(decLat2Rad) + Math.cos(decLat1Rad) * Math.cos(decLat2Rad) * Math.cos(raLong1Rad - raLong2Rad);
+    var dRad = Math.acos(cosD);
+    var dDeg = paMacros.degrees(dRad);
+
+    var angleDeg = paMacros.decimalDegreesDegrees(dDeg);
+    var angleMin = paMacros.decimalDegreesMinutes(dDeg);
+    var angleSec = paMacros.decimalDegreesSeconds(dDeg);
+
+    return [angleDeg, angleMin, angleSec];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -264,7 +293,8 @@ module.exports = {
     eclipticCoordinateToEquatorialCoordinate,
     equatorialCoordinateToEclipticCoordinate,
     equatorialCoordinateToGalacticCoordinate,
-    galacticCoordinateToEquatorialCoordinate
+    galacticCoordinateToEquatorialCoordinate,
+    angleBetweenTwoObjects
 };</code></pre>
         </article>
     </section>
@@ -275,13 +305,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#HMStoDH">HMStoDH</a></li><li><a href="global.html#WarningFlag">WarningFlag</a></li><li><a href="global.html#angleToDecimalDegrees">angleToDecimalDegrees</a></li><li><a href="global.html#civilDateToDayNumber">civilDateToDayNumber</a></li><li><a href="global.html#civilDateToJulianDate">civilDateToJulianDate</a></li><li><a href="global.html#civilTimeToDecimalHours">civilTimeToDecimalHours</a></li><li><a href="global.html#decimalDegreesDegrees">decimalDegreesDegrees</a></li><li><a href="global.html#decimalDegreesMinutes">decimalDegreesMinutes</a></li><li><a href="global.html#decimalDegreesSeconds">decimalDegreesSeconds</a></li><li><a href="global.html#decimalDegreesToAngle">decimalDegreesToAngle</a></li><li><a href="global.html#decimalDegreesToDegreeHours">decimalDegreesToDegreeHours</a></li><li><a href="global.html#decimalHoursHour">decimalHoursHour</a></li><li><a href="global.html#decimalHoursMinute">decimalHoursMinute</a></li><li><a href="global.html#decimalHoursSecond">decimalHoursSecond</a></li><li><a href="global.html#decimalHoursToCivilTime">decimalHoursToCivilTime</a></li><li><a href="global.html#degreeHoursToDecimalDegrees">degreeHoursToDecimalDegrees</a></li><li><a href="global.html#degrees">degrees</a></li><li><a href="global.html#degreesMinutesSecondsToDecimalDegrees">degreesMinutesSecondsToDecimalDegrees</a></li><li><a href="global.html#degreesToRadians">degreesToRadians</a></li><li><a href="global.html#eclipticCoordinateToEquatorialCoordinate">eclipticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#equatorialCoordinateToEclipticCoordinate">equatorialCoordinateToEclipticCoordinate</a></li><li><a href="global.html#equatorialCoordinateToGalacticCoordinate">equatorialCoordinateToGalacticCoordinate</a></li><li><a href="global.html#equatorialCoordinatesToAltitude">equatorialCoordinatesToAltitude</a></li><li><a href="global.html#equatorialCoordinatesToAzimuth">equatorialCoordinatesToAzimuth</a></li><li><a href="global.html#equatorialCoordinatesToHorizonCoordinates">equatorialCoordinatesToHorizonCoordinates</a></li><li><a href="global.html#galacticCoordinateToEquatorialCoordinate">galacticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#getDateOfEaster">getDateOfEaster</a></li><li><a href="global.html#greenwichSiderealTimeToLocalSiderealTime">greenwichSiderealTimeToLocalSiderealTime</a></li><li><a href="global.html#greenwichSiderealTimeToUniversalTime">greenwichSiderealTimeToUniversalTime</a></li><li><a href="global.html#horizonCoordinatesToDeclination">horizonCoordinatesToDeclination</a></li><li><a href="global.html#horizonCoordinatesToEquatorialCoordinates">horizonCoordinatesToEquatorialCoordinates</a></li><li><a href="global.html#horizonCoordinatesToHourAngle">horizonCoordinatesToHourAngle</a></li><li><a href="global.html#hourAngleToRightAscension">hourAngleToRightAscension</a></li><li><a href="global.html#isLeapYear">isLeapYear</a></li><li><a href="global.html#julianDateDay">julianDateDay</a></li><li><a href="global.html#julianDateMonth">julianDateMonth</a></li><li><a href="global.html#julianDateYear">julianDateYear</a></li><li><a href="global.html#localCivilTimeGreenwichDay">localCivilTimeGreenwichDay</a></li><li><a href="global.html#localCivilTimeGreenwichMonth">localCivilTimeGreenwichMonth</a></li><li><a href="global.html#localCivilTimeGreenwichYear">localCivilTimeGreenwichYear</a></li><li><a href="global.html#localCivilTimeToUniversalTime">localCivilTimeToUniversalTime</a></li><li><a href="global.html#localSiderealTimeToGreenwichSiderealTime">localSiderealTimeToGreenwichSiderealTime</a></li><li><a href="global.html#meanObliquityOfTheEcliptic">meanObliquityOfTheEcliptic</a></li><li><a href="global.html#nutatLong">nutatLong</a></li><li><a href="global.html#nutatObl">nutatObl</a></li><li><a href="global.html#obliq">obliq</a></li><li><a href="global.html#radiansToDegrees">radiansToDegrees</a></li><li><a href="global.html#rightAscensionToHourAngle">rightAscensionToHourAngle</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#universalTimeToGreenwichSiderealTime">universalTimeToGreenwichSiderealTime</a></li><li><a href="global.html#universalTimeToLocalCivilTime">universalTimeToLocalCivilTime</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AngleMeasure">AngleMeasure</a></li><li><a href="global.html#HMStoDH">HMStoDH</a></li><li><a href="global.html#WarningFlag">WarningFlag</a></li><li><a href="global.html#angleBetweenTwoObjects">angleBetweenTwoObjects</a></li><li><a href="global.html#angleToDecimalDegrees">angleToDecimalDegrees</a></li><li><a href="global.html#civilDateToDayNumber">civilDateToDayNumber</a></li><li><a href="global.html#civilDateToJulianDate">civilDateToJulianDate</a></li><li><a href="global.html#civilTimeToDecimalHours">civilTimeToDecimalHours</a></li><li><a href="global.html#decimalDegreesDegrees">decimalDegreesDegrees</a></li><li><a href="global.html#decimalDegreesMinutes">decimalDegreesMinutes</a></li><li><a href="global.html#decimalDegreesSeconds">decimalDegreesSeconds</a></li><li><a href="global.html#decimalDegreesToAngle">decimalDegreesToAngle</a></li><li><a href="global.html#decimalDegreesToDegreeHours">decimalDegreesToDegreeHours</a></li><li><a href="global.html#decimalHoursHour">decimalHoursHour</a></li><li><a href="global.html#decimalHoursMinute">decimalHoursMinute</a></li><li><a href="global.html#decimalHoursSecond">decimalHoursSecond</a></li><li><a href="global.html#decimalHoursToCivilTime">decimalHoursToCivilTime</a></li><li><a href="global.html#degreeHoursToDecimalDegrees">degreeHoursToDecimalDegrees</a></li><li><a href="global.html#degrees">degrees</a></li><li><a href="global.html#degreesMinutesSecondsToDecimalDegrees">degreesMinutesSecondsToDecimalDegrees</a></li><li><a href="global.html#degreesToRadians">degreesToRadians</a></li><li><a href="global.html#eclipticCoordinateToEquatorialCoordinate">eclipticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#equatorialCoordinateToEclipticCoordinate">equatorialCoordinateToEclipticCoordinate</a></li><li><a href="global.html#equatorialCoordinateToGalacticCoordinate">equatorialCoordinateToGalacticCoordinate</a></li><li><a href="global.html#equatorialCoordinatesToAltitude">equatorialCoordinatesToAltitude</a></li><li><a href="global.html#equatorialCoordinatesToAzimuth">equatorialCoordinatesToAzimuth</a></li><li><a href="global.html#equatorialCoordinatesToHorizonCoordinates">equatorialCoordinatesToHorizonCoordinates</a></li><li><a href="global.html#galacticCoordinateToEquatorialCoordinate">galacticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#getDateOfEaster">getDateOfEaster</a></li><li><a href="global.html#greenwichSiderealTimeToLocalSiderealTime">greenwichSiderealTimeToLocalSiderealTime</a></li><li><a href="global.html#greenwichSiderealTimeToUniversalTime">greenwichSiderealTimeToUniversalTime</a></li><li><a href="global.html#horizonCoordinatesToDeclination">horizonCoordinatesToDeclination</a></li><li><a href="global.html#horizonCoordinatesToEquatorialCoordinates">horizonCoordinatesToEquatorialCoordinates</a></li><li><a href="global.html#horizonCoordinatesToHourAngle">horizonCoordinatesToHourAngle</a></li><li><a href="global.html#hourAngleToRightAscension">hourAngleToRightAscension</a></li><li><a href="global.html#isLeapYear">isLeapYear</a></li><li><a href="global.html#julianDateDay">julianDateDay</a></li><li><a href="global.html#julianDateMonth">julianDateMonth</a></li><li><a href="global.html#julianDateYear">julianDateYear</a></li><li><a href="global.html#localCivilTimeGreenwichDay">localCivilTimeGreenwichDay</a></li><li><a href="global.html#localCivilTimeGreenwichMonth">localCivilTimeGreenwichMonth</a></li><li><a href="global.html#localCivilTimeGreenwichYear">localCivilTimeGreenwichYear</a></li><li><a href="global.html#localCivilTimeToUniversalTime">localCivilTimeToUniversalTime</a></li><li><a href="global.html#localSiderealTimeToGreenwichSiderealTime">localSiderealTimeToGreenwichSiderealTime</a></li><li><a href="global.html#meanObliquityOfTheEcliptic">meanObliquityOfTheEcliptic</a></li><li><a href="global.html#nutatLong">nutatLong</a></li><li><a href="global.html#nutatObl">nutatObl</a></li><li><a href="global.html#obliq">obliq</a></li><li><a href="global.html#radiansToDegrees">radiansToDegrees</a></li><li><a href="global.html#rightAscensionToHourAngle">rightAscensionToHourAngle</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#universalTimeToGreenwichSiderealTime">universalTimeToGreenwichSiderealTime</a></li><li><a href="global.html#universalTimeToLocalCivilTime">universalTimeToLocalCivilTime</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Mar 28 2024 10:53:38 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Mar 28 2024 11:59:44 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

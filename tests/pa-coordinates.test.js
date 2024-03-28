@@ -1,4 +1,5 @@
 const paCoord = require('../src/pa-coordinates.js');
+const paTypes = require('../src/pa-types.js');
 const paUtils = require('../src/pa-utils.js');
 
 test('Angle to Decimal Degrees', () => {
@@ -43,4 +44,8 @@ test('Equatorial Coordinate to Galactic Coordinate', () => {
 
 test('Galactic Coordinate to Equatorial Coordinate', () => {
     expect(paCoord.galacticCoordinateToEquatorialCoordinate(232, 14, 52.38, 51, 7, 20.16)).toStrictEqual([10, 21, 0, 10, 3, 11]);
+});
+
+test('Angle Between Two Objects', () => {
+    expect(paCoord.angleBetweenTwoObjects(5, 13, 31.7, -8, 13, 30, 6, 44, 13.4, -16, 41, 11, paTypes.AngleMeasure.Hours)).toStrictEqual([23, 40, 25.86]);
 });
