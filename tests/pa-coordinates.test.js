@@ -28,3 +28,11 @@ test('Horizon Coordinates to Equatorial Coordinates', () => {
 test('Mean Obliquity of the Ecliptic', () => {
     expect(paUtils.round(paCoord.meanObliquityOfTheEcliptic(6, 7, 2009), 8)).toBe(23.43805531);
 });
+
+test('Ecliptic Coordinate to Equatorial Coordinate', () => {
+    expect(paCoord.eclipticCoordinateToEquatorialCoordinate(139, 41, 10, 4, 52, 31, 6, 7, 2009)).toStrictEqual([9, 34, 53.4, 19, 32, 8.52]);
+});
+
+test('Equatorial Coordinate to Ecliptic Coordinate', () => {
+    expect(paCoord.equatorialCoordinateToEclipticCoordinate(9, 34, 53.4, 19, 32, 8.52, 6, 7, 2009)).toStrictEqual([139, 41, 9.97, 4, 52, 30.99]);
+});

@@ -110,6 +110,65 @@ function meanObliquityOfTheEcliptic(greenwichDay, greenwichMonth, greenwichYear)
     return 23.439292 - de2;
 }
 
+/**
+ * Convert Ecliptic Coordinates to Equatorial Coordinates
+ */
+function eclipticCoordinateToEquatorialCoordinate(eclipticLongitudeDegrees, eclipticLongitudeMinutes, eclipticLongitudeSeconds, eclipticLatitudeDegrees, eclipticLatitudeMinutes, eclipticLatitudeSeconds, greenwichDay, greenwichMonth, greenwichYear) {
+    var eclonDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(eclipticLongitudeDegrees, eclipticLongitudeMinutes, eclipticLongitudeSeconds);
+    var eclatDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(eclipticLatitudeDegrees, eclipticLatitudeMinutes, eclipticLatitudeSeconds);
+    var eclonRad = paUtils.degreesToRadians(eclonDeg);
+    var eclatRad = paUtils.degreesToRadians(eclatDeg);
+    var obliqDeg = paMacros.obliq(greenwichDay, greenwichMonth, greenwichYear);
+    var obliqRad = paUtils.degreesToRadians(obliqDeg);
+    var sinDec = Math.sin(eclatRad) * Math.cos(obliqRad) + Math.cos(eclatRad) * Math.sin(obliqRad) * Math.sin(eclonRad);
+    var decRad = Math.asin(sinDec);
+    var decDeg = paMacros.degrees(decRad);
+    var y = Math.sin(eclonRad) * Math.cos(obliqRad) - Math.tan(eclatRad) * Math.sin(obliqRad);
+    var x = Math.cos(eclonRad);
+    var raRad = Math.atan2(y, x);
+    var raDeg1 = paMacros.degrees(raRad);
+    var raDeg2 = raDeg1 - 360 * Math.floor(raDeg1 / 360);
+    var raHours = paMacros.decimalDegreesToDegreeHours(raDeg2);
+
+    var outRAHours = paMacros.decimalHoursHour(raHours);
+    var outRAMinutes = paMacros.decimalHoursMinute(raHours);
+    var outRASeconds = paMacros.decimalHoursSecond(raHours);
+    var outDecDegrees = paMacros.decimalDegreesDegrees(decDeg);
+    var outDecMinutes = paMacros.decimalDegreesMinutes(decDeg);
+    var outDecSeconds = paMacros.decimalDegreesSeconds(decDeg);
+
+    return [outRAHours, outRAMinutes, outRASeconds, outDecDegrees, outDecMinutes, outDecSeconds];
+}
+
+/**
+ * Convert Equatorial Coordinates to Ecliptic Coordinates
+ */
+function equatorialCoordinateToEclipticCoordinate(raHours, raMinutes, raSeconds, decDegrees, decMinutes, decSeconds, gwDay, gwMonth, gwYear) {
+    var raDeg = paMacros.degreeHoursToDecimalDegrees(paMacros.HMStoDH(raHours, raMinutes, raSeconds));
+    var decDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(decDegrees, decMinutes, decSeconds);
+    var raRad = paUtils.degreesToRadians(raDeg);
+    var decRad = paUtils.degreesToRadians(decDeg);
+    var obliqDeg = paMacros.obliq(gwDay, gwMonth, gwYear);
+    var obliqRad = paUtils.degreesToRadians(obliqDeg);
+    var sinEclLat = Math.sin(decRad) * Math.cos(obliqRad) - Math.cos(decRad) * Math.sin(obliqRad) * Math.sin(raRad);
+    var eclLatRad = Math.asin(sinEclLat);
+    var eclLatDeg = paMacros.degrees(eclLatRad);
+    var y = Math.sin(raRad) * Math.cos(obliqRad) + Math.tan(decRad) * Math.sin(obliqRad);
+    var x = Math.cos(raRad);
+    var eclLongRad = Math.atan2(y, x);
+    var eclLongDeg1 = paMacros.degrees(eclLongRad);
+    var eclLongDeg2 = eclLongDeg1 - 360 * Math.floor(eclLongDeg1 / 360);
+
+    var outEclLongDeg = paMacros.decimalDegreesDegrees(eclLongDeg2);
+    var outEclLongMin = paMacros.decimalDegreesMinutes(eclLongDeg2);
+    var outEclLongSec = paMacros.decimalDegreesSeconds(eclLongDeg2);
+    var outEclLatDeg = paMacros.decimalDegreesDegrees(eclLatDeg);
+    var outEclLatMin = paMacros.decimalDegreesMinutes(eclLatDeg);
+    var outEclLatSec = paMacros.decimalDegreesSeconds(eclLatDeg);
+
+    return [outEclLongDeg, outEclLongMin, outEclLongSec, outEclLatDeg, outEclLatMin, outEclLatSec];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -118,5 +177,7 @@ module.exports = {
     hourAngleToRightAscension,
     equatorialCoordinatesToHorizonCoordinates,
     horizonCoordinatesToEquatorialCoordinates,
-    meanObliquityOfTheEcliptic
+    meanObliquityOfTheEcliptic,
+    eclipticCoordinateToEquatorialCoordinate,
+    equatorialCoordinateToEclipticCoordinate
 };
