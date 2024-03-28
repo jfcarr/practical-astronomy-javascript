@@ -10,7 +10,7 @@ If you're interested in this topic, please buy the book! It provides far more de
 npm install practical-astronomy-javascript
 ```
 
-NPM page: https://www.npmjs.com/package/practical-astronomy-javascript
+[NPM page](https://www.npmjs.com/package/practical-astronomy-javascript)
 
 ## Usage
 
