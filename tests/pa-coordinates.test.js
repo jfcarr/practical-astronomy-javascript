@@ -49,3 +49,7 @@ test('Galactic Coordinate to Equatorial Coordinate', () => {
 test('Angle Between Two Objects', () => {
     expect(paCoord.angleBetweenTwoObjects(5, 13, 31.7, -8, 13, 30, 6, 44, 13.4, -16, 41, 11, paTypes.AngleMeasure.Hours)).toStrictEqual([23, 40, 25.86]);
 });
+
+test('Rising and Setting', () => {
+    expect(paCoord.risingAndSetting(23, 39, 20, 21, 42, 0, 24, 8, 2010, 64, 30, 0.5667)).toStrictEqual([paTypes.RiseSetStatus.OK, 14, 16, 4, 10, 64.36, 295.64]);
+});
