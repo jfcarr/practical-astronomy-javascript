@@ -97,6 +97,19 @@ function horizonCoordinatesToEquatorialCoordinates(azimuthDegrees, azimuthMinute
     return [hourAngleHours, hourAngleMinutes, hourAngleSeconds, declinationDegrees, declinationMinutes, declinationSeconds];
 }
 
+/**
+ * Calculate Mean Obliquity of the Ecliptic for a Greenwich Date
+ */
+function meanObliquityOfTheEcliptic(greenwichDay, greenwichMonth, greenwichYear) {
+    var jd = paMacros.civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear);
+    var mjd = jd - 2451545;
+    var t = mjd / 36525;
+    var de1 = t * (46.815 + t * (0.0006 - (t * 0.00181)));
+    var de2 = de1 / 3600;
+
+    return 23.439292 - de2;
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -104,5 +117,6 @@ module.exports = {
     rightAscensionToHourAngle,
     hourAngleToRightAscension,
     equatorialCoordinatesToHorizonCoordinates,
-    horizonCoordinatesToEquatorialCoordinates
+    horizonCoordinatesToEquatorialCoordinates,
+    meanObliquityOfTheEcliptic
 };
