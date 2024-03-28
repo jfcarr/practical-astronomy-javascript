@@ -2,7 +2,7 @@
  * Determine if year is a leap year.
  */
 function isLeapYear(inputYear) {
-    year = inputYear;
+    var year = inputYear;
 
     if (year % 4 == 0) {
         if (year % 100 == 0)
@@ -23,7 +23,24 @@ function round(value, precision) {
     return Math.round(value * multiplier) / multiplier;
 }
 
+/**
+ * Convert radians to degrees.
+ */
+function radiansToDegrees(radians) {
+    return radians * Math.PI / 180;
+}
+
+/**
+ * Convert degrees to radians.
+ */
+function degreesToRadians(degrees) {
+    return degrees * (Math.PI / 180);
+}
+
+
 module.exports = {
     isLeapYear,
-    round
+    round,
+    radiansToDegrees,
+    degreesToRadians
 };

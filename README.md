@@ -50,7 +50,7 @@ Result:
 
 - [x] Convert -> Angle <-> Decimal Degrees
 - [x] Convert -> Right Ascension <-> Hour Angle
-- [ ] Convert -> Equatorial Coordinates <-> Horizon Coordinates
+- [x] Convert -> Equatorial Coordinates <-> Horizon Coordinates
 - [ ] Calculate -> Obliquity of the Ecliptic
 - [ ] Convert -> Ecliptic Coordinates <-> Equatorial Coordinates
 - [ ] Convert -> Equatorial Coordinates <-> Galactic Coordinates

@@ -16,3 +16,11 @@ test('Right Ascension to Hour Angle', () => {
 test('Hour Angle to Right Ascension', () => {
     expect(paCoord.hourAngleToRightAscension(9, 52, 23.66, 14, 36, 51.67, false, -4, 22, 4, 1980, -64)).toStrictEqual([18, 32, 21]);
 });
+
+test('Equatorial Coordinates to Horizon Coordinates', () => {
+    expect(paCoord.equatorialCoordinatesToHorizonCoordinates(5, 51, 44, 23, 13, 10, 52)).toStrictEqual([283, 16, 15.7, 19, 20, 3.64]);
+});
+
+test('Horizon Coordinates to Equatorial Coordinates', () => {
+    expect(paCoord.horizonCoordinatesToEquatorialCoordinates(283, 16, 15.7, 19, 20, 3.64, 52)).toStrictEqual([5, 51, 44, 23, 13, 10]);
+});
