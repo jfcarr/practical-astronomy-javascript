@@ -79,3 +79,7 @@ test('Corrections For Geocentric Parallax', () => {
 test('Heliographic Coordinates', () => {
     expect(paCoord.heliographicCoordinates(220, 10.5, 1, 5, 1988)).toStrictEqual([142.59, -19.94]);
 });
+
+test('Carrington Rotation Number', () => {
+    expect(paCoord.carringtonRotationNumber(27, 1, 1975)).toBe(1624);
+});
