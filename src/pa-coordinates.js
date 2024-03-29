@@ -314,6 +314,30 @@ function correctForPrecession(raHour, raMinutes, raSeconds, decDeg, decMinutes, 
     return [correctedRAHour, correctedRAMinutes, correctedRASeconds, correctedDecDeg, correctedDecMinutes, correctedDecSeconds];
 }
 
+/**
+ * Calculate nutation for two values: ecliptic longitude and obliquity, for a Greenwich date.
+ */
+function nutationInEclipticLongitudeAndObliquity(greenwichDay, greenwichMonth, greenwichYear) {
+    var jdDays = paMacros.civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear);
+    var tCenturies = (jdDays - 2415020) / 36525;
+    var aDeg = 100.0021358 * tCenturies;
+    var l1Deg = 279.6967 + (0.000303 * tCenturies * tCenturies);
+    var lDeg1 = l1Deg + 360 * (aDeg - Math.floor(aDeg));
+    var lDeg2 = lDeg1 - 360 * Math.floor(lDeg1 / 360);
+    var lRad = paUtils.degreesToRadians(lDeg2);
+    var bDeg = 5.372617 * tCenturies;
+    var nDeg1 = 259.1833 - 360 * (bDeg - Math.floor(bDeg));
+    var nDeg2 = nDeg1 - 360 * (Math.floor(nDeg1 / 360));
+    var nRad = paUtils.degreesToRadians(nDeg2);
+    var nutInLongArcsec = -17.2 * Math.sin(nRad) - 1.3 * Math.sin(2 * lRad);
+    var nutInOblArcsec = 9.2 * Math.cos(nRad) + 0.5 * Math.cos(2 * lRad);
+
+    var nutInLongDeg = nutInLongArcsec / 3600;
+    var nutInOblDeg = nutInOblArcsec / 3600;
+
+    return [nutInLongDeg, nutInOblDeg];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -329,5 +353,6 @@ module.exports = {
     galacticCoordinateToEquatorialCoordinate,
     angleBetweenTwoObjects,
     risingAndSetting,
-    correctForPrecession
+    correctForPrecession,
+    nutationInEclipticLongitudeAndObliquity
 };
