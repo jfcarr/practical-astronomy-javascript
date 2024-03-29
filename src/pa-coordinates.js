@@ -383,6 +383,28 @@ function atmosphericRefraction(trueRAHour, trueRAMin, trueRASec, trueDecDeg, tru
     return [correctedRAHour, correctedRAMin, correctedRASec, correctedDecDeg, correctedDecMin, correctedDecSec];
 }
 
+/**
+ * Calculate corrected RA/Dec, accounting for geocentric parallax.
+ */
+function correctionsForGeocentricParallax(raHour, raMin, raSec, decDeg, decMin, decSec, coordinateType, equatorialHorParallaxDeg, geogLongDeg, geogLatDeg, heightM, daylightSaving, timezoneHours, lcdDay, lcdMonth, lcdYear, lctHour, lctMin, lctSec) {
+    var haHours = paMacros.rightAscensionToHourAngle(raHour, raMin, raSec, lctHour, lctMin, lctSec, daylightSaving, timezoneHours, lcdDay, lcdMonth, lcdYear, geogLongDeg);
+
+    var correctedHAHours = paMacros.parallaxHA(haHours, 0, 0, decDeg, decMin, decSec, coordinateType, geogLatDeg, heightM, equatorialHorParallaxDeg);
+
+    var correctedRAHours = paMacros.hourAngleToRightAscension(correctedHAHours, 0, 0, lctHour, lctMin, lctSec, daylightSaving, timezoneHours, lcdDay, lcdMonth, lcdYear, geogLongDeg);
+
+    var correctedDecDeg1 = paMacros.parallaxDec(haHours, 0, 0, decDeg, decMin, decSec, coordinateType, geogLatDeg, heightM, equatorialHorParallaxDeg);
+
+    var correctedRAHour = paMacros.decimalHoursHour(correctedRAHours);
+    var correctedRAMin = paMacros.decimalHoursMinute(correctedRAHours);
+    var correctedRASec = paMacros.decimalHoursSecond(correctedRAHours);
+    var correctedDecDeg = paMacros.decimalDegreesDegrees(correctedDecDeg1);
+    var correctedDecMin = paMacros.decimalDegreesMinutes(correctedDecDeg1);
+    var correctedDecSec = paMacros.decimalDegreesSeconds(correctedDecDeg1);
+
+    return [correctedRAHour, correctedRAMin, correctedRASec, correctedDecDeg, correctedDecMin, correctedDecSec];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -401,5 +423,6 @@ module.exports = {
     correctForPrecession,
     nutationInEclipticLongitudeAndObliquity,
     correctForAberration,
-    atmosphericRefraction
+    atmosphericRefraction,
+    correctionsForGeocentricParallax
 };
