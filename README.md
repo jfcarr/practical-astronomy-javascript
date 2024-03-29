@@ -67,7 +67,7 @@ Result:
 - [x] Calculate -> RA and Declination values, corrected for geocentric parallax
 - [x] Calculate -> Heliographic coordinates
 - [x] Calculate -> Carrington rotation number
-- [ ] Calculate -> Selenographic (lunar) coordinates (sub-Earth and sub-Solar)
+- [x] Calculate -> Selenographic (lunar) coordinates (sub-Earth and sub-Solar)
 
 ### The Sun
 

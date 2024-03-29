@@ -83,3 +83,11 @@ test('Heliographic Coordinates', () => {
 test('Carrington Rotation Number', () => {
     expect(paCoord.carringtonRotationNumber(27, 1, 1975)).toBe(1624);
 });
+
+test('Selenographic Coordinates 1', () => {
+    expect(paCoord.selenographicCoordinates1(1, 5, 1988)).toStrictEqual([-4.88, 4.04, 19.78]);
+});
+
+test('Selenographic Coordinates 2', () => {
+    expect(paCoord.selenographicCoordinates2(1, 5, 1988)).toStrictEqual([6.81, 83.19, 1.19]);
+});

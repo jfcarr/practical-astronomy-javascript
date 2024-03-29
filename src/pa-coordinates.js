@@ -448,6 +448,72 @@ function carringtonRotationNumber(gwdateDay, gwdateMonth, gwdateYear) {
     return crn;
 }
 
+/**
+ * Calculate selenographic (lunar) coordinates (sub-Earth)
+ */
+function selenographicCoordinates1(gwdateDay, gwdateMonth, gwdateYear) {
+    var julianDateDays = paMacros.civilDateToJulianDate(gwdateDay, gwdateMonth, gwdateYear);
+    var tCenturies = (julianDateDays - 2451545) / 36525;
+    var longAscNodeDeg = 125.044522 - 1934.136261 * tCenturies;
+    var f1 = 93.27191 + 483202.0175 * tCenturies;
+    var f2 = f1 - 360 * Math.floor(f1 / 360);
+    var geocentricMoonLongDeg = paMacros.moonLong(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var geocentricMoonLatRad = paUtils.degreesToRadians(paMacros.moonLat(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear));
+    var inclinationRad = paUtils.degreesToRadians(paMacros.degreesMinutesSecondsToDecimalDegrees(1, 32, 32.7));
+    var nodeLongRad = paUtils.degreesToRadians(longAscNodeDeg - geocentricMoonLongDeg);
+    var sinBe = -Math.cos(inclinationRad) * Math.sin(geocentricMoonLatRad) + Math.sin(inclinationRad) * Math.cos(geocentricMoonLatRad) * Math.sin(nodeLongRad);
+    var subEarthLatDeg = paMacros.degrees(Math.asin(sinBe));
+    var aRad = Math.atan2((-Math.sin(geocentricMoonLatRad) * Math.sin(inclinationRad) - Math.cos(geocentricMoonLatRad) * Math.cos(inclinationRad) * Math.sin(nodeLongRad)), (Math.cos(geocentricMoonLatRad) * Math.cos(nodeLongRad)));
+    var aDeg = paMacros.degrees(aRad);
+    var subEarthLongDeg1 = aDeg - f2;
+    var subEarthLongDeg2 = subEarthLongDeg1 - 360 * Math.floor(subEarthLongDeg1 / 360);
+    var subEarthLongDeg3 = (subEarthLongDeg2 > 180) ? subEarthLongDeg2 - 360 : subEarthLongDeg2;
+    var c1Rad = Math.atan(Math.cos(nodeLongRad) * Math.sin(inclinationRad) / (Math.cos(geocentricMoonLatRad) * Math.cos(inclinationRad) + Math.sin(geocentricMoonLatRad) * Math.sin(inclinationRad) * Math.sin(nodeLongRad)));
+    var obliquityRad = paUtils.degreesToRadians(paMacros.obliq(gwdateDay, gwdateMonth, gwdateYear));
+    var c2Rad = Math.atan(Math.sin(obliquityRad) * Math.cos(paUtils.degreesToRadians(geocentricMoonLongDeg)) / (Math.sin(obliquityRad) * Math.sin(geocentricMoonLatRad) * Math.sin(paUtils.degreesToRadians(geocentricMoonLongDeg)) - Math.cos(obliquityRad) * Math.cos(geocentricMoonLatRad)));
+    var cDeg = paMacros.degrees(c1Rad + c2Rad);
+
+    var subEarthLongitude = paUtils.round(subEarthLongDeg3, 2);
+    var subEarthLatitude = paUtils.round(subEarthLatDeg, 2);
+    var positionAngleOfPole = paUtils.round(cDeg, 2);
+
+    return [subEarthLongitude, subEarthLatitude, positionAngleOfPole];
+}
+
+/**
+ * Calculate selenographic (lunar) coordinates (sub-Solar)
+ */
+function selenographicCoordinates2(gwdateDay, gwdateMonth, gwdateYear) {
+    var julianDateDays = paMacros.civilDateToJulianDate(gwdateDay, gwdateMonth, gwdateYear);
+    var tCenturies = (julianDateDays - 2451545) / 36525;
+    var longAscNodeDeg = 125.044522 - 1934.136261 * tCenturies;
+    var f1 = 93.27191 + 483202.0175 * tCenturies;
+    var f2 = f1 - 360 * Math.floor(f1 / 360);
+    var sunGeocentricLongDeg = paMacros.sunLong(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var moonEquHorParallaxArcMin = paMacros.moonHP(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear) * 60;
+    var sunEarthDistAU = paMacros.sunDist(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var geocentricMoonLatRad = paUtils.degreesToRadians(paMacros.moonLat(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear));
+    var geocentricMoonLongDeg = paMacros.moonLong(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var adjustedMoonLongDeg = sunGeocentricLongDeg + 180 + (26.4 * Math.cos(geocentricMoonLatRad) * Math.sin(paUtils.degreesToRadians(sunGeocentricLongDeg - geocentricMoonLongDeg)) / (moonEquHorParallaxArcMin * sunEarthDistAU));
+    var adjustedMoonLatRad = 0.14666 * geocentricMoonLatRad / (moonEquHorParallaxArcMin * sunEarthDistAU);
+    var inclinationRad = paUtils.degreesToRadians(paMacros.degreesMinutesSecondsToDecimalDegrees(1, 32, 32.7));
+    var nodeLongRad = paUtils.degreesToRadians(longAscNodeDeg - adjustedMoonLongDeg);
+    var sinBs = -Math.cos(inclinationRad) * Math.sin(adjustedMoonLatRad) + Math.sin(inclinationRad) * Math.cos(adjustedMoonLatRad) * Math.sin(nodeLongRad);
+    var subSolarLatDeg = paMacros.degrees(Math.asin(sinBs));
+    var aRad = Math.atan2((-Math.sin(adjustedMoonLatRad) * Math.sin(inclinationRad) - Math.cos(adjustedMoonLatRad) * Math.cos(inclinationRad) * Math.sin(nodeLongRad)), (Math.cos(adjustedMoonLatRad) * Math.cos(nodeLongRad)));
+    var aDeg = paMacros.degrees(aRad);
+    var subSolarLongDeg1 = aDeg - f2;
+    var subSolarLongDeg2 = subSolarLongDeg1 - 360 * Math.floor(subSolarLongDeg1 / 360);
+    var subSolarLongDeg3 = (subSolarLongDeg2 > 180) ? subSolarLongDeg2 - 360 : subSolarLongDeg2;
+    var subSolarColongDeg = 90 - subSolarLongDeg3;
+
+    var subSolarLongitude = paUtils.round(subSolarLongDeg3, 2);
+    var subSolarColongitude = paUtils.round(subSolarColongDeg, 2);
+    var subSolarLatitude = paUtils.round(subSolarLatDeg, 2);
+
+    return [subSolarLongitude, subSolarColongitude, subSolarLatitude];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -469,5 +535,7 @@ module.exports = {
     atmosphericRefraction,
     correctionsForGeocentricParallax,
     heliographicCoordinates,
-    carringtonRotationNumber
+    carringtonRotationNumber,
+    selenographicCoordinates1,
+    selenographicCoordinates2
 };
