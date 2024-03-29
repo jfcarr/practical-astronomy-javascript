@@ -63,3 +63,7 @@ test('Nutation', () => {
 
     expect([paUtils.round(nutInLongDeg, 9), paUtils.round(nutInOblDeg, 7)]).toStrictEqual([0.001525808, 0.0025671]);
 });
+
+test('Correct For Aberration', () => {
+    expect(paCoord.correctForAberration(0, 0, 0, 8, 9, 1988, 352, 37, 10.1, -1, 32, 56.4)).toStrictEqual([352, 37, 30.45, -1, 32, 56.33]);
+});

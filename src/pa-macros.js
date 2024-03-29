@@ -584,6 +584,91 @@ function localSiderealTimeToGreenwichSiderealTime(localHours, localMinutes, loca
   return c - (24 * Math.floor(c / 24));
 }
 
+/**
+ * Calculate Sun's ecliptic longitude
+ * 
+ * Original macro name: SunLong
+ */
+function sunLong(lch, lcm, lcs, ds, zc, ld, lm, ly) {
+  var aa = localCivilTimeGreenwichDay(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var bb = localCivilTimeGreenwichMonth(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var cc = localCivilTimeGreenwichYear(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var ut = localCivilTimeToUniversalTime(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var dj = civilDateToJulianDate(aa, bb, cc) - 2415020;
+  var t = (dj / 36525) + (ut / 876600);
+  var t2 = t * t;
+  var a = 100.0021359 * t;
+  var b = 360.0 * (a - Math.floor(a));
+
+  var l = 279.69668 + 0.0003025 * t2 + b;
+  a = 99.99736042 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var m1 = 358.47583 - (0.00015 + 0.0000033 * t) * t2 + b;
+  var ec = 0.01675104 - 0.0000418 * t - 0.000000126 * t2;
+
+  var am = paUtils.degreesToRadians(m1);
+  var at = trueAnomaly(am, ec);
+
+  a = 62.55209472 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var a1 = paUtils.degreesToRadians(153.23 + b);
+  a = 125.1041894 * t;
+  b = 360 * (a - Math.floor(a));
+
+  var b1 = paUtils.degreesToRadians(216.57 + b);
+  a = 91.56766028 * t;
+  b = 360.0 * (a - Math.floor(a));
+
+  var c1 = paUtils.degreesToRadians(312.69 + b);
+  a = 1236.853095 * t;
+  b = 360.0 * (a - Math.floor(a));
+
+  var d1 = paUtils.degreesToRadians(350.74 - 0.00144 * t2 + b);
+  var e1 = paUtils.degreesToRadians(231.19 + 20.2 * t);
+  a = 183.1353208 * t;
+  b = 360.0 * (a - Math.floor(a));
+  var h1 = paUtils.degreesToRadians(353.4 + b);
+
+  var d2 = 0.00134 * Math.cos(a1) + 0.00154 * Math.cos(b1) + 0.002 * Math.cos(c1);
+  d2 = d2 + 0.00179 * Math.sin(d1) + 0.00178 * Math.sin(e1);
+  var d3 = 0.00000543 * Math.sin(a1) + 0.00001575 * Math.sin(b1);
+  d3 = d3 + 0.00001627 * Math.sin(c1) + 0.00003076 * Math.cos(d1);
+
+  var sr = at + paUtils.degreesToRadians(l - m1 + d2);
+  var tp = 6.283185308;
+
+  sr = sr - tp * Math.floor(sr / tp);
+
+  return degrees(sr);
+}
+
+/**
+ * Solve Kepler's equation, and return value of the true anomaly in radians
+ * 
+ * Original macro name: TrueAnomaly
+ */
+function trueAnomaly(am, ec) {
+  var tp = 6.283185308;
+  var m = am - tp * Math.floor(am / tp);
+  var ae = m;
+
+  while (1 == 1) {
+    var d = ae - (ec * Math.sin(ae)) - m;
+    if (Math.abs(d) < 0.000001) {
+      break;
+    }
+    d = d / (1.0 - (ec * Math.cos(ae)));
+    ae = ae - d;
+  }
+  var a = Math.sqrt((1 + ec) / (1 - ec)) * Math.tan(ae / 2);
+  var at = 2.0 * Math.atan(a);
+
+  return at;
+}
+
+
 
 module.exports = {
   HMStoDH,
@@ -617,5 +702,7 @@ module.exports = {
   nutatLong,
   nutatObl,
   greenwichSiderealTimeToUniversalTime,
-  localSiderealTimeToGreenwichSiderealTime
+  localSiderealTimeToGreenwichSiderealTime,
+  sunLong,
+  trueAnomaly
 };

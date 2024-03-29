@@ -338,6 +338,28 @@ function nutationInEclipticLongitudeAndObliquity(greenwichDay, greenwichMonth, g
     return [nutInLongDeg, nutInOblDeg];
 }
 
+/**
+ * Correct ecliptic coordinates for the effects of aberration.
+ */
+function correctForAberration(utHour, utMinutes, utSeconds, gwDay, gwMonth, gwYear, trueEclLongDeg, trueEclLongMin, trueEclLongSec, trueEclLatDeg, trueEclLatMin, trueEclLatSec) {
+    var trueLongDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(trueEclLongDeg, trueEclLongMin, trueEclLongSec);
+    var trueLatDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(trueEclLatDeg, trueEclLatMin, trueEclLatSec);
+    var sunTrueLongDeg = paMacros.sunLong(utHour, utMinutes, utSeconds, 0, 0, gwDay, gwMonth, gwYear);
+    var dlongArcsec = -20.5 * Math.cos(paUtils.degreesToRadians(sunTrueLongDeg - trueLongDeg)) / Math.cos(paUtils.degreesToRadians(trueLatDeg));
+    var dlatArcsec = -20.5 * Math.sin(paUtils.degreesToRadians(sunTrueLongDeg - trueLongDeg)) * Math.sin(paUtils.degreesToRadians(trueLatDeg));
+    var apparentLongDeg = trueLongDeg + (dlongArcsec / 3600);
+    var apparentLatDeg = trueLatDeg + (dlatArcsec / 3600);
+
+    var apparentEclLongDeg = paMacros.decimalDegreesDegrees(apparentLongDeg);
+    var apparentEclLongMin = paMacros.decimalDegreesMinutes(apparentLongDeg);
+    var apparentEclLongSec = paMacros.decimalDegreesSeconds(apparentLongDeg);
+    var apparentEclLatDeg = paMacros.decimalDegreesDegrees(apparentLatDeg);
+    var apparentEclLatMin = paMacros.decimalDegreesMinutes(apparentLatDeg);
+    var apparentEclLatSec = paMacros.decimalDegreesSeconds(apparentLatDeg);
+
+    return [apparentEclLongDeg, apparentEclLongMin, apparentEclLongSec, apparentEclLatDeg, apparentEclLatMin, apparentEclLatSec];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -354,5 +376,6 @@ module.exports = {
     angleBetweenTwoObjects,
     risingAndSetting,
     correctForPrecession,
-    nutationInEclipticLongitudeAndObliquity
+    nutationInEclipticLongitudeAndObliquity,
+    correctForAberration
 };
