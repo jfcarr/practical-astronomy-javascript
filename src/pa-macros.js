@@ -731,6 +731,165 @@ function refractL3035(pr, tr, y, d) {
   return -d * 0.00007888888 * pr / ((273.0 + tr) * Math.tan(y));
 }
 
+/**
+ * Calculate corrected hour angle in decimal hours
+ * 
+ * Original macro name: ParallaxHA
+ */
+function parallaxHA(hh, hm, hs, dd, dm, ds, sw, gp, ht, hp) {
+  var a = paUtils.degreesToRadians(gp);
+  var c1 = Math.cos(a);
+  var s1 = Math.sin(a);
+
+  var u = Math.atan(0.996647 * s1 / c1);
+  var c2 = Math.cos(u);
+  var s2 = Math.sin(u);
+  var b = ht / 6378160;
+
+  var rs = (0.996647 * s2) + (b * s1);
+
+  var rc = c2 + (b * c1);
+  var tp = 6.283185308;
+
+  var rp = 1.0 / Math.sin(paUtils.degreesToRadians(hp));
+
+  var x = paUtils.degreesToRadians(degreeHoursToDecimalDegrees(HMStoDH(hh, hm, hs)));
+  var x1 = x;
+  var y = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var y1 = y;
+
+  var d = (sw == paTypes.CoordinateType.True) ? 1.0 : -1.0;
+
+  if (d == 1) {
+    var [resultP, resultQ] = parallaxHAL2870(x, y, rc, rp, rs, tp);
+    return decimalDegreesToDegreeHours(degrees(resultP));
+  }
+
+  var p1 = 0.0;
+  var q1 = 0.0;
+  var xLoop = x;
+  var yLoop = y;
+
+  while (1 == 1) {
+    var [resultP, resultQ] = parallaxHAL2870(xLoop, yLoop, rc, rp, rs, tp);
+    var p2 = resultP - xLoop;
+    var q2 = resultQ - yLoop;
+
+    var aa = Math.abs(p2 - p1);
+    var bb = Math.abs(q2 - q1);
+
+    if ((aa < 0.000001) && (bb < 0.000001)) {
+      var p3 = x1 - p2;
+
+      return decimalDegreesToDegreeHours(degrees(p3));
+    }
+
+    xLoop = x1 - p2;
+    yLoop = y1 - q2;
+    p1 = p2;
+    q1 = q2;
+  }
+}
+
+/**
+ * Helper function for parallax_ha
+ */
+function parallaxHAL2870(x, y, rc, rp, rs, tp) {
+  var cx = Math.cos(x);
+  var sy = Math.sin(y);
+  var cy = Math.cos(y);
+
+  var aa = (rc * Math.sin(x)) / ((rp * cy) - (rc * cx));
+
+  var dx = Math.atan(aa);
+  var p = x + dx;
+  var cp = Math.cos(p);
+
+  p = p - tp * Math.floor(p / tp);
+  var q = Math.atan(cp * (rp * sy - rs) / (rp * cy * cx - rc));
+
+  return [p, q];
+}
+
+/**
+ * Calculate corrected declination in decimal degrees
+ * 
+ * Original macro name: ParallaxDec
+ */
+function parallaxDec(hh, hm, hs, dd, dm, ds, sw, gp, ht, hp) {
+  var a = paUtils.degreesToRadians(gp);
+  var c1 = Math.cos(a);
+  var s1 = Math.sin(a);
+
+  var u = Math.atan(0.996647 * s1 / c1);
+
+  var c2 = Math.cos(u);
+  var s2 = Math.sin(u);
+  var b = ht / 6378160;
+  var rs = (0.996647 * s2) + (b * s1);
+
+  var rc = c2 + (b * c1);
+  var tp = 6.283185308;
+
+  var rp = 1.0 / Math.sin(paUtils.degreesToRadians(hp));
+
+  var x = paUtils.degreesToRadians(degreeHoursToDecimalDegrees(HMStoDH(hh, hm, hs)));
+  var x1 = x;
+
+  var y = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var y1 = y;
+
+  var d = (sw == paTypes.CoordinateType.True) ? 1.0 : -1.0;
+
+  if (d == 1) {
+    var [resultP, resultQ] = parallaxDecL2870(x, y, rc, rp, rs, tp);
+
+    return degrees(resultQ);
+  }
+
+  var p1 = 0.0;
+  var q1 = 0.0;
+
+  var xLoop = x;
+  var yLoop = y;
+
+  while (1 == 1) {
+    var [resultP, resultQ] = parallaxDecL2870(xLoop, yLoop, rc, rp, rs, tp);
+    var p2 = resultP - xLoop;
+    var q2 = resultQ - yLoop;
+    var aa = Math.abs(p2 - p1);
+
+    if ((aa < 0.000001) && (b < 0.000001)) {
+      var q = y1 - q2;
+
+      return degrees(q);
+    }
+    xLoop = x1 - p2;
+    yLoop = y1 - q2;
+    p1 = p2;
+    q1 = q2;
+  }
+}
+
+/**
+ * Helper function for parallax_dec
+ */
+function parallaxDecL2870(x, y, rc, rp, rs, tp) {
+  var cx = Math.cos(x);
+  var sy = Math.sin(y);
+  var cy = Math.cos(y);
+
+  var aa = (rc * Math.sin(x)) / ((rp * cy) - (rc * cx));
+  var dx = Math.atan(aa);
+  var p = x + dx;
+  var cp = Math.cos(p);
+
+  p = p - tp * Math.floor(p / tp);
+  var q = Math.atan(cp * (rp * sy - rs) / (rp * cy * cx - rc));
+
+  return [p, q];
+}
+
 
 module.exports = {
   HMStoDH,
@@ -768,5 +927,9 @@ module.exports = {
   sunLong,
   trueAnomaly,
   refract,
-  refractL3035
+  refractL3035,
+  parallaxHA,
+  parallaxHAL2870,
+  parallaxDec,
+  parallaxDecL2870
 };

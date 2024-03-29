@@ -71,3 +71,7 @@ test('Correct For Aberration', () => {
 test('Atmospheric Refraction', () => {
     expect(paCoord.atmosphericRefraction(23, 14, 0, 40, 10, 0, paTypes.CoordinateType.True, 0.17, 51.2036110, 0, 0, 23, 3, 1987, 1, 1, 24, 1012, 21.7)).toStrictEqual([23, 13, 44.74, 40, 19, 45.76]);
 });
+
+test('Corrections For Geocentric Parallax', () => {
+    expect(paCoord.correctionsForGeocentricParallax(22, 35, 19, -7, 41, 13, paTypes.CoordinateType.True, 1.019167, -100, 50, 60, 0, -6, 26, 2, 1979, 10, 45, 0)).toStrictEqual([22, 36, 43.22, -8, 32, 17.4]);
+});
