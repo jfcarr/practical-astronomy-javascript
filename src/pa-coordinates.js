@@ -437,6 +437,16 @@ function heliographicCoordinates(helioPositionAngleDeg, helioDisplacementArcmin,
     return [helioLongDeg, helioLatDeg];
 }
 
+/**
+ * Calculate carrington rotation number for a Greenwich date
+ */
+function carringtonRotationNumber(gwdateDay, gwdateMonth, gwdateYear) {
+    var julianDateDays = paMacros.civilDateToJulianDate(gwdateDay, gwdateMonth, gwdateYear);
+
+    var crn = 1690 + paUtils.round((julianDateDays - 2444235.34) / 27.2753, 0);
+
+    return crn;
+}
 
 
 module.exports = {
@@ -458,5 +468,6 @@ module.exports = {
     correctForAberration,
     atmosphericRefraction,
     correctionsForGeocentricParallax,
-    heliographicCoordinates
+    heliographicCoordinates,
+    carringtonRotationNumber
 };
