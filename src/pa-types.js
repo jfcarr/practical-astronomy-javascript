@@ -6,6 +6,11 @@ const AngleMeasure = {
     Hours: 'Hours'
 };
 
+const CoordinateType = {
+    True: 'True',
+    Apparent: 'Apparent'
+};
+
 const RiseSetStatus = {
     OK: 'OK',
     NeverRises: 'NeverRises',
@@ -22,6 +27,7 @@ const WarningFlag = {
 
 module.exports = {
     AngleMeasure,
+    CoordinateType,
     RiseSetStatus,
     WarningFlag
 };

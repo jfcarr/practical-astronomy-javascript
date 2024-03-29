@@ -360,6 +360,29 @@ function correctForAberration(utHour, utMinutes, utSeconds, gwDay, gwMonth, gwYe
     return [apparentEclLongDeg, apparentEclLongMin, apparentEclLongSec, apparentEclLatDeg, apparentEclLatMin, apparentEclLatSec];
 }
 
+/**
+ * Calculate corrected RA/Dec, accounting for atmospheric refraction.
+ */
+function atmosphericRefraction(trueRAHour, trueRAMin, trueRASec, trueDecDeg, trueDecMin, trueDecSec, coordinateType, geogLongDeg, geogLatDeg, daylightSavingHours, timezoneHours, lcdDay, lcdMonth, lcdYear, lctHour, lctMin, lctSec, atmosphericPressureMbar, atmosphericTemperatureCelsius) {
+    var haHour = paMacros.rightAscensionToHourAngle(trueRAHour, trueRAMin, trueRASec, lctHour, lctMin, lctSec, daylightSavingHours, timezoneHours, lcdDay, lcdMonth, lcdYear, geogLongDeg);
+    var azimuthDeg = paMacros.equatorialCoordinatesToAzimuth(haHour, 0, 0, trueDecDeg, trueDecMin, trueDecSec, geogLatDeg);
+    var altitudeDeg = paMacros.equatorialCoordinatesToAltitude(haHour, 0, 0, trueDecDeg, trueDecMin, trueDecSec, geogLatDeg);
+    var correctedAltitudeDeg = paMacros.refract(altitudeDeg, coordinateType, atmosphericPressureMbar, atmosphericTemperatureCelsius);
+
+    var correctedHAHour = paMacros.horizonCoordinatesToHourAngle(azimuthDeg, 0, 0, correctedAltitudeDeg, 0, 0, geogLatDeg);
+    var correctedRAHour1 = paMacros.hourAngleToRightAscension(correctedHAHour, 0, 0, lctHour, lctMin, lctSec, daylightSavingHours, timezoneHours, lcdDay, lcdMonth, lcdYear, geogLongDeg);
+    var correctedDecDeg1 = paMacros.horizonCoordinatesToDeclination(azimuthDeg, 0, 0, correctedAltitudeDeg, 0, 0, geogLatDeg);
+
+    var correctedRAHour = paMacros.decimalHoursHour(correctedRAHour1);
+    var correctedRAMin = paMacros.decimalHoursMinute(correctedRAHour1);
+    var correctedRASec = paMacros.decimalHoursSecond(correctedRAHour1);
+    var correctedDecDeg = paMacros.decimalDegreesDegrees(correctedDecDeg1);
+    var correctedDecMin = paMacros.decimalDegreesMinutes(correctedDecDeg1);
+    var correctedDecSec = paMacros.decimalDegreesSeconds(correctedDecDeg1);
+
+    return [correctedRAHour, correctedRAMin, correctedRASec, correctedDecDeg, correctedDecMin, correctedDecSec];
+}
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -377,5 +400,6 @@ module.exports = {
     risingAndSetting,
     correctForPrecession,
     nutationInEclipticLongitudeAndObliquity,
-    correctForAberration
+    correctForAberration,
+    atmosphericRefraction
 };
