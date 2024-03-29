@@ -405,6 +405,39 @@ function correctionsForGeocentricParallax(raHour, raMin, raSec, decDeg, decMin, 
     return [correctedRAHour, correctedRAMin, correctedRASec, correctedDecDeg, correctedDecMin, correctedDecSec];
 }
 
+/**
+ * 
+ * Calculate heliographic coordinates for a given Greenwich date, with a given heliographic position angle and heliographic displacement in arc minutes.
+ */
+function heliographicCoordinates(helioPositionAngleDeg, helioDisplacementArcmin, gwdateDay, gwdateMonth, gwdateYear) {
+    var julianDateDays = paMacros.civilDateToJulianDate(gwdateDay, gwdateMonth, gwdateYear);
+    var tCenturies = (julianDateDays - 2415020) / 36525;
+    var longAscNodeDeg = paMacros.degreesMinutesSecondsToDecimalDegrees(74, 22, 0) + (84 * tCenturies / 60);
+    var sunLongDeg = paMacros.sunLong(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var y = Math.sin(paUtils.degreesToRadians(longAscNodeDeg - sunLongDeg)) * Math.cos(paUtils.degreesToRadians(paMacros.degreesMinutesSecondsToDecimalDegrees(7, 15, 0)));
+    var x = -Math.cos(paUtils.degreesToRadians(longAscNodeDeg - sunLongDeg));
+    var aDeg = paMacros.degrees(Math.atan2(y, x));
+    var mDeg1 = 360 - (360 * (julianDateDays - 2398220) / 25.38);
+    var mDeg2 = mDeg1 - 360 * Math.floor(mDeg1 / 360);
+    var l0Deg1 = mDeg2 + aDeg;
+    var b0Rad = Math.asin(Math.sin(paUtils.degreesToRadians(sunLongDeg - longAscNodeDeg)) * Math.sin(paUtils.degreesToRadians(paMacros.degreesMinutesSecondsToDecimalDegrees(7, 15, 0))));
+    var theta1Rad = Math.atan(-Math.cos(paUtils.degreesToRadians(sunLongDeg)) * Math.tan(paUtils.degreesToRadians(paMacros.obliq(gwdateDay, gwdateMonth, gwdateYear))));
+    var theta2Rad = Math.atan(-Math.cos(paUtils.degreesToRadians(longAscNodeDeg - sunLongDeg)) * Math.tan(paUtils.degreesToRadians(paMacros.degreesMinutesSecondsToDecimalDegrees(7, 15, 0))));
+    var pDeg = paMacros.degrees(theta1Rad + theta2Rad);
+    var rho1Deg = helioDisplacementArcmin / 60;
+    var rhoRad = Math.asin(2 * rho1Deg / paMacros.sunDia(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear)) - paUtils.degreesToRadians(rho1Deg);
+    var bRad = Math.asin(Math.sin(b0Rad) * Math.cos(rhoRad) + Math.cos(b0Rad) * Math.sin(rhoRad) * Math.cos(paUtils.degreesToRadians(pDeg - helioPositionAngleDeg)));
+    var bDeg = paMacros.degrees(bRad);
+    var lDeg1 = paMacros.degrees(Math.asin(Math.sin(rhoRad) * Math.sin(paUtils.degreesToRadians(pDeg - helioPositionAngleDeg)) / Math.cos(bRad))) + l0Deg1;
+    var lDeg2 = lDeg1 - 360 * Math.floor(lDeg1 / 360);
+
+    var helioLongDeg = paUtils.round(lDeg2, 2);
+    var helioLatDeg = paUtils.round(bDeg, 2);
+
+    return [helioLongDeg, helioLatDeg];
+}
+
+
 
 module.exports = {
     angleToDecimalDegrees,
@@ -424,5 +457,6 @@ module.exports = {
     nutationInEclipticLongitudeAndObliquity,
     correctForAberration,
     atmosphericRefraction,
-    correctionsForGeocentricParallax
+    correctionsForGeocentricParallax,
+    heliographicCoordinates
 };

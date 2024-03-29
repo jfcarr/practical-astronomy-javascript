@@ -890,6 +890,88 @@ function parallaxDecL2870(x, y, rc, rp, rs, tp) {
   return [p, q];
 }
 
+/**
+ * Calculate Sun's angular diameter in decimal degrees
+ * 
+ * Original macro name: SunDia
+ */
+function sunDia(lch, lcm, lcs, ds, zc, ld, lm, ly) {
+  var a = sunDist(lch, lcm, lcs, ds, zc, ld, lm, ly);
+
+  return 0.533128 / a;
+}
+
+/**
+ * Calculate Sun's distance from the Earth in astronomical units
+ * 
+ * Original macro name: SunDist
+ */
+function sunDist(lch, lcm, lcs, ds, zc, ld, lm, ly) {
+  var aa = localCivilTimeGreenwichDay(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var bb = localCivilTimeGreenwichMonth(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var cc = localCivilTimeGreenwichYear(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var ut = localCivilTimeToUniversalTime(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var dj = civilDateToJulianDate(aa, bb, cc) - 2415020;
+
+  var t = (dj / 36525) + (ut / 876600);
+  var t2 = t * t;
+
+  var a = 100.0021359 * t;
+  var b = 360 * (a - Math.floor(a));
+  a = 99.99736042 * t;
+  b = 360 * (a - Math.floor(a));
+  var m1 = 358.47583 - (0.00015 + 0.0000033 * t) * t2 + b;
+  var ec = 0.01675104 - 0.0000418 * t - 0.000000126 * t2;
+
+  var am = paUtils.degreesToRadians(m1);
+  var ae = eccentricAnomaly(am, ec);
+
+  a = 62.55209472 * t;
+  b = 360 * (a - Math.floor(a));
+  var a1 = paUtils.degreesToRadians(153.23 + b);
+  a = 125.1041894 * t;
+  b = 360 * (a - Math.floor(a));
+  var b1 = paUtils.degreesToRadians(216.57 + b);
+  a = 91.56766028 * t;
+  b = 360 * (a - Math.floor(a));
+  var c1 = paUtils.degreesToRadians(312.69 + b);
+  a = 1236.853095 * t;
+  b = 360 * (a - Math.floor(a));
+  var d1 = paUtils.degreesToRadians(350.74 - 0.00144 * t2 + b);
+  var e1 = paUtils.degreesToRadians(231.19 + 20.2 * t);
+  a = 183.1353208 * t;
+  b = 360 * (a - Math.floor(a));
+  var h1 = paUtils.degreesToRadians(353.4 + b);
+
+  var d3 = (0.00000543 * Math.sin(a1) + 0.00001575 * Math.sin(b1)) + (0.00001627 * Math.sin(c1) + 0.00003076 * Math.cos(d1)) + (0.00000927 * Math.sin(h1));
+
+  return 1.0000002 * (1 - ec * Math.cos(ae)) + d3;
+}
+
+/**
+ * Solve Kepler's equation, and return value of the eccentric anomaly in radians
+ * 
+ * Original macro name: EccentricAnomaly
+ */
+function eccentricAnomaly(am, ec) {
+  var tp = 6.283185308;
+  var m = am - tp * Math.floor(am / tp);
+  var ae = m;
+
+  while (1 == 1) {
+    var d = ae - (ec * Math.sin(ae)) - m;
+
+    if (Math.abs(d) < 0.000001) {
+      break;
+    }
+
+    d = d / (1 - (ec * Math.cos(ae)));
+    ae = ae - d;
+  }
+
+  return ae;
+}
+
 
 module.exports = {
   HMStoDH,
@@ -931,5 +1013,8 @@ module.exports = {
   parallaxHA,
   parallaxHAL2870,
   parallaxDec,
-  parallaxDecL2870
+  parallaxDecL2870,
+  sunDia,
+  sunDist,
+  eccentricAnomaly
 };
