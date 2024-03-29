@@ -57,3 +57,9 @@ test('Rising and Setting', () => {
 test('Correct For Precession', () => {
     expect(paCoord.correctForPrecession(9, 10, 43, 14, 23, 25, 0.923, 1, 1950, 1, 6, 1979)).toStrictEqual([9, 12, 20.18, 14, 16, 9.12]);
 });
+
+test('Nutation', () => {
+    var [nutInLongDeg, nutInOblDeg] = paCoord.nutationInEclipticLongitudeAndObliquity(1, 9, 1988);
+
+    expect([paUtils.round(nutInLongDeg, 9), paUtils.round(nutInOblDeg, 7)]).toStrictEqual([0.001525808, 0.0025671]);
+});
