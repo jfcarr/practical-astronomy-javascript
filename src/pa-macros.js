@@ -1,3 +1,4 @@
+const paTypes = require('./pa-types.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -668,6 +669,67 @@ function trueAnomaly(am, ec) {
   return at;
 }
 
+/**
+ * Calculate effects of refraction
+ * 
+ * Original macro name: Refract
+ */
+function refract(y2, sw, pr, tr) {
+  var y = paUtils.degreesToRadians(y2);
+
+  var d = (sw == paTypes.CoordinateType.True) ? -1.0 : 1.0;
+
+  if (d == -1) {
+    var y3 = y;
+    var y1 = y;
+    var r1 = 0.0;
+
+    while (1 == 1) {
+      var yNew = y1 + r1;
+      var rfNew = refractL3035(pr, tr, yNew, d);
+
+      if (y < -0.087)
+        return 0;
+
+      var r2 = rfNew;
+
+      if ((r2 == 0) || (Math.abs(r2 - r1) < 0.000001)) {
+        var qNew = y3;
+
+        return degrees(qNew + rfNew);
+      }
+
+      r1 = r2;
+    }
+  }
+
+  var rf = refractL3035(pr, tr, y, d);
+
+  if (y < -0.087)
+    return 0;
+
+  var q = y;
+
+  return degrees(q + rf);
+}
+
+/**
+ * Helper function for Refract
+ */
+function refractL3035(pr, tr, y, d) {
+  if (y < 0.2617994) {
+    if (y < -0.087)
+      return 0;
+
+    var yd = degrees(y);
+    var a = ((0.00002 * yd + 0.0196) * yd + 0.1594) * pr;
+    var b = (273.0 + tr) * ((0.0845 * yd + 0.505) * yd + 1);
+
+    return paUtils.degreesToRadians(-(a / b) * d);
+  }
+
+  return -d * 0.00007888888 * pr / ((273.0 + tr) * Math.tan(y));
+}
 
 
 module.exports = {
@@ -704,5 +766,7 @@ module.exports = {
   greenwichSiderealTimeToUniversalTime,
   localSiderealTimeToGreenwichSiderealTime,
   sunLong,
-  trueAnomaly
+  trueAnomaly,
+  refract,
+  refractL3035
 };

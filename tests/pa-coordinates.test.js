@@ -67,3 +67,7 @@ test('Nutation', () => {
 test('Correct For Aberration', () => {
     expect(paCoord.correctForAberration(0, 0, 0, 8, 9, 1988, 352, 37, 10.1, -1, 32, 56.4)).toStrictEqual([352, 37, 30.45, -1, 32, 56.33]);
 });
+
+test('Atmospheric Refraction', () => {
+    expect(paCoord.atmosphericRefraction(23, 14, 0, 40, 10, 0, paTypes.CoordinateType.True, 0.17, 51.2036110, 0, 0, 23, 3, 1987, 1, 1, 24, 1012, 21.7)).toStrictEqual([23, 13, 44.74, 40, 19, 45.76]);
+});
