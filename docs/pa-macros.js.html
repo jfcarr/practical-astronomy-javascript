@@ -918,6 +918,88 @@ function parallaxDecL2870(x, y, rc, rp, rs, tp) {
   return [p, q];
 }
 
+/**
+ * Calculate Sun's angular diameter in decimal degrees
+ * 
+ * Original macro name: SunDia
+ */
+function sunDia(lch, lcm, lcs, ds, zc, ld, lm, ly) {
+  var a = sunDist(lch, lcm, lcs, ds, zc, ld, lm, ly);
+
+  return 0.533128 / a;
+}
+
+/**
+ * Calculate Sun's distance from the Earth in astronomical units
+ * 
+ * Original macro name: SunDist
+ */
+function sunDist(lch, lcm, lcs, ds, zc, ld, lm, ly) {
+  var aa = localCivilTimeGreenwichDay(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var bb = localCivilTimeGreenwichMonth(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var cc = localCivilTimeGreenwichYear(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var ut = localCivilTimeToUniversalTime(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var dj = civilDateToJulianDate(aa, bb, cc) - 2415020;
+
+  var t = (dj / 36525) + (ut / 876600);
+  var t2 = t * t;
+
+  var a = 100.0021359 * t;
+  var b = 360 * (a - Math.floor(a));
+  a = 99.99736042 * t;
+  b = 360 * (a - Math.floor(a));
+  var m1 = 358.47583 - (0.00015 + 0.0000033 * t) * t2 + b;
+  var ec = 0.01675104 - 0.0000418 * t - 0.000000126 * t2;
+
+  var am = paUtils.degreesToRadians(m1);
+  var ae = eccentricAnomaly(am, ec);
+
+  a = 62.55209472 * t;
+  b = 360 * (a - Math.floor(a));
+  var a1 = paUtils.degreesToRadians(153.23 + b);
+  a = 125.1041894 * t;
+  b = 360 * (a - Math.floor(a));
+  var b1 = paUtils.degreesToRadians(216.57 + b);
+  a = 91.56766028 * t;
+  b = 360 * (a - Math.floor(a));
+  var c1 = paUtils.degreesToRadians(312.69 + b);
+  a = 1236.853095 * t;
+  b = 360 * (a - Math.floor(a));
+  var d1 = paUtils.degreesToRadians(350.74 - 0.00144 * t2 + b);
+  var e1 = paUtils.degreesToRadians(231.19 + 20.2 * t);
+  a = 183.1353208 * t;
+  b = 360 * (a - Math.floor(a));
+  var h1 = paUtils.degreesToRadians(353.4 + b);
+
+  var d3 = (0.00000543 * Math.sin(a1) + 0.00001575 * Math.sin(b1)) + (0.00001627 * Math.sin(c1) + 0.00003076 * Math.cos(d1)) + (0.00000927 * Math.sin(h1));
+
+  return 1.0000002 * (1 - ec * Math.cos(ae)) + d3;
+}
+
+/**
+ * Solve Kepler's equation, and return value of the eccentric anomaly in radians
+ * 
+ * Original macro name: EccentricAnomaly
+ */
+function eccentricAnomaly(am, ec) {
+  var tp = 6.283185308;
+  var m = am - tp * Math.floor(am / tp);
+  var ae = m;
+
+  while (1 == 1) {
+    var d = ae - (ec * Math.sin(ae)) - m;
+
+    if (Math.abs(d) &lt; 0.000001) {
+      break;
+    }
+
+    d = d / (1 - (ec * Math.cos(ae)));
+    ae = ae - d;
+  }
+
+  return ae;
+}
+
 
 module.exports = {
   HMStoDH,
@@ -959,7 +1041,10 @@ module.exports = {
   parallaxHA,
   parallaxHAL2870,
   parallaxDec,
-  parallaxDecL2870
+  parallaxDecL2870,
+  sunDia,
+  sunDist,
+  eccentricAnomaly
 };
 </code></pre>
         </article>
@@ -971,13 +1056,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AngleMeasure">AngleMeasure</a></li><li><a href="global.html#HMStoDH">HMStoDH</a></li><li><a href="global.html#WarningFlag">WarningFlag</a></li><li><a href="global.html#angleBetweenTwoObjects">angleBetweenTwoObjects</a></li><li><a href="global.html#angleToDecimalDegrees">angleToDecimalDegrees</a></li><li><a href="global.html#atmosphericRefraction">atmosphericRefraction</a></li><li><a href="global.html#civilDateToDayNumber">civilDateToDayNumber</a></li><li><a href="global.html#civilDateToJulianDate">civilDateToJulianDate</a></li><li><a href="global.html#civilTimeToDecimalHours">civilTimeToDecimalHours</a></li><li><a href="global.html#correctForAberration">correctForAberration</a></li><li><a href="global.html#correctForPrecession">correctForPrecession</a></li><li><a href="global.html#correctionsForGeocentricParallax">correctionsForGeocentricParallax</a></li><li><a href="global.html#decimalDegreesDegrees">decimalDegreesDegrees</a></li><li><a href="global.html#decimalDegreesMinutes">decimalDegreesMinutes</a></li><li><a href="global.html#decimalDegreesSeconds">decimalDegreesSeconds</a></li><li><a href="global.html#decimalDegreesToAngle">decimalDegreesToAngle</a></li><li><a href="global.html#decimalDegreesToDegreeHours">decimalDegreesToDegreeHours</a></li><li><a href="global.html#decimalHoursHour">decimalHoursHour</a></li><li><a href="global.html#decimalHoursMinute">decimalHoursMinute</a></li><li><a href="global.html#decimalHoursSecond">decimalHoursSecond</a></li><li><a href="global.html#decimalHoursToCivilTime">decimalHoursToCivilTime</a></li><li><a href="global.html#degreeHoursToDecimalDegrees">degreeHoursToDecimalDegrees</a></li><li><a href="global.html#degrees">degrees</a></li><li><a href="global.html#degreesMinutesSecondsToDecimalDegrees">degreesMinutesSecondsToDecimalDegrees</a></li><li><a href="global.html#degreesToRadians">degreesToRadians</a></li><li><a href="global.html#eclipticCoordinateToEquatorialCoordinate">eclipticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#equatorialCoordinateToEclipticCoordinate">equatorialCoordinateToEclipticCoordinate</a></li><li><a href="global.html#equatorialCoordinateToGalacticCoordinate">equatorialCoordinateToGalacticCoordinate</a></li><li><a href="global.html#equatorialCoordinatesToAltitude">equatorialCoordinatesToAltitude</a></li><li><a href="global.html#equatorialCoordinatesToAzimuth">equatorialCoordinatesToAzimuth</a></li><li><a href="global.html#equatorialCoordinatesToHorizonCoordinates">equatorialCoordinatesToHorizonCoordinates</a></li><li><a href="global.html#galacticCoordinateToEquatorialCoordinate">galacticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#getDateOfEaster">getDateOfEaster</a></li><li><a href="global.html#greenwichSiderealTimeToLocalSiderealTime">greenwichSiderealTimeToLocalSiderealTime</a></li><li><a href="global.html#greenwichSiderealTimeToUniversalTime">greenwichSiderealTimeToUniversalTime</a></li><li><a href="global.html#horizonCoordinatesToDeclination">horizonCoordinatesToDeclination</a></li><li><a href="global.html#horizonCoordinatesToEquatorialCoordinates">horizonCoordinatesToEquatorialCoordinates</a></li><li><a href="global.html#horizonCoordinatesToHourAngle">horizonCoordinatesToHourAngle</a></li><li><a href="global.html#hourAngleToRightAscension">hourAngleToRightAscension</a></li><li><a href="global.html#isLeapYear">isLeapYear</a></li><li><a href="global.html#julianDateDay">julianDateDay</a></li><li><a href="global.html#julianDateMonth">julianDateMonth</a></li><li><a href="global.html#julianDateYear">julianDateYear</a></li><li><a href="global.html#localCivilTimeGreenwichDay">localCivilTimeGreenwichDay</a></li><li><a href="global.html#localCivilTimeGreenwichMonth">localCivilTimeGreenwichMonth</a></li><li><a href="global.html#localCivilTimeGreenwichYear">localCivilTimeGreenwichYear</a></li><li><a href="global.html#localCivilTimeToUniversalTime">localCivilTimeToUniversalTime</a></li><li><a href="global.html#localSiderealTimeToGreenwichSiderealTime">localSiderealTimeToGreenwichSiderealTime</a></li><li><a href="global.html#meanObliquityOfTheEcliptic">meanObliquityOfTheEcliptic</a></li><li><a href="global.html#nutatLong">nutatLong</a></li><li><a href="global.html#nutatObl">nutatObl</a></li><li><a href="global.html#nutationInEclipticLongitudeAndObliquity">nutationInEclipticLongitudeAndObliquity</a></li><li><a href="global.html#obliq">obliq</a></li><li><a href="global.html#parallaxDec">parallaxDec</a></li><li><a href="global.html#parallaxDecL2870">parallaxDecL2870</a></li><li><a href="global.html#parallaxHA">parallaxHA</a></li><li><a href="global.html#parallaxHAL2870">parallaxHAL2870</a></li><li><a href="global.html#radiansToDegrees">radiansToDegrees</a></li><li><a href="global.html#refract">refract</a></li><li><a href="global.html#refractL3035">refractL3035</a></li><li><a href="global.html#rightAscensionToHourAngle">rightAscensionToHourAngle</a></li><li><a href="global.html#risingAndSetting">risingAndSetting</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#sunLong">sunLong</a></li><li><a href="global.html#trueAnomaly">trueAnomaly</a></li><li><a href="global.html#universalTimeToGreenwichSiderealTime">universalTimeToGreenwichSiderealTime</a></li><li><a href="global.html#universalTimeToLocalCivilTime">universalTimeToLocalCivilTime</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AngleMeasure">AngleMeasure</a></li><li><a href="global.html#HMStoDH">HMStoDH</a></li><li><a href="global.html#WarningFlag">WarningFlag</a></li><li><a href="global.html#angleBetweenTwoObjects">angleBetweenTwoObjects</a></li><li><a href="global.html#angleToDecimalDegrees">angleToDecimalDegrees</a></li><li><a href="global.html#atmosphericRefraction">atmosphericRefraction</a></li><li><a href="global.html#civilDateToDayNumber">civilDateToDayNumber</a></li><li><a href="global.html#civilDateToJulianDate">civilDateToJulianDate</a></li><li><a href="global.html#civilTimeToDecimalHours">civilTimeToDecimalHours</a></li><li><a href="global.html#correctForAberration">correctForAberration</a></li><li><a href="global.html#correctForPrecession">correctForPrecession</a></li><li><a href="global.html#correctionsForGeocentricParallax">correctionsForGeocentricParallax</a></li><li><a href="global.html#decimalDegreesDegrees">decimalDegreesDegrees</a></li><li><a href="global.html#decimalDegreesMinutes">decimalDegreesMinutes</a></li><li><a href="global.html#decimalDegreesSeconds">decimalDegreesSeconds</a></li><li><a href="global.html#decimalDegreesToAngle">decimalDegreesToAngle</a></li><li><a href="global.html#decimalDegreesToDegreeHours">decimalDegreesToDegreeHours</a></li><li><a href="global.html#decimalHoursHour">decimalHoursHour</a></li><li><a href="global.html#decimalHoursMinute">decimalHoursMinute</a></li><li><a href="global.html#decimalHoursSecond">decimalHoursSecond</a></li><li><a href="global.html#decimalHoursToCivilTime">decimalHoursToCivilTime</a></li><li><a href="global.html#degreeHoursToDecimalDegrees">degreeHoursToDecimalDegrees</a></li><li><a href="global.html#degrees">degrees</a></li><li><a href="global.html#degreesMinutesSecondsToDecimalDegrees">degreesMinutesSecondsToDecimalDegrees</a></li><li><a href="global.html#degreesToRadians">degreesToRadians</a></li><li><a href="global.html#eccentricAnomaly">eccentricAnomaly</a></li><li><a href="global.html#eclipticCoordinateToEquatorialCoordinate">eclipticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#equatorialCoordinateToEclipticCoordinate">equatorialCoordinateToEclipticCoordinate</a></li><li><a href="global.html#equatorialCoordinateToGalacticCoordinate">equatorialCoordinateToGalacticCoordinate</a></li><li><a href="global.html#equatorialCoordinatesToAltitude">equatorialCoordinatesToAltitude</a></li><li><a href="global.html#equatorialCoordinatesToAzimuth">equatorialCoordinatesToAzimuth</a></li><li><a href="global.html#equatorialCoordinatesToHorizonCoordinates">equatorialCoordinatesToHorizonCoordinates</a></li><li><a href="global.html#galacticCoordinateToEquatorialCoordinate">galacticCoordinateToEquatorialCoordinate</a></li><li><a href="global.html#getDateOfEaster">getDateOfEaster</a></li><li><a href="global.html#greenwichSiderealTimeToLocalSiderealTime">greenwichSiderealTimeToLocalSiderealTime</a></li><li><a href="global.html#greenwichSiderealTimeToUniversalTime">greenwichSiderealTimeToUniversalTime</a></li><li><a href="global.html#heliographicCoordinates">heliographicCoordinates</a></li><li><a href="global.html#horizonCoordinatesToDeclination">horizonCoordinatesToDeclination</a></li><li><a href="global.html#horizonCoordinatesToEquatorialCoordinates">horizonCoordinatesToEquatorialCoordinates</a></li><li><a href="global.html#horizonCoordinatesToHourAngle">horizonCoordinatesToHourAngle</a></li><li><a href="global.html#hourAngleToRightAscension">hourAngleToRightAscension</a></li><li><a href="global.html#isLeapYear">isLeapYear</a></li><li><a href="global.html#julianDateDay">julianDateDay</a></li><li><a href="global.html#julianDateMonth">julianDateMonth</a></li><li><a href="global.html#julianDateYear">julianDateYear</a></li><li><a href="global.html#localCivilTimeGreenwichDay">localCivilTimeGreenwichDay</a></li><li><a href="global.html#localCivilTimeGreenwichMonth">localCivilTimeGreenwichMonth</a></li><li><a href="global.html#localCivilTimeGreenwichYear">localCivilTimeGreenwichYear</a></li><li><a href="global.html#localCivilTimeToUniversalTime">localCivilTimeToUniversalTime</a></li><li><a href="global.html#localSiderealTimeToGreenwichSiderealTime">localSiderealTimeToGreenwichSiderealTime</a></li><li><a href="global.html#meanObliquityOfTheEcliptic">meanObliquityOfTheEcliptic</a></li><li><a href="global.html#nutatLong">nutatLong</a></li><li><a href="global.html#nutatObl">nutatObl</a></li><li><a href="global.html#nutationInEclipticLongitudeAndObliquity">nutationInEclipticLongitudeAndObliquity</a></li><li><a href="global.html#obliq">obliq</a></li><li><a href="global.html#parallaxDec">parallaxDec</a></li><li><a href="global.html#parallaxDecL2870">parallaxDecL2870</a></li><li><a href="global.html#parallaxHA">parallaxHA</a></li><li><a href="global.html#parallaxHAL2870">parallaxHAL2870</a></li><li><a href="global.html#radiansToDegrees">radiansToDegrees</a></li><li><a href="global.html#refract">refract</a></li><li><a href="global.html#refractL3035">refractL3035</a></li><li><a href="global.html#rightAscensionToHourAngle">rightAscensionToHourAngle</a></li><li><a href="global.html#risingAndSetting">risingAndSetting</a></li><li><a href="global.html#round">round</a></li><li><a href="global.html#sunDia">sunDia</a></li><li><a href="global.html#sunDist">sunDist</a></li><li><a href="global.html#sunLong">sunLong</a></li><li><a href="global.html#trueAnomaly">trueAnomaly</a></li><li><a href="global.html#universalTimeToGreenwichSiderealTime">universalTimeToGreenwichSiderealTime</a></li><li><a href="global.html#universalTimeToLocalCivilTime">universalTimeToLocalCivilTime</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Mar 29 2024 10:49:49 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Mar 29 2024 12:24:49 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

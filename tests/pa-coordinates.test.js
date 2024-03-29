@@ -75,3 +75,7 @@ test('Atmospheric Refraction', () => {
 test('Corrections For Geocentric Parallax', () => {
     expect(paCoord.correctionsForGeocentricParallax(22, 35, 19, -7, 41, 13, paTypes.CoordinateType.True, 1.019167, -100, 50, 60, 0, -6, 26, 2, 1979, 10, 45, 0)).toStrictEqual([22, 36, 43.22, -8, 32, 17.4]);
 });
+
+test('Heliographic Coordinates', () => {
+    expect(paCoord.heliographicCoordinates(220, 10.5, 1, 5, 1988)).toStrictEqual([142.59, -19.94]);
+});
