@@ -114,10 +114,36 @@ function sunriseAndSunset(localDay, localMonth, localYear, isDaylightSaving, zon
     return [localSunriseHour, localSunriseMinute, localSunsetHour, localSunsetMinute, azimuthOfSunriseDeg, azimuthOfSunsetDeg, status];
 }
 
+/**
+   * Calculate times of morning and evening twilight.
+ */
+function morningAndEveningTwilight(localDay, localMonth, localYear, isDaylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg, twilightType) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var startOfAMTwilightHours = paMacros.twilightAMLCT(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg, twilightType);
+
+    var endOfPMTwilightHours = paMacros.twilightPMLCT(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg, twilightType);
+
+    var twilightStatus = paMacros.eTwilight(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg, twilightType);
+
+    var adjustedAMStartTime = startOfAMTwilightHours + 0.008333;
+    var adjustedPMStartTime = endOfPMTwilightHours + 0.008333;
+
+    var amTwilightBeginsHour = (twilightStatus == paTypes.TwilightStatus.OK) ? paMacros.decimalHoursHour(adjustedAMStartTime) : -99;
+    var amTwilightBeginsMin = (twilightStatus == paTypes.TwilightStatus.OK) ? paMacros.decimalHoursMinute(adjustedAMStartTime) : -99;
+
+    var pmTwilightEndsHour = (twilightStatus == paTypes.TwilightStatus.OK) ? paMacros.decimalHoursHour(adjustedPMStartTime) : -99;
+    var pmTwilightEndsMin = (twilightStatus == paTypes.TwilightStatus.OK) ? paMacros.decimalHoursMinute(adjustedPMStartTime) : -99;
+
+    var status = twilightStatus;
+
+    return [amTwilightBeginsHour, amTwilightBeginsMin, pmTwilightEndsHour, pmTwilightEndsMin, status];
+}
 
 module.exports = {
     approximatePositionOfSun,
     precisePositionOfSun,
     sunDistanceAndAngularSize,
-    sunriseAndSunset
+    sunriseAndSunset,
+    morningAndEveningTwilight
 };

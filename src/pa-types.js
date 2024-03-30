@@ -22,6 +22,19 @@ const RiseSetStatus = {
     Circumpolar: 'Circumpolar'
 };
 
+const TwilightStatus = {
+    OK: 'OK',
+    AllNight: 'Lasts all night',
+    TooFarBelowHorizon: 'Sun too far below horizon',
+    ConversionWarning: 'GST to UT conversion warning'
+};
+
+const TwilightType = {
+    Civil: 6,
+    Nautical: 12,
+    Astronomical: 18
+};
+
 /**
  * Warning flags for calculation results
  */
@@ -35,5 +48,7 @@ module.exports = {
     CoordinateType,
     RiseSetCalcStatus,
     RiseSetStatus,
+    TwilightStatus,
+    TwilightType,
     WarningFlag
 };
