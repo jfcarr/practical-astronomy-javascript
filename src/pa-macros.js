@@ -1751,6 +1751,168 @@ function riseSetAzimuthSet(rah, ram, ras, dd, dm, ds, vd, g) {
   return i - 360 * Math.floor(i / 360);
 }
 
+/**
+ * Calculate morning twilight start, in local time.
+ * 
+ * Original macro name: TwilightAMLCT
+ */
+function twilightAMLCT(ld, lm, ly, ds, zc, gl, gp, tt) {
+  var di = tt;
+
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = twilightAMLCT_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result1_s != "OK")
+    return -99.0;
+
+  var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+  var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK)
+    return -99.0;
+
+  sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+
+  var [result2_a, result2_x, result2_y, result2_la, result2_s] = twilightAMLCT_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result2_s != "OK")
+    return -99.0;
+
+  x = localSiderealTimeToGreenwichSiderealTime(result2_la, 0, 0, gl);
+  ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+  var xx = universalTimeToLocalCivilTime(ut, 0, 0, ds, zc, gd, gm, gy);
+
+  return xx;
+}
+
+/**
+ * Helper function for twilight_am_lct()
+ */
+function twilightAMLCT_L3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var y = ecDec(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeRise(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+
+  return [a, x, y, la, s];
+}
+
+/**
+ * Calculate evening twilight end, in local time.
+ * 
+ * Original macro name: TwilightPMLCT
+ */
+function twilightPMLCT(ld, lm, ly, ds, zc, gl, gp, tt) {
+  var di = tt;
+
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = twilightPMLCT_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result1_s != "OK")
+    return 0.0;
+
+  var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+  var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK)
+    return 0.0;
+
+  sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+
+  var [result2_a, result2_x, result2_y, result2_la, result2_s] = twilightPMLCT_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result2_s != "OK")
+    return 0.0;
+
+  x = localSiderealTimeToGreenwichSiderealTime(result2_la, 0, 0, gl);
+  ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+  return universalTimeToLocalCivilTime(ut, 0, 0, ds, zc, gd, gm, gy);
+}
+
+/**
+ * Helper function for twilight_pm_lct()
+ */
+function twilightPMLCT_L3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var y = ecDec(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeSet(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+
+  return [a, x, y, la, s];
+}
+
+/**
+ * Twilight calculation status.
+ * 
+ * Original macro name: eTwilight
+ */
+function eTwilight(ld, lm, ly, ds, zc, gl, gp, tt) {
+  var di = tt;
+
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = eTwilight_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result1_s != "OK")
+    return result1_s;
+
+  var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+  var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+  sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+
+  var [result2_a, result2_x, result2_y, result2_la, result2_s] = eTwilight_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result2_s != "OK")
+    return result2_s;
+
+  x = localSiderealTimeToGreenwichSiderealTime(result2_la, 0, 0, gl);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK) {
+    return paTypes.TwilightStatus.ConversionWarning;
+  }
+
+  return result2_s;
+}
+
+/**
+ * Helper function for e_twilight()
+ */
+function eTwilight_L3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var y = ecDec(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeRise(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+
+  if (s != paTypes.RiseSetStatus.OK) {
+    if (s == paTypes.RiseSetStatus.Circumpolar) {
+      s = paTypes.TwilightStatus.AllNight;
+    }
+    else {
+      if (s == paTypes.RiseSetStatus.NeverRises) {
+        s = paTypes.TwilightStatus.TooFarBelowHorizon;
+      }
+    }
+  }
+
+  return [a, x, y, la, s];
+}
+
 
 module.exports = {
   HMStoDH,
@@ -1824,5 +1986,11 @@ module.exports = {
   sunsetAZ,
   sunsetAZ_L3710,
   riseSetAzimuthRise,
-  riseSetAzimuthSet
+  riseSetAzimuthSet,
+  twilightAMLCT,
+  twilightAMLCT_L3710,
+  twilightPMLCT,
+  twilightPMLCT_L3710,
+  eTwilight,
+  eTwilight_L3710
 };

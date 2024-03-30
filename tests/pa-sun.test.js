@@ -16,3 +16,7 @@ test('Sun Distance and Angular Size', () => {
 test('Sunrise and Sunset', () => {
     expect(paSun.sunriseAndSunset(10, 3, 1986, false, -5, -71.05, 42.37)).toStrictEqual([6, 5, 17, 45, 94.83, 265.43, paTypes.RiseSetCalcStatus.OK]);
 });
+
+test('Morning and Evening Twilight', () => {
+    expect(paSun.morningAndEveningTwilight(7, 9, 1979, false, 0, 0, 52, paTypes.TwilightType.Astronomical)).toStrictEqual([3, 17, 20, 37, paTypes.TwilightStatus.OK]);
+});
