@@ -1251,6 +1251,73 @@ function unwindDeg(w) {
   return w - 360 * Math.floor(w / 360);
 }
 
+/**
+ * Mean ecliptic longitude of the Sun at the epoch
+ * 
+ * Original macro name: SunElong
+ */
+function sunELong(gd, gm, gy) {
+  var t = (civilDateToJulianDate(gd, gm, gy) - 2415020) / 36525;
+  var t2 = t * t;
+  var x = 279.6966778 + 36000.76892 * t + 0.0003025 * t2;
+
+  return x - 360 * Math.floor(x / 360);
+}
+
+/**
+ * Longitude of the Sun at perigee
+ * 
+ * Original macro name: SunPeri
+ */
+function sunPeri(gd, gm, gy) {
+  var t = (civilDateToJulianDate(gd, gm, gy) - 2415020) / 36525;
+  var t2 = t * t;
+  var x = 281.2208444 + 1.719175 * t + 0.000452778 * t2;
+
+  return x - 360 * Math.floor(x / 360);
+}
+
+/**
+ * Eccentricity of the Sun-Earth orbit
+ * 
+ * Original macro name: SunEcc
+ */
+function sunEcc(gd, gm, gy) {
+  var t = (civilDateToJulianDate(gd, gm, gy) - 2415020) / 36525;
+  var t2 = t * t;
+
+  return 0.01675104 - 0.0000418 * t - 0.000000126 * t2;
+}
+
+/**
+ * Ecliptic - Declination (degrees)
+ * 
+ * Original macro name: ECDec
+ */
+function ecDec(eld, elm, els, bd, bm, bs, gd, gm, gy) {
+  var a = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(eld, elm, els));
+  var b = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(bd, bm, bs));
+  var c = paUtils.degreesToRadians(obliq(gd, gm, gy));
+  var d = Math.sin(b) * Math.cos(c) + Math.cos(b) * Math.sin(c) * Math.sin(a);
+
+  return degrees(Math.asin(d));
+}
+
+/**
+ * Ecliptic - Right Ascension (degrees)
+ * 
+ * Original macro name: ECRA
+ */
+function ecRA(eld, elm, els, bd, bm, bs, gd, gm, gy) {
+  var a = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(eld, elm, els));
+  var b = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(bd, bm, bs));
+  var c = paUtils.degreesToRadians(obliq(gd, gm, gy));
+  var d = Math.sin(a) * Math.cos(c) - Math.tan(b) * Math.sin(c);
+  var e = Math.cos(a);
+  var f = degrees(Math.atan2(d, e));
+
+  return f - 360 * Math.floor(f / 360);
+}
 
 
 module.exports = {
@@ -1301,5 +1368,10 @@ module.exports = {
   moonLat,
   moonHP,
   unwind,
-  unwindDeg
+  unwindDeg,
+  sunELong,
+  sunPeri,
+  sunEcc,
+  ecDec,
+  ecRA
 };
