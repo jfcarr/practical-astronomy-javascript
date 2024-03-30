@@ -1319,6 +1319,53 @@ function ecRA(eld, elm, els, bd, bm, bs, gd, gm, gy) {
   return f - 360 * Math.floor(f / 360);
 }
 
+/**
+ * Calculate Sun's true anomaly, i.e., how much its orbit deviates from a true circle to an ellipse.
+ *
+ * Original macro name: SunTrueAnomaly
+ */
+function sunTrueAnomaly(lch, lcm, lcs, ds, zc, ld, lm, ly) {
+  var aa = localCivilTimeGreenwichDay(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var bb = localCivilTimeGreenwichMonth(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var cc = localCivilTimeGreenwichYear(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var ut = localCivilTimeToUniversalTime(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var dj = civilDateToJulianDate(aa, bb, cc) - 2415020;
+
+  var t = (dj / 36525) + (ut / 876600);
+  var t2 = t * t;
+
+  var a = 99.99736042 * t;
+  var b = 360 * (a - Math.floor(a));
+
+  var m1 = 358.47583 - (0.00015 + 0.0000033 * t) * t2 + b;
+  var ec = 0.01675104 - 0.0000418 * t - 0.000000126 * t2;
+
+  var am = paUtils.degreesToRadians(m1);
+
+  return degrees(trueAnomaly(am, ec));
+}
+
+/**
+ * Calculate the Sun's mean anomaly.
+ * 
+ * Original macro name: SunMeanAnomaly
+ */
+function sunMeanAnomaly(lch, lcm, lcs, ds, zc, ld, lm, ly) {
+  var aa = localCivilTimeGreenwichDay(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var bb = localCivilTimeGreenwichMonth(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var cc = localCivilTimeGreenwichYear(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var ut = localCivilTimeToUniversalTime(lch, lcm, lcs, ds, zc, ld, lm, ly);
+  var dj = civilDateToJulianDate(aa, bb, cc) - 2415020;
+  var t = (dj / 36525) + (ut / 876600);
+  var t2 = t * t;
+  var a = 100.0021359 * t;
+  var b = 360 * (a - Math.floor(a));
+  var m1 = 358.47583 - (0.00015 + 0.0000033 * t) * t2 + b;
+  var am = unwind(paUtils.degreesToRadians(m1));
+
+  return am;
+}
+
 
 module.exports = {
   HMStoDH,
@@ -1373,5 +1420,7 @@ module.exports = {
   sunPeri,
   sunEcc,
   ecDec,
-  ecRA
+  ecRA,
+  sunTrueAnomaly,
+  sunMeanAnomaly
 };
