@@ -1,4 +1,5 @@
 const paSun = require('../src/pa-sun.js');
+const paTypes = require('../src/pa-types.js');
 
 test('Approximate Position of Sun', () => {
     expect(paSun.approximatePositionOfSun(0, 0, 0, 27, 7, 2003, false, 0)).toStrictEqual([8, 23, 33.73, 19, 21, 14.33]);
@@ -10,4 +11,8 @@ test('Precise Position of Sun', () => {
 
 test('Sun Distance and Angular Size', () => {
     expect(paSun.sunDistanceAndAngularSize(0, 0, 0, 27, 7, 1988, false, 0)).toStrictEqual([151920130, 0, 31, 29.93]);
+});
+
+test('Sunrise and Sunset', () => {
+    expect(paSun.sunriseAndSunset(10, 3, 1986, false, -5, -71.05, 42.37)).toStrictEqual([6, 5, 17, 45, 94.83, 265.43, paTypes.RiseSetCalcStatus.OK]);
 });

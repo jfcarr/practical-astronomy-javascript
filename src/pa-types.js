@@ -11,6 +11,11 @@ const CoordinateType = {
     Apparent: 'Apparent'
 };
 
+const RiseSetCalcStatus = {
+    OK: 'OK',
+    ConversionWarning: 'GST to UT conversion warning'
+};
+
 const RiseSetStatus = {
     OK: 'OK',
     NeverRises: 'NeverRises',
@@ -28,6 +33,7 @@ const WarningFlag = {
 module.exports = {
     AngleMeasure,
     CoordinateType,
+    RiseSetCalcStatus,
     RiseSetStatus,
     WarningFlag
 };

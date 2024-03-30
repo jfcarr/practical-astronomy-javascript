@@ -1,4 +1,5 @@
 const paMacros = require('./pa-macros.js');
+const paTypes = require('./pa-types.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -82,9 +83,41 @@ function sunDistanceAndAngularSize(lctHours, lctMinutes, lctSeconds, localDay, l
     return [sunDistKm, sunAngSizeDeg, sunAngSizeMin, sunAngSizeSec];
 }
 
+/**
+   * Calculate local sunrise and sunset.
+ */
+function sunriseAndSunset(localDay, localMonth, localYear, isDaylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var localSunriseHours = paMacros.sunriseLCT(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg);
+    var localSunsetHours = paMacros.sunsetLCT(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg);
+
+    var sunRiseSetStatus = paMacros.eSunRS(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg);
+
+    var adjustedSunriseHours = localSunriseHours + 0.008333;
+    var adjustedSunsetHours = localSunsetHours + 0.008333;
+
+    var azimuthOfSunriseDeg1 = paMacros.sunriseAZ(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg);
+    var azimuthOfSunsetDeg1 = paMacros.sunsetAZ(localDay, localMonth, localYear, daylightSaving, zoneCorrection, geographicalLongDeg, geographicalLatDeg);
+
+    var localSunriseHour = (sunRiseSetStatus == paTypes.RiseSetCalcStatus.OK) ? paMacros.decimalHoursHour(adjustedSunriseHours) : 0;
+    var localSunriseMinute = (sunRiseSetStatus == paTypes.RiseSetCalcStatus.OK) ? paMacros.decimalHoursMinute(adjustedSunriseHours) : 0;
+
+    var localSunsetHour = (sunRiseSetStatus == paTypes.RiseSetCalcStatus.OK) ? paMacros.decimalHoursHour(adjustedSunsetHours) : 0;
+    var localSunsetMinute = (sunRiseSetStatus == paTypes.RiseSetCalcStatus.OK) ? paMacros.decimalHoursMinute(adjustedSunsetHours) : 0;
+
+    var azimuthOfSunriseDeg = (sunRiseSetStatus == paTypes.RiseSetCalcStatus.OK) ? paUtils.round(azimuthOfSunriseDeg1, 2) : 0;
+    var azimuthOfSunsetDeg = (sunRiseSetStatus == paTypes.RiseSetCalcStatus.OK) ? paUtils.round(azimuthOfSunsetDeg1, 2) : 0;
+
+    var status = sunRiseSetStatus;
+
+    return [localSunriseHour, localSunriseMinute, localSunsetHour, localSunsetMinute, azimuthOfSunriseDeg, azimuthOfSunsetDeg, status];
+}
+
 
 module.exports = {
     approximatePositionOfSun,
     precisePositionOfSun,
-    sunDistanceAndAngularSize
+    sunDistanceAndAngularSize,
+    sunriseAndSunset
 };

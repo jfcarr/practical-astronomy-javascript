@@ -211,6 +211,23 @@ function localCivilTimeToUniversalTime(lctHours, lctMinutes, lctSeconds, dayligh
 }
 
 /**
+ * Convert Universal Time to Local Civil Time
+ * 
+ * Original macro name: UTLct
+ */
+function universalTimeToLocalCivilTime(uHours, uMinutes, uSeconds, daylightSaving, zoneCorrection, greenwichDay, greenwichMonth, greenwichYear) {
+  var a = HMStoDH(uHours, uMinutes, uSeconds);
+  var b = a + zoneCorrection;
+  var c = b + daylightSaving;
+  var d = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear) + (c / 24);
+  var e = julianDateDay(d);
+  var e1 = Math.floor(e);
+
+  return 24 * (e - e1);
+}
+
+
+/**
  * Determine Greenwich Day for Local Time
  * 
  * Original macro name: LctGDay
@@ -1366,6 +1383,374 @@ function sunMeanAnomaly(lch, lcm, lcs, ds, zc, ld, lm, ly) {
   return am;
 }
 
+/**
+ * Calculate local civil time of sunrise.
+ * 
+ * Original macro name: SunriseLCT
+ */
+function sunriseLCT(ld, lm, ly, ds, zc, gl, gp) {
+  var di = 0.8333333;
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = sunriseLCTL3710(gd, gm, gy, sr, di, gp);
+
+  var xx;
+  if (result1_s != paTypes.RiseSetCalcStatus.OK) {
+    xx = -99.0;
+  }
+  else {
+    var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+    var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+    if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK) {
+      xx = -99.0;
+    }
+    else {
+      sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+
+      var [result2_a, result2_x, result2_y, result2_la, result2_s] = sunriseLCTL3710(gd, gm, gy, sr, di, gp);
+
+      if (result2_s != paTypes.RiseSetCalcStatus.OK) {
+        xx = -99.0;
+      }
+      else {
+        x = localSiderealTimeToGreenwichSiderealTime(result2_la, 0, 0, gl);
+        ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+        xx = universalTimeToLocalCivilTime(ut, 0, 0, ds, zc, gd, gm, gy);
+      }
+    }
+  }
+
+  return xx;
+}
+
+/**
+ * Helper function for sunrise_lct()
+ */
+function sunriseLCTL3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var y = ecDec(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeRise(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0.0, 0.0, y, 0.0, 0.0, di, gp);
+
+  return [a, x, y, la, s];
+}
+
+/**
+ * Calculate local civil time of sunset.
+ * 
+ * Original macro name: SunsetLCT
+ */
+function sunsetLCT(ld, lm, ly, ds, zc, gl, gp) {
+  var di = 0.8333333;
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = sunsetLCTL3710(gd, gm, gy, sr, di, gp);
+
+  var xx;
+  if (result1_s != paTypes.RiseSetCalcStatus.OK) {
+    xx = -99.0;
+  }
+  else {
+    var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+    var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+    if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK) {
+      xx = -99.0;
+    }
+    else {
+      sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+      var [result2_a, result2_x, result2_y, result2_la, result2_s] = sunsetLCTL3710(gd, gm, gy, sr, di, gp);
+
+      if (result2_s != paTypes.RiseSetCalcStatus.OK) {
+        xx = -99;
+      }
+      else {
+        x = localSiderealTimeToGreenwichSiderealTime(result2_la, 0, 0, gl);
+        ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+        xx = universalTimeToLocalCivilTime(ut, 0, 0, ds, zc, gd, gm, gy);
+      }
+    }
+  }
+  return xx;
+}
+
+/**
+ * Helper function for sunset_lct().
+ */
+function sunsetLCTL3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0.0, 0.0, 0.0, 0.0, 0.0, gd, gm, gy);
+  var y = ecDec(a, 0.0, 0.0, 0.0, 0.0, 0.0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeSet(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+
+  return [a, x, y, la, s];
+}
+
+/**
+ * Calculate azimuth of sunrise.
+ *
+ * Original macro name: SunriseAz
+ */
+function sunriseAZ(ld, lm, ly, ds, zc, gl, gp) {
+  var di = 0.8333333;
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = sunriseAZ_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result1_s != paTypes.RiseSetCalcStatus.OK) {
+    return -99.0;
+  }
+
+  var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+  var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK) {
+    return -99.0;
+  }
+
+  sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+
+  var [result2_a, result2_x, result2_y, result2_la, result2_s] = sunriseAZ_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result2_s != paTypes.RiseSetCalcStatus.OK) {
+    return -99.0;
+  }
+
+  return riseSetAzimuthRise(decimalDegreesToDegreeHours(x), 0, 0, result2_y, 0.0, 0.0, di, gp);
+}
+
+/**
+ * Helper function for sunrise_az()
+ */
+function sunriseAZ_L3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var y = ecDec(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeRise(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+
+  return [a, x, y, la, s];
+}
+
+/**
+ * Calculate azimuth of sunset.
+ * 
+ * Original macro name: SunsetAz
+ */
+function sunsetAZ(ld, lm, ly, ds, zc, gl, gp) {
+  var di = 0.8333333;
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = sunsetAZ_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result1_s != paTypes.RiseSetCalcStatus.OK) {
+    return -99.0;
+  }
+
+  var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+  var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK) {
+    return -99.0;
+  }
+
+  sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+
+  var [result2_a, result2_x, result2_y, result2_la, result2_s] = sunsetAZ_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result2_s != paTypes.RiseSetCalcStatus.OK) {
+    return -99.0;
+  }
+  return riseSetAzimuthSet(decimalDegreesToDegreeHours(x), 0, 0, result2_y, 0, 0, di, gp);
+}
+
+/**
+ * Helper function for sunset_az()
+ */
+function sunsetAZ_L3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var y = ecDec(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeSet(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+
+  return [a, x, y, la, s];
+}
+
+/**
+ * Status of conversion of Greenwich Sidereal Time to Universal Time.
+ * 
+ * Original macro name: eGSTUT
+ */
+function eGreenwichSiderealToUniversalTime(gsh, gsm, gss, gd, gm, gy) {
+  var a = civilDateToJulianDate(gd, gm, gy);
+  var b = a - 2451545;
+  var c = b / 36525;
+  var d = 6.697374558 + (2400.051336 * c) + (0.000025862 * c * c);
+  var e = d - (24 * Math.floor(d / 24));
+  var f = HMStoDH(gsh, gsm, gss);
+  var g = f - e;
+  var h = g - (24 * Math.floor(g / 24));
+
+  return ((h * 0.9972695663) < (4.0 / 60.0)) ? paTypes.WarningFlag.Warning : paTypes.WarningFlag.OK;
+}
+
+/**
+ * Rise/Set status
+ * 
+ * Original macro name: eRS
+ */
+function eRS(rah, ram, ras, dd, dm, ds, vd, g) {
+  var a = HMStoDH(rah, ram, ras);
+  var c = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var d = paUtils.degreesToRadians(vd);
+  var e = paUtils.degreesToRadians(g);
+  var f = -(Math.sin(d) + Math.sin(e) * Math.sin(c)) / (Math.cos(e) * Math.cos(c));
+
+  var returnValue = paTypes.RiseSetStatus.OK
+  if (f >= 1)
+    returnValue = paTypes.RiseSetStatus.NeverRises;
+  if (f <= -1)
+    returnValue = paTypes.RiseSetStatus.Circumpolar;
+
+  return returnValue;
+}
+
+/**
+ * Local sidereal time of rise, in hours.
+ * 
+ * Original macro name: RSLSTR
+ */
+function riseSetLocalSiderealTimeRise(rah, ram, ras, dd, dm, ds, vd, g) {
+  var a = HMStoDH(rah, ram, ras);
+  var b = paUtils.degreesToRadians(degreeHoursToDecimalDegrees(a));
+  var c = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var d = paUtils.degreesToRadians(vd);
+  var e = paUtils.degreesToRadians(g);
+  var f = -(Math.sin(d) + Math.sin(e) * Math.sin(c)) / (Math.cos(e) * Math.cos(c));
+  var h = (Math.abs(f) < 1) ? Math.acos(f) : 0;
+  var i = decimalDegreesToDegreeHours(degrees(b - h));
+
+  return i - 24 * Math.floor(i / 24);
+}
+
+/**
+ * Local sidereal time of setting, in hours.
+ * 
+ * Original macro name: RSLSTS
+ */
+function riseSetLocalSiderealTimeSet(rah, ram, ras, dd, dm, ds, vd, g) {
+  var a = HMStoDH(rah, ram, ras);
+  var b = paUtils.degreesToRadians(degreeHoursToDecimalDegrees(a));
+  var c = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var d = paUtils.degreesToRadians(vd);
+  var e = paUtils.degreesToRadians(g);
+  var f = -(Math.sin(d) + Math.sin(e) * Math.sin(c)) / (Math.cos(e) * Math.cos(c));
+  var h = (Math.abs(f) < 1) ? Math.acos(f) : 0;
+  var i = decimalDegreesToDegreeHours(degrees(b + h));
+
+  return i - 24 * Math.floor(i / 24);
+}
+
+/**
+ * Sunrise/Sunset calculation status.
+ * 
+ * Original macro name: eSunRS
+ */
+function eSunRS(ld, lm, ly, ds, zc, gl, gp) {
+  var di = 0.8333333;
+  var gd = localCivilTimeGreenwichDay(12, 0, 0, ds, zc, ld, lm, ly);
+  var gm = localCivilTimeGreenwichMonth(12, 0, 0, ds, zc, ld, lm, ly);
+  var gy = localCivilTimeGreenwichYear(12, 0, 0, ds, zc, ld, lm, ly);
+  var sr = sunLong(12, 0, 0, ds, zc, ld, lm, ly);
+
+  var [result1_a, result1_x, result1_y, result1_la, result1_s] = eSunRS_L3710(gd, gm, gy, sr, di, gp);
+
+  if (result1_s != paTypes.RiseSetCalcStatus.OK) {
+    return result1_s;
+  }
+  else {
+    var x = localSiderealTimeToGreenwichSiderealTime(result1_la, 0, 0, gl);
+    var ut = greenwichSiderealTimeToUniversalTime(x, 0, 0, gd, gm, gy);
+    sr = sunLong(ut, 0, 0, 0, 0, gd, gm, gy);
+    var [result2_a, result2_x, result2_y, result2_la, result2_s] = eSunRS_L3710(gd, gm, gy, sr, di, gp);
+    if (result2_s != paTypes.RiseSetCalcStatus.OK) {
+      return result2_s;
+    }
+    else {
+      x = localSiderealTimeToGreenwichSiderealTime(result2_la, 0, 0, gl);
+
+      if (eGreenwichSiderealToUniversalTime(x, 0, 0, gd, gm, gy) != paTypes.WarningFlag.OK) {
+        return paTypes.RiseSetCalcStatus.ConversionWarning;
+      }
+
+      return result2_s;
+    }
+  }
+}
+
+/**
+ * Helper function for eSunRS()
+ */
+function eSunRS_L3710(gd, gm, gy, sr, di, gp) {
+  var a = sr + nutatLong(gd, gm, gy) - 0.005694;
+  var x = ecRA(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var y = ecDec(a, 0, 0, 0, 0, 0, gd, gm, gy);
+  var la = riseSetLocalSiderealTimeRise(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+  var s = eRS(decimalDegreesToDegreeHours(x), 0, 0, y, 0, 0, di, gp);
+
+  return [a, x, y, la, s];
+}
+
+/**
+ * Azimuth of rising, in degrees.
+ * 
+ * Original macro name: RSAZR
+ */
+function riseSetAzimuthRise(rah, ram, ras, dd, dm, ds, vd, g) {
+  var a = HMStoDH(rah, ram, ras);
+  var c = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var d = paUtils.degreesToRadians(vd);
+  var e = paUtils.degreesToRadians(g);
+  var f = (Math.sin(c) + Math.sin(d) * Math.sin(e)) / (Math.cos(d) * Math.cos(e));
+  var h = (eRS(rah, ram, ras, dd, dm, ds, vd, g) == paTypes.RiseSetStatus.OK) ? Math.acos(f) : 0;
+  var i = degrees(h);
+
+  return i - 360 * Math.floor(i / 360);
+}
+
+/**
+ * Azimuth of setting, in degrees.
+ * 
+ * Original macro name: RSAZS
+ */
+function riseSetAzimuthSet(rah, ram, ras, dd, dm, ds, vd, g) {
+  var a = HMStoDH(rah, ram, ras);
+  var c = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var d = paUtils.degreesToRadians(vd);
+  var e = paUtils.degreesToRadians(g);
+  var f = (Math.sin(c) + Math.sin(d) * Math.sin(e)) / (Math.cos(d) * Math.cos(e));
+  var h = (eRS(rah, ram, ras, dd, dm, ds, vd, g) == paTypes.RiseSetStatus.OK) ? Math.acos(f) : 0;
+  var i = 360 - degrees(h);
+
+  return i - 360 * Math.floor(i / 360);
+}
+
 
 module.exports = {
   HMStoDH,
@@ -1422,5 +1807,22 @@ module.exports = {
   ecDec,
   ecRA,
   sunTrueAnomaly,
-  sunMeanAnomaly
+  sunMeanAnomaly,
+  sunriseLCT,
+  sunriseLCTL3710,
+  sunsetLCT,
+  sunsetLCTL3710,
+  universalTimeToLocalCivilTime,
+  eGreenwichSiderealToUniversalTime,
+  eRS,
+  riseSetLocalSiderealTimeRise,
+  riseSetLocalSiderealTimeSet,
+  eSunRS,
+  eSunRS_L3710,
+  sunriseAZ,
+  sunriseAZ_L3710,
+  sunsetAZ,
+  sunsetAZ_L3710,
+  riseSetAzimuthRise,
+  riseSetAzimuthSet
 };
