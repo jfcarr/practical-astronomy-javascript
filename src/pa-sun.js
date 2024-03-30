@@ -58,8 +58,33 @@ function precisePositionOfSun(lctHours, lctMinutes, lctSeconds, localDay, localM
     return [sunRAHour, sunRAMin, sunRASec, sunDecDeg, sunDecMin, sunDecSec];
 }
 
+/**
+ * Calculate distance to the Sun (in km), and angular size.
+ */
+function sunDistanceAndAngularSize(lctHours, lctMinutes, lctSeconds, localDay, localMonth, localYear, isDaylightSaving, zoneCorrection) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var gDay = paMacros.localCivilTimeGreenwichDay(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+    var gMonth = paMacros.localCivilTimeGreenwichMonth(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+    var gYear = paMacros.localCivilTimeGreenwichYear(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+    var trueAnomalyDeg = paMacros.sunTrueAnomaly(lctHours, lctMinutes, lctSeconds, daylightSaving, zoneCorrection, localDay, localMonth, localYear);
+    var trueAnomalyRad = paUtils.degreesToRadians(trueAnomalyDeg);
+    var eccentricity = paMacros.sunEcc(gDay, gMonth, gYear);
+    var f = (1 + eccentricity * Math.cos(trueAnomalyRad)) / (1 - eccentricity * eccentricity);
+    var rKm = 149598500 / f;
+    var thetaDeg = f * 0.533128;
+
+    var sunDistKm = paUtils.round(rKm, 0);
+    var sunAngSizeDeg = paMacros.decimalDegreesDegrees(thetaDeg);
+    var sunAngSizeMin = paMacros.decimalDegreesMinutes(thetaDeg);
+    var sunAngSizeSec = paMacros.decimalDegreesSeconds(thetaDeg);
+
+    return [sunDistKm, sunAngSizeDeg, sunAngSizeMin, sunAngSizeSec];
+}
+
 
 module.exports = {
     approximatePositionOfSun,
-    precisePositionOfSun
+    precisePositionOfSun,
+    sunDistanceAndAngularSize
 };
