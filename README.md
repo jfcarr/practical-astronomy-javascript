@@ -1,8 +1,6 @@
-# practical-astronomy-javascript
+# Practical Astronomy - JavaScript (practical-astronomy-javascript)
 
 Algorithms from "[Practical Astronomy with your Calculator or Spreadsheet](https://www.amazon.com/Practical-Astronomy-your-Calculator-Spreadsheet/dp/1108436072)" by Peter Duffett-Smith, implemented in JavaScript.
-
-[GitHub](https://github.com/jfcarr/practical-astronomy-javascript)
 
 If you're interested in this topic, please buy the book! It provides far more detail and context.
 
@@ -11,8 +9,6 @@ If you're interested in this topic, please buy the book! It provides far more de
 ```bash
 npm install practical-astronomy-javascript
 ```
-
-[NPM page](https://www.npmjs.com/package/practical-astronomy-javascript)
 
 ## Usage
 
@@ -37,6 +33,14 @@ Result:
 ```
 [ 3, 31, 2024 ]
 ```
+
+## Links
+
+[GitHub](https://github.com/jfcarr/practical-astronomy-javascript)
+
+[Documentation](https://jfcarr.github.io/practical-astronomy-javascript/)
+
+[NPM page](https://www.npmjs.com/package/practical-astronomy-javascript)
 
 ## Library Functions - Status
 
