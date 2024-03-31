@@ -59,7 +59,29 @@ function approximatePositionOfPlanet(lctHour, lctMin, lctSec, isDaylightSaving, 
     return [planetRAHour, planetRAMin, planetRASec, planetDecDeg, planetDecMin, planetDecSec];
 }
 
+/**
+ * Calculate precise position of a planet.
+ */
+function precisePositionOfPlanet(lctHour, lctMin, lctSec, isDaylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, planetName) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var [planetLongitude, planetLatitude, planetDistanceAU, planetHLong1, planetHLong2, planetHLat, planetRVect] = paMacros.planetCoordinates(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, planetName);
+
+    var planetRAHours = paMacros.decimalDegreesToDegreeHours(paMacros.ecRA(planetLongitude, 0, 0, planetLatitude, 0, 0, localDateDay, localDateMonth, localDateYear));
+    var planetDecDeg1 = paMacros.ecDec(planetLongitude, 0, 0, planetLatitude, 0, 0, localDateDay, localDateMonth, localDateYear);
+
+    var planetRAHour = paMacros.decimalHoursHour(planetRAHours);
+    var planetRAMin = paMacros.decimalHoursMinute(planetRAHours);
+    var planetRASec = paMacros.decimalHoursSecond(planetRAHours);
+    var planetDecDeg = paMacros.decimalDegreesDegrees(planetDecDeg1);
+    var planetDecMin = paMacros.decimalDegreesMinutes(planetDecDeg1);
+    var planetDecSec = paMacros.decimalDegreesSeconds(planetDecDeg1);
+
+    return [planetRAHour, planetRAMin, planetRASec, planetDecDeg, planetDecMin, planetDecSec];
+}
+
 
 module.exports = {
-    approximatePositionOfPlanet
+    approximatePositionOfPlanet,
+    precisePositionOfPlanet
 };
