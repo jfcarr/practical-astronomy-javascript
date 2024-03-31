@@ -1913,6 +1913,25 @@ function eTwilight_L3710(gd, gm, gy, sr, di, gp) {
   return [a, x, y, la, s];
 }
 
+/**
+ * Calculate the angle between two celestial objects
+ * 
+ * Original macro name: Angle
+ */
+function angle(xx1, xm1, xs1, dd1, dm1, ds1, xx2, xm2, xs2, dd2, dm2, ds2, s) {
+  var a = (s == paTypes.AngleMeasure.Hours) ? degreeHoursToDecimalDegrees(HMStoDH(xx1, xm1, xs1)) : degreesMinutesSecondsToDecimalDegrees(xx1, xm1, xs1);
+  var b = paUtils.degreesToRadians(a);
+  var c = degreesMinutesSecondsToDecimalDegrees(dd1, dm1, ds1);
+  var d = paUtils.degreesToRadians(c);
+  var e = (s == paTypes.AngleMeasure.Hours) ? degreeHoursToDecimalDegrees(HMStoDH(xx2, xm2, xs2)) : degreesMinutesSecondsToDecimalDegrees(xx2, xm2, xs2);
+  var f = paUtils.degreesToRadians(e);
+  var g = degreesMinutesSecondsToDecimalDegrees(dd2, dm2, ds2);
+  var h = paUtils.degreesToRadians(g);
+  var i = Math.acos(Math.sin(d) * Math.sin(h) + Math.cos(d) * Math.cos(h) * Math.cos(b - f));
+
+  return degrees(i);
+}
+
 
 module.exports = {
   HMStoDH,
@@ -1992,5 +2011,6 @@ module.exports = {
   twilightPMLCT,
   twilightPMLCT_L3710,
   eTwilight,
-  eTwilight_L3710
+  eTwilight_L3710,
+  angle
 };

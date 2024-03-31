@@ -24,3 +24,7 @@ test('Morning and Evening Twilight', () => {
 test('Equation of Time', () => {
     expect(paSun.equationOfTime(27, 7, 2010)).toStrictEqual([6, 31.52]);
 });
+
+test('Solar Elongation', () => {
+    expect(paSun.solarElongation(10, 6, 45, 11, 57, 27, 27.8333333, 7, 2010)).toBe(24.78);
+});
