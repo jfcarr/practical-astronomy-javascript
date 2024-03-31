@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: pa-utils.js</title>
+    <title>JSDoc: Source: data/pa-planetdata.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: pa-utils.js</h1>
+    <h1 class="page-title">Source: data/pa-planetdata.js</h1>
 
     
 
@@ -26,52 +26,46 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * Determine if year is a leap year.
+            <pre class="prettyprint source linenums"><code>
+/**
+ * Planet Data
+ * 
+ * Elements:
+ *   0: Name
+ *   1: tp_PeriodOrbit
+ *   2: long_LongitudeEpoch
+ *   3: peri_LongitudePerihelion
+ *   4: ecc_EccentricityOrbit 
+ *   5: axis_AxisOrbit 
+ *   6: incl_OrbitalInclination 
+ *   7: node_LongitudeAscendingNode 
+ *   8: theta0_AngularDiameter 
+ *   9: v0_VisualMagnitude 
  */
-function isLeapYear(inputYear) {
-    var year = inputYear;
+const planetData = [
+    ["Mercury", 0.24085, 75.5671, 77.612, 0.205627, 0.387098, 7.0051, 48.449, 6.74, -0.42],
+    ["Venus", 0.615207, 272.30044, 131.54, 0.006812, 0.723329, 3.3947, 76.769, 16.92, -4.4],
+    ["Earth", 0.999996, 99.556772, 103.2055, 0.016671, 0.999985, -99.0, -99.0, -99.0, -99.0],
+    ["Mars", 1.880765, 109.09646, 336.217, 0.093348, 1.523689, 1.8497, 49.632, 9.36, -1.52],
+    ["Jupiter", 11.857911, 337.917132, 14.6633, 0.048907, 5.20278, 1.3035, 100.595, 196.74, -9.4],
+    ["Saturn", 29.310579, 172.398316, 89.567, 0.053853, 9.51134, 2.4873, 113.752, 165.6, -8.88],
+    ["Uranus", 84.039492, 356.135400, 172.884833, 0.046321, 19.21814, 0.773059, 73.926961, 65.8, -7.19],
+    ["Neptune", 165.845392, 326.895127, 23.07, 0.010483, 30.1985, 1.7673, 131.879, 62.2, -6.87]
+];
 
-    if (year % 4 == 0) {
-        if (year % 100 == 0)
-            return (year % 400 == 0) ? true : false;
-        else
-            return true;
+function getPlanetData(planetName) {
+    for (let iLoop = 0; iLoop &lt; planetData.length; iLoop++) {
+        if (planetData[iLoop][0] == planetName)
+            return planetData[iLoop];
     }
-    else
-        return false;
-}
 
-/**
- * Round a number (value) to specified number of decimal places (precision)
- */
-function round(value, precision) {
-    var multiplier = Math.pow(10, precision || 0);
-
-    return Math.round(value * multiplier) / multiplier;
-}
-
-/**
- * Convert radians to degrees.
- */
-function radiansToDegrees(radians) {
-    return radians * Math.PI / 180;
-}
-
-/**
- * Convert degrees to radians.
- */
-function degreesToRadians(degrees) {
-    return degrees * (Math.PI / 180);
-}
-
+    return ["not found", -99, -99, -99, -99, -99, -99, -99, -99, -99];
+};
 
 module.exports = {
-    isLeapYear,
-    round,
-    radiansToDegrees,
-    degreesToRadians
-};</code></pre>
+    planetData,
+    getPlanetData
+}</code></pre>
         </article>
     </section>
 
