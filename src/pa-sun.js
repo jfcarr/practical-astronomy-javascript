@@ -140,10 +140,27 @@ function morningAndEveningTwilight(localDay, localMonth, localYear, isDaylightSa
     return [amTwilightBeginsHour, amTwilightBeginsMin, pmTwilightEndsHour, pmTwilightEndsMin, status];
 }
 
+/**
+   * Calculate the equation of time. (The difference between the real Sun time and the mean Sun time.)
+ */
+function equationOfTime(gwdateDay, gwdateMonth, gwdateYear) {
+    var sunLongitudeDeg = paMacros.sunLong(12, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var sunRAHours = paMacros.decimalDegreesToDegreeHours(paMacros.ecRA(sunLongitudeDeg, 0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear));
+    var equivalentUTHours = paMacros.greenwichSiderealTimeToUniversalTime(sunRAHours, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var equationOfTimeHours = equivalentUTHours - 12;
+
+    var equationOfTimeMin = paMacros.decimalHoursMinute(equationOfTimeHours);
+    var equationOfTimeSec = paMacros.decimalHoursSecond(equationOfTimeHours);
+
+    return [equationOfTimeMin, equationOfTimeSec];
+}
+
+
 module.exports = {
     approximatePositionOfSun,
     precisePositionOfSun,
     sunDistanceAndAngularSize,
     sunriseAndSunset,
-    morningAndEveningTwilight
+    morningAndEveningTwilight,
+    equationOfTime
 };

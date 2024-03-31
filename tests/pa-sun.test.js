@@ -20,3 +20,7 @@ test('Sunrise and Sunset', () => {
 test('Morning and Evening Twilight', () => {
     expect(paSun.morningAndEveningTwilight(7, 9, 1979, false, 0, 0, 52, paTypes.TwilightType.Astronomical)).toStrictEqual([3, 17, 20, 37, paTypes.TwilightStatus.OK]);
 });
+
+test('Equation of Time', () => {
+    expect(paSun.equationOfTime(27, 7, 2010)).toStrictEqual([6, 31.52]);
+});

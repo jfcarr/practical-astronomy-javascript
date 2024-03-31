@@ -79,7 +79,7 @@ Result:
 - [x] Calculate -> Sun's distance and angular size
 - [x] Calculate -> Local sunrise and sunset
 - [x] Calculate -> Morning and evening twilight
-- [ ] Calculate -> Equation of time
+- [x] Calculate -> Equation of time
 - [ ] Calculate -> Solar elongation
 
 ### Planets
