@@ -155,6 +155,20 @@ function equationOfTime(gwdateDay, gwdateMonth, gwdateYear) {
     return [equationOfTimeMin, equationOfTimeSec];
 }
 
+/**
+ * Calculate solar elongation for a celestial body.
+ *
+ * Solar elongation is the angle between the lines of sight from the Earth to the Sun and from the Earth to the celestial body.
+ */
+function solarElongation(raHour, raMin, raSec, decDeg, decMin, decSec, gwdateDay, gwdateMonth, gwdateYear) {
+    var sunLongitudeDeg = paMacros.sunLong(0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var sunRAHours = paMacros.decimalDegreesToDegreeHours(paMacros.ecRA(sunLongitudeDeg, 0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear));
+    var sunDecDeg = paMacros.ecDec(sunLongitudeDeg, 0, 0, 0, 0, 0, gwdateDay, gwdateMonth, gwdateYear);
+    var solarElongationDeg = paMacros.angle(sunRAHours, 0, 0, sunDecDeg, 0, 0, raHour, raMin, raSec, decDeg, decMin, decSec, paTypes.AngleMeasure.Hours);
+
+    return paUtils.round(solarElongationDeg, 2);
+}
+
 
 module.exports = {
     approximatePositionOfSun,
@@ -162,5 +176,6 @@ module.exports = {
     sunDistanceAndAngularSize,
     sunriseAndSunset,
     morningAndEveningTwilight,
-    equationOfTime
+    equationOfTime,
+    solarElongation
 };
