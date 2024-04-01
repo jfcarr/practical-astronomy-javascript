@@ -4,6 +4,7 @@ const paSun = require('./pa-sun.js');
 const paPlanet = require('./pa-planet.js');
 const paComet = require('./pa-comet.js');
 const paBinary = require('./pa-binary.js');
+const paMoon = require('./pa-moon.js');
 
 module.exports = {
     paDateTime,
@@ -11,5 +12,6 @@ module.exports = {
     paSun,
     paPlanet,
     paComet,
-    paBinary
+    paBinary,
+    paMoon
 };
