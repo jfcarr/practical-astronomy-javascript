@@ -24,7 +24,7 @@ function approximatePositionOfPlanet(lctHour, lctMin, lctSec, isDaylightSaving, 
     var planetTrueAnomalyDeg = lpDeg2 - Number(planetInfo_peri_LongitudePerihelion);
     var rAU = Number(planetInfo_axis_AxisOrbit) * (1 - Math.pow(Number(planetInfo_ecc_EccentricityOrbit), 2)) / (1 + Number(planetInfo_ecc_EccentricityOrbit) * Math.cos(paUtils.degreesToRadians(planetTrueAnomalyDeg)));
 
-    var [earthInfo_name, earthInfo_tp_PeriodOrbit, earthInfo_long_LongitudeEpoch, earthInfo_peri_LongitudePerihelion, earthInfo_ecc_EccentricityOrbit, earthInfo_axis_AxisOrbit, earthInfo_incl_OrbitalInclination, earthInfo_node_LongitudeAscendingNode, earthInfo_theta0_AngularDiameter, earthInfo_v0_VisualMagnitude] = paPlanetData.getPlanetData("Earth");
+    var [earthInfo_name, earthInfo_tp_PeriodOrbit, earthInfo_long_LongitudeEpoch, earthInfo_peri_LongitudePerihelion, earthInfo_ecc_EccentricityOrbit, earthInfo_axis_AxisOrbit, earthInfo_incl_OrbitalInclination, earthInfo_node_LongitudeAscendingNode, earthInfo_theta0_AngularDiameter, earthInfo_v0_VisualMagnitude] = paPlanetData.getPlanetData(paPlanetData.planetNames.earth);
 
     var neDeg1 = 360 * dDays / (365.242191 * Number(earthInfo_tp_PeriodOrbit));
     var neDeg2 = neDeg1 - 360 * Math.floor(neDeg1 / 360);
