@@ -3,11 +3,13 @@ const paCoord = require('./pa-coordinates.js');
 const paSun = require('./pa-sun.js');
 const paPlanet = require('./pa-planet.js');
 const paComet = require('./pa-comet.js');
+const paBinary = require('./pa-binary.js');
 
 module.exports = {
     paDateTime,
     paCoord,
     paSun,
     paPlanet,
-    paComet
+    paComet,
+    paBinary
 };

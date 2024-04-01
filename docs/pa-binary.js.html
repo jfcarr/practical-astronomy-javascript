@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: pa-comet.js</title>
+    <title>JSDoc: Source: pa-binary.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: pa-comet.js</h1>
+    <h1 class="page-title">Source: pa-binary.js</h1>
 
     
 
@@ -26,100 +26,40 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const paCometData = require('./data/pa-cometdata.js');
+            <pre class="prettyprint source linenums"><code>const paBinaryData = require("./data/pa-binarydata");
 const paMacros = require('./pa-macros.js');
 const paUtils = require('./pa-utils.js');
 
 /**
- * Calculate position of an elliptical comet.
+ * Calculate orbital data for binary star.
  */
-function positionOfEllipticalComet(lctHour, lctMin, lctSec, isDaylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, cometName) {
-    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+function binaryStarOrbit(greenwichDateDay, greenwichDateMonth, greenwichDateYear, binaryName) {
+    var [binary_name, period, epochPeri, longPeri, ecc, axis, incl, paNode] = paBinaryData.getBinaryData(binaryName);
 
-    var greenwichDateDay = paMacros.localCivilTimeGreenwichDay(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
-    var greenwichDateMonth = paMacros.localCivilTimeGreenwichMonth(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
-    var greenwichDateYear = paMacros.localCivilTimeGreenwichYear(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var yYears = (greenwichDateYear + (paMacros.civilDateToJulianDate(greenwichDateDay, greenwichDateMonth, greenwichDateYear) - paMacros.civilDateToJulianDate(0, 1, greenwichDateYear)) / 365.242191) - Number(epochPeri);
+    var mDeg = 360 * yYears / Number(period);
+    var mRad = paUtils.degreesToRadians(mDeg - 360 * Math.floor(mDeg / 360));
+    var eccentricity = Number(ecc);
+    var trueAnomalyRad = paMacros.trueAnomaly(mRad, eccentricity);
+    var rArcsec = (1 - eccentricity * Math.cos(paMacros.eccentricAnomaly(mRad, eccentricity))) * Number(axis);
+    var taPeriRad = trueAnomalyRad + paUtils.degreesToRadians(Number(longPeri));
 
-    var [comet_name, epoch_EpochOfPerihelion, peri_LongitudeOfPerihelion, node_LongitudeOfAscendingNode, period_PeriodOfOrbit, axis_SemiMajorAxisOfOrbit, ecc_EccentricityOfOrbit, incl_InclinationOfOrbit] = paCometData.getCometEllipticalData(cometName);
+    var y = Math.sin(taPeriRad) * Math.cos(paUtils.degreesToRadians(Number(incl)));
+    var x = Math.cos(taPeriRad);
+    var aDeg = paMacros.degrees(Math.atan2(y, x));
+    var thetaDeg1 = aDeg + Number(paNode);
+    var thetaDeg2 = thetaDeg1 - 360 * Math.floor(thetaDeg1 / 360);
+    var rhoArcsec = rArcsec * Math.cos(taPeriRad) / Math.cos(paUtils.degreesToRadians(thetaDeg2 - Number(paNode)));
 
-    var timeSinceEpochYears = (paMacros.civilDateToJulianDate(greenwichDateDay, greenwichDateMonth, greenwichDateYear) - paMacros.civilDateToJulianDate(0.0, 1, greenwichDateYear)) / 365.242191 + greenwichDateYear - Number(epoch_EpochOfPerihelion);
-    var mcDeg = 360 * timeSinceEpochYears / Number(period_PeriodOfOrbit);
-    var mcRad = paUtils.degreesToRadians(mcDeg - 360 * Math.floor(mcDeg / 360));
-    var eccentricity = Number(ecc_EccentricityOfOrbit);
-    var trueAnomalyDeg = paMacros.degrees(paMacros.trueAnomaly(mcRad, eccentricity));
-    var lcDeg = trueAnomalyDeg + Number(peri_LongitudeOfPerihelion);
-    var rAU = Number(axis_SemiMajorAxisOfOrbit) * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(paUtils.degreesToRadians(trueAnomalyDeg)));
-    var lcNodeRad = paUtils.degreesToRadians(lcDeg - Number(node_LongitudeOfAscendingNode));
-    var psiRad = Math.asin(Math.sin(lcNodeRad) * Math.sin(paUtils.degreesToRadians(Number(incl_InclinationOfOrbit))));
+    var positionAngleDeg = paUtils.round(thetaDeg2, 1);
+    var separationArcsec = paUtils.round(rhoArcsec, 2);
 
-    var y = Math.sin(lcNodeRad) * Math.cos(paUtils.degreesToRadians(Number(incl_InclinationOfOrbit)));
-    var x = Math.cos(lcNodeRad);
-
-    var ldDeg = paMacros.degrees(Math.atan2(y, x)) + Number(node_LongitudeOfAscendingNode);
-    var rdAU = rAU * Math.cos(psiRad);
-
-    var earthLongitudeLeDeg = paMacros.sunLong(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear) + 180.0;
-    var earthRadiusVectorAU = paMacros.sunDist(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
-
-    var leLdRad = paUtils.degreesToRadians(earthLongitudeLeDeg - ldDeg);
-    var aRad = (rdAU &lt; earthRadiusVectorAU) ? Math.atan2((rdAU * Math.sin(leLdRad)), (earthRadiusVectorAU - rdAU * Math.cos(leLdRad))) : Math.atan2((earthRadiusVectorAU * Math.sin(-leLdRad)), (rdAU - earthRadiusVectorAU * Math.cos(leLdRad)));
-
-    var cometLongDeg1 = (rdAU &lt; earthRadiusVectorAU) ? 180.0 + earthLongitudeLeDeg + paMacros.degrees(aRad) : paMacros.degrees(aRad) + ldDeg;
-    var cometLongDeg = cometLongDeg1 - 360 * Math.floor(cometLongDeg1 / 360);
-    var cometLatDeg = paMacros.degrees(Math.atan(rdAU * Math.tan(psiRad) * Math.sin(paUtils.degreesToRadians(cometLongDeg1 - ldDeg)) / (earthRadiusVectorAU * Math.sin(-leLdRad))));
-    var cometRAHours1 = paMacros.decimalDegreesToDegreeHours(paMacros.ecRA(cometLongDeg, 0, 0, cometLatDeg, 0, 0, greenwichDateDay, greenwichDateMonth, greenwichDateYear));
-    var cometDecDeg1 = paMacros.ecDec(cometLongDeg, 0, 0, cometLatDeg, 0, 0, greenwichDateDay, greenwichDateMonth, greenwichDateYear);
-    var cometDistanceAU = Math.sqrt(Math.pow(earthRadiusVectorAU, 2) + Math.pow(rAU, 2) - 2.0 * earthRadiusVectorAU * rAU * Math.cos(paUtils.degreesToRadians(lcDeg - earthLongitudeLeDeg)) * Math.cos(psiRad));
-
-    var cometRAHour = paMacros.decimalHoursHour(cometRAHours1 + 0.008333);
-    var cometRAMin = paMacros.decimalHoursMinute(cometRAHours1 + 0.008333);
-    var cometDecDeg = paMacros.decimalDegreesDegrees(cometDecDeg1 + 0.008333);
-    var cometDecMin = paMacros.decimalDegreesMinutes(cometDecDeg1 + 0.008333);
-    var cometDistEarth = paUtils.round(cometDistanceAU, 2);
-
-    return [cometRAHour, cometRAMin, cometDecDeg, cometDecMin, cometDistEarth];
-}
-
-/**
- * Calculate position of a parabolic comet.
- */
-function positionOfParabolicComet(lctHour, lctMin, lctSec, isDaylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, cometName) {
-    var daylightSaving = (isDaylightSaving) ? 1 : 0;
-
-    var greenwichDateDay = paMacros.localCivilTimeGreenwichDay(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
-    var greenwichDateMonth = paMacros.localCivilTimeGreenwichMonth(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
-    var greenwichDateYear = paMacros.localCivilTimeGreenwichYear(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
-
-    var [comet_name, epochPeriDay, epochPeriMonth, epochPeriYear, argPeri, node, periDist, incl] = paCometData.getCometParabolicData(cometName);
-
-    var perihelionEpochDay = Number(epochPeriDay);
-    var perihelionEpochMonth = Number(epochPeriMonth);
-    var perihelionEpochYear = Number(epochPeriYear);
-    var qAU = Number(periDist);
-    var inclinationDeg = Number(incl);
-    var perihelionDeg = Number(argPeri);
-    var nodeDeg = Number(node);
-
-    var [cometLongDeg, cometLatDeg, cometDistAU] = paMacros.pCometLongLatDist(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, perihelionEpochDay, perihelionEpochMonth, perihelionEpochYear, qAU, inclinationDeg, perihelionDeg, nodeDeg);
-
-    var cometRAHours = paMacros.decimalDegreesToDegreeHours(paMacros.ecRA(cometLongDeg, 0, 0, cometLatDeg, 0, 0, greenwichDateDay, greenwichDateMonth, greenwichDateYear));
-    var cometDecDeg1 = paMacros.ecDec(cometLongDeg, 0, 0, cometLatDeg, 0, 0, greenwichDateDay, greenwichDateMonth, greenwichDateYear);
-
-    var cometRAHour = paMacros.decimalHoursHour(cometRAHours);
-    var cometRAMin = paMacros.decimalHoursMinute(cometRAHours);
-    var cometRASec = paMacros.decimalHoursSecond(cometRAHours);
-    var cometDecDeg = paMacros.decimalDegreesDegrees(cometDecDeg1);
-    var cometDecMin = paMacros.decimalDegreesMinutes(cometDecDeg1);
-    var cometDecSec = paMacros.decimalDegreesSeconds(cometDecDeg1);
-    var cometDistEarth = paUtils.round(cometDistAU, 2);
-
-    return [cometRAHour, cometRAMin, cometRASec, cometDecDeg, cometDecMin, cometDecSec, cometDistEarth];
+    return [positionAngleDeg, separationArcsec];
 }
 
 
 module.exports = {
-    positionOfEllipticalComet,
-    positionOfParabolicComet
+    binaryStarOrbit
 };</code></pre>
         </article>
     </section>

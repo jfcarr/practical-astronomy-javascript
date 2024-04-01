@@ -95,7 +95,7 @@ Result:
 
 ### Binary Stars
 
-- [ ] Calculate -> Binary star orbit data
+- [x] Calculate -> Binary star orbit data
 
 ### The Moon
 
