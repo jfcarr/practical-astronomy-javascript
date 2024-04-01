@@ -2877,6 +2877,87 @@ function planetLong_L4945(t, planet) {
   return [qa, qb, qc, qd, qe, qf, qg];
 }
 
+/**
+ * For W, in radians, return S, also in radians.
+ * 
+ * Original macro name: SolveCubic
+ */
+function solveCubic(w) {
+  var s = w / 3.0;
+
+  while (1 == 1) {
+    var s2 = s * s;
+    var d = (s2 + 3.0) * s - w;
+
+    if (Math.abs(d) < 0.000001) {
+      return s;
+    }
+
+    s = ((2.0 * s * s2) + w) / (3.0 * (s2 + 1.0));
+  }
+}
+
+/**
+ * Calculate longitude, latitude, and distance of parabolic-orbit comet.
+ * 
+ * Original macro names: PcometLong, PcometLat, PcometDist
+ */
+function pCometLongLatDist(lh, lm, ls, ds, zc, dy, mn, yr, td, tm, ty, q, i, p, n) {
+  var gd = localCivilTimeGreenwichDay(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gm = localCivilTimeGreenwichMonth(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gy = localCivilTimeGreenwichYear(lh, lm, ls, ds, zc, dy, mn, yr);
+  var ut = localCivilTimeToUniversalTime(lh, lm, ls, ds, zc, dy, mn, yr);
+  var tpe = (ut / 365.242191) + civilDateToJulianDate(gd, gm, gy) - civilDateToJulianDate(td, tm, ty);
+  var lg = paUtils.degreesToRadians(sunLong(lh, lm, ls, ds, zc, dy, mn, yr) + 180.0);
+  var re = sunDist(lh, lm, ls, ds, zc, dy, mn, yr);
+
+  var rh2 = 0.0;
+  var rd = 0.0;
+  var s3 = 0.0;
+  var c3 = 0.0;
+  var lc = 0.0;
+  var s2 = 0.0;
+  var c2 = 0.0;
+
+  for (let k = 1; k < 3; k++) {
+    var s = solveCubic(0.0364911624 * tpe / (q * Math.sqrt(q)));
+    s = Number(s);
+    var nu = 2.0 * Math.atan(s);
+    var r = q * (1.0 + s * s);
+    var l = nu + paUtils.degreesToRadians(p);
+    var s1 = Math.sin(l);
+    var c1 = Math.cos(l);
+    var i1 = paUtils.degreesToRadians(i);
+    s2 = s1 * Math.sin(i1);
+    var ps = Math.asin(s2);
+    var y = s1 * Math.cos(i1);
+    lc = Math.atan2(y, c1) + paUtils.degreesToRadians(n);
+    c2 = Math.cos(ps);
+    rd = r * c2;
+    var ll = lc - lg;
+    c3 = Math.cos(ll);
+    s3 = Math.sin(ll);
+    var rh = Math.sqrt((re * re) + (r * r) - (2.0 * re * rd * c3 * Math.cos(ps)));
+    if (k == 1) {
+      rh2 = Math.sqrt((re * re) + (r * r) - (2.0 * re * r * Math.cos(ps) * Math.cos(l + paUtils.degreesToRadians(n) - lg)));
+    }
+  }
+
+  var ep;
+
+  ep = (rd < re) ? Math.atan((-rd * s3) / (re - (rd * c3))) + lg + 3.141592654 : Math.atan((re * s3) / (rd - (re * c3))) + lc;
+  ep = unwind(ep);
+
+  var tb = (rd * s2 * Math.sin(ep - lc)) / (c2 * re * s3);
+  var bp = Math.atan(tb);
+
+  var cometLongDeg = degrees(ep);
+  var cometLatDeg = degrees(bp);
+  var cometDistAU = rh2;
+
+  return [cometLongDeg, cometLatDeg, cometDistAU];
+}
+
 
 module.exports = {
   HMStoDH,
@@ -2962,5 +3043,7 @@ module.exports = {
   planetLong_L4685,
   planetLong_L4735,
   planetLong_L4810,
-  planetLong_L4945
+  planetLong_L4945,
+  solveCubic,
+  pCometLongLatDist
 };

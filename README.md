@@ -91,7 +91,7 @@ Result:
 ### Comets
 
 - [x] Calculate -> Position of comet (elliptical)
-- [ ] Calculate -> Position of comet (parabolic)
+- [x] Calculate -> Position of comet (parabolic)
 
 ### Binary Stars
 
