@@ -29,6 +29,23 @@ const cometEllipticalData = [
     ["Halley", 1986.112, 170.011, 58.154, 76.0081, 17.9435, 0.9673, 162.2384]
 ];
 
+/**
+ * Comet Parabolic Data 
+ * 
+ * Elements:
+ *   0: comet_name
+ *   1: epochPeriDay
+ *   2: epochPeriMonth
+ *   3: epochPeriYear
+ *   4: argPeri
+ *   5: node
+ *   6: periDist
+ *   7: incl 
+ */
+const cometParabolicData = [
+    ["Kohler", 10.5659, 11, 1977, 163.4799, 181.8175, 0.990662, 48.7196]
+];
+
 function getCometEllipticalData(cometName) {
     let [comet_name, epoch_EpochOfPerihelion, peri_LongitudeOfPerihelion, node_LongitudeOfAscendingNode, period_PeriodOfOrbit, axis_SemiMajorAxisOfOrbit, ecc_EccentricityOfOrbit, incl_InclinationOfOrbit] = ["not found", -99, -99, -99, -99, -99, -99, -99]
 
@@ -50,8 +67,31 @@ function getCometEllipticalData(cometName) {
     return [comet_name, epoch_EpochOfPerihelion, peri_LongitudeOfPerihelion, node_LongitudeOfAscendingNode, period_PeriodOfOrbit, axis_SemiMajorAxisOfOrbit, ecc_EccentricityOfOrbit, incl_InclinationOfOrbit];
 };
 
+function getCometParabolicData(cometName) {
+    let [comet_name, epochPeriDay, epochPeriMonth, epochPeriYear, argPeri, node, periDist, incl] = ["not found", -99, -99, -99, -99, -99, -99, -99];
+
+    for (let iLoop = 0; iLoop < cometParabolicData.length; iLoop++) {
+        if (cometParabolicData[iLoop][0] == cometName) {
+            comet_name = String(cometParabolicData[iLoop][0]);
+            epochPeriDay = Number(cometParabolicData[iLoop][1]);
+            epochPeriMonth = Number(cometParabolicData[iLoop][2]);
+            epochPeriYear = Number(cometParabolicData[iLoop][3]);
+            argPeri = Number(cometParabolicData[iLoop][4]);
+            node = Number(cometParabolicData[iLoop][5]);
+            periDist = Number(cometParabolicData[iLoop][6]);
+            incl = Number(cometParabolicData[iLoop][7]);
+
+            break;
+        }
+    }
+
+    return [comet_name, epochPeriDay, epochPeriMonth, epochPeriYear, argPeri, node, periDist, incl];
+}
+
 
 module.exports = {
     cometEllipticalData,
-    getCometEllipticalData
+    cometParabolicData,
+    getCometEllipticalData,
+    getCometParabolicData
 };
