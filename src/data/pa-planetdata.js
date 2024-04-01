@@ -26,12 +26,26 @@ const planetData = [
 ];
 
 function getPlanetData(planetName) {
+    let [planet_name, tp_PeriodOrbit, long_LongitudeEpoch, peri_LongitudePerihelion, ecc_EccentricityOrbit, axis_AxisOrbit, incl_OrbitalInclination, node_LongitudeAscendingNode, theta0_AngularDiameter, v0_VisualMagnitude] = ["not found", -99, -99, -99, -99, -99, -99, -99, -99, -99];
+
     for (let iLoop = 0; iLoop < planetData.length; iLoop++) {
-        if (planetData[iLoop][0] == planetName)
-            return planetData[iLoop];
+        if (planetData[iLoop][0] == planetName) {
+            planet_name = String(planetData[iLoop][0]);
+            tp_PeriodOrbit = Number(planetData[iLoop][1]);
+            long_LongitudeEpoch = Number(planetData[iLoop][2]);
+            peri_LongitudePerihelion = Number(planetData[iLoop][3]);
+            ecc_EccentricityOrbit = Number(planetData[iLoop][4]);
+            axis_AxisOrbit = Number(planetData[iLoop][5]);
+            incl_OrbitalInclination = Number(planetData[iLoop][6]);
+            node_LongitudeAscendingNode = Number(planetData[iLoop][7]);
+            theta0_AngularDiameter = Number(planetData[iLoop][8]);
+            v0_VisualMagnitude = Number(planetData[iLoop][9]);
+
+            break;
+        }
     }
 
-    return ["not found", -99, -99, -99, -99, -99, -99, -99, -99, -99];
+    return [planet_name, tp_PeriodOrbit, long_LongitudeEpoch, peri_LongitudePerihelion, ecc_EccentricityOrbit, axis_AxisOrbit, incl_OrbitalInclination, node_LongitudeAscendingNode, theta0_AngularDiameter, v0_VisualMagnitude];
 };
 
 module.exports = {
