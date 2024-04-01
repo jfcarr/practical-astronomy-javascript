@@ -2958,6 +2958,153 @@ function pCometLongLatDist(lh, lm, ls, ds, zc, dy, mn, yr, td, tm, ty, q, i, p, 
   return [cometLongDeg, cometLatDeg, cometDistAU];
 }
 
+/**
+ * Calculate longitude, latitude, and horizontal parallax of the Moon.
+ * 
+ * Original macro names: MoonLong, MoonLat, MoonHP
+ */
+function moonLongLatHP(lh, lm, ls, ds, zc, dy, mn, yr) {
+  var ut = localCivilTimeToUniversalTime(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gd = localCivilTimeGreenwichDay(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gm = localCivilTimeGreenwichMonth(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gy = localCivilTimeGreenwichYear(lh, lm, ls, ds, zc, dy, mn, yr);
+  var t = ((civilDateToJulianDate(gd, gm, gy) - 2415020.0) / 36525.0) + (ut / 876600.0);
+  var t2 = t * t;
+
+  var m1 = 27.32158213;
+  var m2 = 365.2596407;
+  var m3 = 27.55455094;
+  var m4 = 29.53058868;
+  var m5 = 27.21222039;
+  var m6 = 6798.363307;
+  var q = civilDateToJulianDate(gd, gm, gy) - 2415020.0 + (ut / 24.0);
+  m1 = q / m1;
+  m2 = q / m2;
+  m3 = q / m3;
+  m4 = q / m4;
+  m5 = q / m5;
+  m6 = q / m6;
+  m1 = 360.0 * (m1 - Math.floor(m1));
+  m2 = 360.0 * (m2 - Math.floor(m2));
+  m3 = 360.0 * (m3 - Math.floor(m3));
+  m4 = 360.0 * (m4 - Math.floor(m4));
+  m5 = 360.0 * (m5 - Math.floor(m5));
+  m6 = 360.0 * (m6 - Math.floor(m6));
+
+  var ml = 270.434164 + m1 - (0.001133 - 0.0000019 * t) * t2;
+  var ms = 358.475833 + m2 - (0.00015 + 0.0000033 * t) * t2;
+  var md = 296.104608 + m3 + (0.009192 + 0.0000144 * t) * t2;
+  var me1 = 350.737486 + m4 - (0.001436 - 0.0000019 * t) * t2;
+  var mf = 11.250889 + m5 - (0.003211 + 0.0000003 * t) * t2;
+  var na = 259.183275 - m6 + (0.002078 + 0.0000022 * t) * t2;
+  var a = paUtils.degreesToRadians(51.2 + 20.2 * t);
+  var s1 = Math.sin(a);
+  var s2 = Math.sin(paUtils.degreesToRadians(na));
+  var b = 346.56 + (132.87 - 0.0091731 * t) * t;
+  var s3 = 0.003964 * Math.sin(paUtils.degreesToRadians(b));
+  var c = paUtils.degreesToRadians(na + 275.05 - 2.3 * t);
+  var s4 = Math.sin(c);
+  ml = ml + 0.000233 * s1 + s3 + 0.001964 * s2;
+  ms = ms - 0.001778 * s1;
+  md = md + 0.000817 * s1 + s3 + 0.002541 * s2;
+  mf = mf + s3 - 0.024691 * s2 - 0.004328 * s4;
+  me1 = me1 + 0.002011 * s1 + s3 + 0.001964 * s2;
+  var e = 1.0 - (0.002495 + 0.00000752 * t) * t;
+  var e2 = e * e;
+  ml = paUtils.degreesToRadians(ml);
+  ms = paUtils.degreesToRadians(ms);
+  na = paUtils.degreesToRadians(na);
+  me1 = paUtils.degreesToRadians(me1);
+  mf = paUtils.degreesToRadians(mf);
+  md = paUtils.degreesToRadians(md);
+
+  // Longitude-specific
+  var l = 6.28875 * Math.sin(md) + 1.274018 * Math.sin(2.0 * me1 - md);
+  l = l + 0.658309 * Math.sin(2.0 * me1) + 0.213616 * Math.sin(2.0 * md);
+  l = l - e * 0.185596 * Math.sin(ms) - 0.114336 * Math.sin(2.0 * mf);
+  l = l + 0.058793 * Math.sin(2.0 * (me1 - md));
+  l = l + 0.057212 * e * Math.sin(2.0 * me1 - ms - md) + 0.05332 * Math.sin(2.0 * me1 + md);
+  l = l + 0.045874 * e * Math.sin(2.0 * me1 - ms) + 0.041024 * e * Math.sin(md - ms);
+  l = l - 0.034718 * Math.sin(me1) - e * 0.030465 * Math.sin(ms + md);
+  l = l + 0.015326 * Math.sin(2.0 * (me1 - mf)) - 0.012528 * Math.sin(2.0 * mf + md);
+  l = l - 0.01098 * Math.sin(2.0 * mf - md) + 0.010674 * Math.sin(4.0 * me1 - md);
+  l = l + 0.010034 * Math.sin(3.0 * md) + 0.008548 * Math.sin(4.0 * me1 - 2.0 * md);
+  l = l - e * 0.00791 * Math.sin(ms - md + 2.0 * me1) - e * 0.006783 * Math.sin(2.0 * me1 + ms);
+  l = l + 0.005162 * Math.sin(md - me1) + e * 0.005 * Math.sin(ms + me1);
+  l = l + 0.003862 * Math.sin(4.0 * me1) + e * 0.004049 * Math.sin(md - ms + 2.0 * me1);
+  l = l + 0.003996 * Math.sin(2.0 * (md + me1)) + 0.003665 * Math.sin(2.0 * me1 - 3.0 * md);
+  l = l + e * 0.002695 * Math.sin(2.0 * md - ms) + 0.002602 * Math.sin(md - 2.0 * (mf + me1));
+  l = l + e * 0.002396 * Math.sin(2.0 * (me1 - md) - ms) - 0.002349 * Math.sin(md + me1);
+  l = l + e2 * 0.002249 * Math.sin(2.0 * (me1 - ms)) - e * 0.002125 * Math.sin(2.0 * md + ms);
+  l = l - e2 * 0.002079 * Math.sin(2.0 * ms) + e2 * 0.002059 * Math.sin(2.0 * (me1 - ms) - md);
+  l = l - 0.001773 * Math.sin(md + 2.0 * (me1 - mf)) - 0.001595 * Math.sin(2.0 * (mf + me1));
+  l = l + e * 0.00122 * Math.sin(4.0 * me1 - ms - md) - 0.00111 * Math.sin(2.0 * (md + mf));
+  l = l + 0.000892 * Math.sin(md - 3.0 * me1) - e * 0.000811 * Math.sin(ms + md + 2.0 * me1);
+  l = l + e * 0.000761 * Math.sin(4.0 * me1 - ms - 2.0 * md);
+  l = l + e2 * 0.000704 * Math.sin(md - 2.0 * (ms + me1));
+  l = l + e * 0.000693 * Math.sin(ms - 2.0 * (md - me1));
+  l = l + e * 0.000598 * Math.sin(2.0 * (me1 - mf) - ms);
+  l = l + 0.00055 * Math.sin(md + 4.0 * me1) + 0.000538 * Math.sin(4.0 * md);
+  l = l + e * 0.000521 * Math.sin(4.0 * me1 - ms) + 0.000486 * Math.sin(2.0 * md - me1);
+  l = l + e2 * 0.000717 * Math.sin(md - 2.0 * ms);
+  var mm = unwind(ml + paUtils.degreesToRadians(l));
+
+
+  // Latitude-specific
+  var g = 5.128189 * Math.sin(mf) + 0.280606 * Math.sin(md + mf);
+  g = g + 0.277693 * Math.sin(md - mf) + 0.173238 * Math.sin(2.0 * me1 - mf);
+  g = g + 0.055413 * Math.sin(2.0 * me1 + mf - md) + 0.046272 * Math.sin(2.0 * me1 - mf - md);
+  g = g + 0.032573 * Math.sin(2.0 * me1 + mf) + 0.017198 * Math.sin(2.0 * md + mf);
+  g = g + 0.009267 * Math.sin(2.0 * me1 + md - mf) + 0.008823 * Math.sin(2.0 * md - mf);
+  g = g + e * 0.008247 * Math.sin(2.0 * me1 - ms - mf) + 0.004323 * Math.sin(2.0 * (me1 - md) - mf);
+  g = g + 0.0042 * Math.sin(2.0 * me1 + mf + md) + e * 0.003372 * Math.sin(mf - ms - 2.0 * me1);
+  g = g + e * 0.002472 * Math.sin(2.0 * me1 + mf - ms - md);
+  g = g + e * 0.002222 * Math.sin(2.0 * me1 + mf - ms);
+  g = g + e * 0.002072 * Math.sin(2.0 * me1 - mf - ms - md);
+  g = g + e * 0.001877 * Math.sin(mf - ms + md) + 0.001828 * Math.sin(4.0 * me1 - mf - md);
+  g = g - e * 0.001803 * Math.sin(mf + ms) - 0.00175 * Math.sin(3.0 * mf);
+  g = g + e * 0.00157 * Math.sin(md - ms - mf) - 0.001487 * Math.sin(mf + me1);
+  g = g - e * 0.001481 * Math.sin(mf + ms + md) + e * 0.001417 * Math.sin(mf - ms - md);
+  g = g + e * 0.00135 * Math.sin(mf - ms) + 0.00133 * Math.sin(mf - me1);
+  g = g + 0.001106 * Math.sin(mf + 3.0 * md) + 0.00102 * Math.sin(4.0 * me1 - mf);
+  g = g + 0.000833 * Math.sin(mf + 4.0 * me1 - md) + 0.000781 * Math.sin(md - 3.0 * mf);
+  g = g + 0.00067 * Math.sin(mf + 4.0 * me1 - 2.0 * md) + 0.000606 * Math.sin(2.0 * me1 - 3.0 * mf);
+  g = g + 0.000597 * Math.sin(2.0 * (me1 + md) - mf);
+  g = g + e * 0.000492 * Math.sin(2.0 * me1 + md - ms - mf) + 0.00045 * Math.sin(2.0 * (md - me1) - mf);
+  g = g + 0.000439 * Math.sin(3.0 * md - mf) + 0.000423 * Math.sin(mf + 2.0 * (me1 + md));
+  g = g + 0.000422 * Math.sin(2.0 * me1 - mf - 3.0 * md) - e * 0.000367 * Math.sin(ms + mf + 2.0 * me1 - md);
+  g = g - e * 0.000353 * Math.sin(ms + mf + 2.0 * me1) + 0.000331 * Math.sin(mf + 4.0 * me1);
+  g = g + e * 0.000317 * Math.sin(2.0 * me1 + mf - ms + md);
+  g = g + e2 * 0.000306 * Math.sin(2.0 * (me1 - ms) - mf) - 0.000283 * Math.sin(md + 3.0 * mf);
+  var w1 = 0.0004664 * Math.cos(na);
+  var w2 = 0.0000754 * Math.cos(c);
+  var bm = paUtils.degreesToRadians(g) * (1.0 - w1 - w2);
+
+  // Horizontal parallax-specific
+  var pm = 0.950724 + 0.051818 * Math.cos(md) + 0.009531 * Math.cos(2.0 * me1 - md);
+  pm = pm + 0.007843 * Math.cos(2.0 * me1) + 0.002824 * Math.cos(2.0 * md);
+  pm = pm + 0.000857 * Math.cos(2.0 * me1 + md) + e * 0.000533 * Math.cos(2.0 * me1 - ms);
+  pm = pm + e * 0.000401 * Math.cos(2.0 * me1 - md - ms);
+  pm = pm + e * 0.00032 * Math.cos(md - ms) - 0.000271 * Math.cos(me1);
+  pm = pm - e * 0.000264 * Math.cos(ms + md) - 0.000198 * Math.cos(2.0 * mf - md);
+  pm = pm + 0.000173 * Math.cos(3.0 * md) + 0.000167 * Math.cos(4.0 * me1 - md);
+  pm = pm - e * 0.000111 * Math.cos(ms) + 0.000103 * Math.cos(4.0 * me1 - 2.0 * md);
+  pm = pm - 0.000084 * Math.cos(2.0 * md - 2.0 * me1) - e * 0.000083 * Math.cos(2.0 * me1 + ms);
+  pm = pm + 0.000079 * Math.cos(2.0 * me1 + 2.0 * md) + 0.000072 * Math.cos(4.0 * me1);
+  pm = pm + e * 0.000064 * Math.cos(2.0 * me1 - ms + md) - e * 0.000063 * Math.cos(2.0 * me1 + ms - md);
+  pm = pm + e * 0.000041 * Math.cos(ms + me1) + e * 0.000035 * Math.cos(2.0 * md - ms);
+  pm = pm - 0.000033 * Math.cos(3.0 * md - 2.0 * me1) - 0.00003 * Math.cos(md + me1);
+  pm = pm - 0.000029 * Math.cos(2.0 * (mf - me1)) - e * 0.000029 * Math.cos(2.0 * md + ms);
+  pm = pm + e2 * 0.000026 * Math.cos(2.0 * (me1 - ms)) - 0.000023 * Math.cos(2.0 * (mf - me1) + md);
+  pm = pm + e * 0.000019 * Math.cos(4.0 * me1 - ms - md);
+
+  var moonLongDeg = degrees(mm);
+  var moonLatDeg = degrees(bm);
+  var moonHorPara = pm;
+
+  return [moonLongDeg, moonLatDeg, moonHorPara];
+}
+
 
 module.exports = {
   HMStoDH,
@@ -3045,5 +3192,6 @@ module.exports = {
   planetLong_L4810,
   planetLong_L4945,
   solveCubic,
-  pCometLongLatDist
+  pCometLongLatDist,
+  moonLongLatHP
 };
