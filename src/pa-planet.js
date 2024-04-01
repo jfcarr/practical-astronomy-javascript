@@ -80,8 +80,53 @@ function precisePositionOfPlanet(lctHour, lctMin, lctSec, isDaylightSaving, zone
     return [planetRAHour, planetRAMin, planetRASec, planetDecDeg, planetDecMin, planetDecSec];
 }
 
+/**
+ * Calculate several visual aspects of a planet.
+ */
+function visualAspectsOfAPlanet(lctHour, lctMin, lctSec, isDaylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, planetName) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var greenwichDateDay = paMacros.localCivilTimeGreenwichDay(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var greenwichDateMonth = paMacros.localCivilTimeGreenwichMonth(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var greenwichDateYear = paMacros.localCivilTimeGreenwichYear(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+
+    var [planetLongitude, planetLatitude, planetDistanceAU, planetHLong1, planetHLong2, planetHLat, planetRVect] = paMacros.planetCoordinates(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, planetName);
+
+    var planetRARad = paUtils.degreesToRadians(paMacros.ecRA(planetLongitude, 0, 0, planetLatitude, 0, 0, localDateDay, localDateMonth, localDateYear));
+    var planetDecRad = paUtils.degreesToRadians(paMacros.ecDec(planetLongitude, 0, 0, planetLatitude, 0, 0, localDateDay, localDateMonth, localDateYear));
+
+    var lightTravelTimeHours = planetDistanceAU * 0.1386;
+
+    var [planet_name, tp_PeriodOrbit, long_LongitudeEpoch, peri_LongitudePerihelion, ecc_EccentricityOrbit, axis_AxisOrbit, incl_OrbitalInclination, node_LongitudeAscendingNode, theta0_AngularDiameter, v0_VisualMagnitude] = paPlanetData.getPlanetData(planetName);
+
+    var angularDiameterArcsec = Number(theta0_AngularDiameter) / planetDistanceAU;
+    var phase1 = 0.5 * (1.0 + Math.cos(paUtils.degreesToRadians(planetLongitude - planetHLong1)));
+
+    var sunEclLongDeg = paMacros.sunLong(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var sunRARad = paUtils.degreesToRadians(paMacros.ecRA(sunEclLongDeg, 0, 0, 0, 0, 0, greenwichDateDay, greenwichDateMonth, greenwichDateYear));
+    var sunDecRad = paUtils.degreesToRadians(paMacros.ecDec(sunEclLongDeg, 0, 0, 0, 0, 0, greenwichDateDay, greenwichDateMonth, greenwichDateYear));
+
+    var y = Math.cos(sunDecRad) * Math.sin(sunRARad - planetRARad);
+    var x = Math.cos(planetDecRad) * Math.sin(sunDecRad) - Math.sin(planetDecRad) * Math.cos(sunDecRad) * Math.cos(sunRARad - planetRARad);
+
+    var chiDeg = paMacros.degrees(Math.atan2(y, x));
+    var radiusVectorAU = planetRVect;
+    var approximateMagnitude1 = 5.0 * Math.log10(radiusVectorAU * planetDistanceAU / (Math.sqrt(phase1))) + Number(v0_VisualMagnitude);
+
+    var distanceAU = paUtils.round(planetDistanceAU, 5);
+    var angDiaArcsec = paUtils.round(angularDiameterArcsec, 1);
+    var phase = paUtils.round(phase1, 2);
+    var lightTimeHour = paMacros.decimalHoursHour(lightTravelTimeHours);
+    var lightTimeMinutes = paMacros.decimalHoursMinute(lightTravelTimeHours);
+    var lightTimeSeconds = paMacros.decimalHoursSecond(lightTravelTimeHours);
+    var posAngleBrightLimbDeg = paUtils.round(chiDeg, 1);
+    var approximateMagnitude = paUtils.round(approximateMagnitude1, 1);
+
+    return [distanceAU, angDiaArcsec, phase, lightTimeHour, lightTimeMinutes, lightTimeSeconds, posAngleBrightLimbDeg, approximateMagnitude];
+}
 
 module.exports = {
     approximatePositionOfPlanet,
-    precisePositionOfPlanet
+    precisePositionOfPlanet,
+    visualAspectsOfAPlanet
 };
