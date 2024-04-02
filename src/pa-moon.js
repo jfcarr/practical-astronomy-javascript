@@ -1,5 +1,5 @@
 const paMacros = require('./pa-macros.js');
-const paPlanetData = require('./data/pa-planetdata.js');
+const paTypes = require('./pa-types.js');
 const paUtils = require('./pa-utils.js');
 
 /**
@@ -82,8 +82,41 @@ function precisePositionOfMoon(lctHour, lctMin, lctSec, isDaylightSaving, zoneCo
     return [moonRAHour, moonRAMin, moonRASec, moonDecDeg, moonDecMin, moonDecSec, earthMoonDistKM, moonHorParallaxDeg];
 }
 
+/**
+ * Calculate Moon phase and position angle of bright limb.
+ */
+function moonPhase(lctHour, lctMin, lctSec, isDaylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear, accuracyLevel) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var gdateDay = paMacros.localCivilTimeGreenwichDay(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var gdateMonth = paMacros.localCivilTimeGreenwichMonth(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var gdateYear = paMacros.localCivilTimeGreenwichYear(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+
+    var sunLongDeg = paMacros.sunLong(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var [moonLongDeg, moonLatDeg, moonHorPara] = paMacros.moonLongLatHP(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var dRad = paUtils.degreesToRadians(moonLongDeg - sunLongDeg);
+
+    var moonPhase1 = (accuracyLevel == paTypes.AccuracyLevel.Precise) ? paMacros.moonPhase(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear) : (1.0 - Math.cos(dRad)) / 2.0;
+
+    var sunRARad = paUtils.degreesToRadians(paMacros.ecRA(sunLongDeg, 0, 0, 0, 0, 0, gdateDay, gdateMonth, gdateYear));
+    var moonRARad = paUtils.degreesToRadians(paMacros.ecRA(moonLongDeg, 0, 0, moonLatDeg, 0, 0, gdateDay, gdateMonth, gdateYear));
+    var sunDecRad = paUtils.degreesToRadians(paMacros.ecDec(sunLongDeg, 0, 0, 0, 0, 0, gdateDay, gdateMonth, gdateYear));
+    var moonDecRad = paUtils.degreesToRadians(paMacros.ecDec(moonLongDeg, 0, 0, moonLatDeg, 0, 0, gdateDay, gdateMonth, gdateYear));
+
+    var y = Math.cos(sunDecRad) * Math.sin(sunRARad - moonRARad);
+    var x = Math.cos(moonDecRad) * Math.sin(sunDecRad) - Math.sin(moonDecRad) * Math.cos(sunDecRad) * Math.cos(sunRARad - moonRARad);
+
+    var chiDeg = paMacros.degrees(Math.atan2(y, x));
+
+    var moonPhase = paUtils.round(moonPhase1, 2);
+    var paBrightLimbDeg = paUtils.round(chiDeg, 2);
+
+    return [moonPhase, paBrightLimbDeg];
+}
+
 
 module.exports = {
     approximatePositionOfMoon,
-    precisePositionOfMoon
+    precisePositionOfMoon,
+    moonPhase
 };

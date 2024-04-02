@@ -1,3 +1,8 @@
+const AccuracyLevel = {
+    Approximate: 'Approximate',
+    Precise: 'Precise'
+};
+
 /**
  * Angle measurement units
  */
@@ -44,6 +49,7 @@ const WarningFlag = {
 };
 
 module.exports = {
+    AccuracyLevel,
     AngleMeasure,
     CoordinateType,
     RiseSetCalcStatus,

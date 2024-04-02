@@ -3105,6 +3105,73 @@ function moonLongLatHP(lh, lm, ls, ds, zc, dy, mn, yr) {
   return [moonLongDeg, moonLatDeg, moonHorPara];
 }
 
+/**
+ * Calculate current phase of Moon.
+ * 
+ * Original macro name: MoonPhase
+ */
+function moonPhase(lh, lm, ls, ds, zc, dy, mn, yr) {
+  var [moonLongDeg, moonLatDeg, moonHorPara] = moonLongLatHP(lh, lm, ls, ds, zc, dy, mn, yr);
+
+  var cd = Math.cos(paUtils.degreesToRadians(moonLongDeg - sunLong(lh, lm, ls, ds, zc, dy, mn, yr))) * Math.cos(paUtils.degreesToRadians(moonLatDeg));
+  var d = Math.acos(cd);
+  var sd = Math.sin(d);
+  var i = 0.1468 * sd * (1.0 - 0.0549 * Math.sin(moonMeanAnomaly(lh, lm, ls, ds, zc, dy, mn, yr)));
+  i = i / (1.0 - 0.0167 * Math.sin(sunMeanAnomaly(lh, lm, ls, ds, zc, dy, mn, yr)));
+  i = 3.141592654 - d - paUtils.degreesToRadians(i);
+  var k = (1.0 + Math.cos(i)) / 2.0;
+
+  return paUtils.round(k, 2);
+}
+
+/**
+ * Calculate the Moon's mean anomaly.
+ * 
+ * Original macro name: MoonMeanAnomaly
+ */
+function moonMeanAnomaly(lh, lm, ls, ds, zc, dy, mn, yr) {
+  var ut = localCivilTimeToUniversalTime(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gd = localCivilTimeGreenwichDay(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gm = localCivilTimeGreenwichMonth(lh, lm, ls, ds, zc, dy, mn, yr);
+  var gy = localCivilTimeGreenwichYear(lh, lm, ls, ds, zc, dy, mn, yr);
+  var t = ((civilDateToJulianDate(gd, gm, gy) - 2415020.0) / 36525.0) + (ut / 876600.0);
+  var t2 = t * t;
+
+  var m1 = 27.32158213;
+  var m2 = 365.2596407;
+  var m3 = 27.55455094;
+  var m4 = 29.53058868;
+  var m5 = 27.21222039;
+  var m6 = 6798.363307;
+  var q = civilDateToJulianDate(gd, gm, gy) - 2415020.0 + (ut / 24.0);
+  m1 = q / m1;
+  m2 = q / m2;
+  m3 = q / m3;
+  m4 = q / m4;
+  m5 = q / m5;
+  m6 = q / m6;
+  m1 = 360.0 * (m1 - Math.floor(m1));
+  m2 = 360.0 * (m2 - Math.floor(m2));
+  m3 = 360.0 * (m3 - Math.floor(m3));
+  m4 = 360.0 * (m4 - Math.floor(m4));
+  m5 = 360.0 * (m5 - Math.floor(m5));
+  m6 = 360.0 * (m6 - Math.floor(m6));
+
+  var ml = 270.434164 + m1 - (0.001133 - 0.0000019 * t) * t2;
+  var ms = 358.475833 + m2 - (0.00015 + 0.0000033 * t) * t2;
+  var md = 296.104608 + m3 + (0.009192 + 0.0000144 * t) * t2;
+  var na = 259.183275 - m6 + (0.002078 + 0.0000022 * t) * t2;
+  var a = paUtils.degreesToRadians(51.2 + 20.2 * t);
+  var s1 = Math.sin(a);
+  var s2 = Math.sin(paUtils.degreesToRadians(na));
+  var b = 346.56 + (132.87 - 0.0091731 * t) * t;
+  var s3 = 0.003964 * Math.sin(paUtils.degreesToRadians(b));
+  var c = paUtils.degreesToRadians(na + 275.05 - 2.3 * t);
+  md = md + 0.000817 * s1 + s3 + 0.002541 * s2;
+
+  return paUtils.degreesToRadians(md);
+}
+
 
 module.exports = {
   HMStoDH,
@@ -3193,5 +3260,7 @@ module.exports = {
   planetLong_L4945,
   solveCubic,
   pCometLongLatDist,
-  moonLongLatHP
+  moonLongLatHP,
+  moonPhase,
+  moonMeanAnomaly
 };
