@@ -114,9 +114,48 @@ function moonPhase(lctHour, lctMin, lctSec, isDaylightSaving, zoneCorrectionHour
     return [moonPhase, paBrightLimbDeg];
 }
 
+/**
+ * Calculate new moon and full moon instances.
+ */
+function timesOfNewMoonAndFullMoon(isDaylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var jdOfNewMoonDays = paMacros.newMoon(daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var jdOfFullMoonDays = paMacros.fullMoon(3, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+
+    var gDateOfNewMoonDay = paMacros.julianDateDay(jdOfNewMoonDays);
+    var integerDay1 = Math.floor(gDateOfNewMoonDay);
+    var gDateOfNewMoonMonth = paMacros.julianDateMonth(jdOfNewMoonDays);
+    var gDateOfNewMoonYear = paMacros.julianDateYear(jdOfNewMoonDays);
+
+    var gDateOfFullMoonDay = paMacros.julianDateDay(jdOfFullMoonDays);
+    var integerDay2 = Math.floor(gDateOfFullMoonDay);
+    var gDateOfFullMoonMonth = paMacros.julianDateMonth(jdOfFullMoonDays);
+    var gDateOfFullMoonYear = paMacros.julianDateYear(jdOfFullMoonDays);
+
+    var utOfNewMoonHours = 24.0 * (gDateOfNewMoonDay - integerDay1);
+    var utOfFullMoonHours = 24.0 * (gDateOfFullMoonDay - integerDay2);
+    var lctOfNewMoonHours = paMacros.universalTimeToLocalCivilTime(utOfNewMoonHours + 0.008333, 0, 0, daylightSaving, zoneCorrectionHours, integerDay1, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var lctOfFullMoonHours = paMacros.universalTimeToLocalCivilTime(utOfFullMoonHours + 0.008333, 0, 0, daylightSaving, zoneCorrectionHours, integerDay2, gDateOfFullMoonMonth, gDateOfFullMoonYear);
+
+    var nmLocalTimeHour = paMacros.decimalHoursHour(lctOfNewMoonHours);
+    var nmLocalTimeMin = paMacros.decimalHoursMinute(lctOfNewMoonHours);
+    var nmLocalDateDay = paMacros.universalTime_LocalCivilDay(utOfNewMoonHours, 0, 0, daylightSaving, zoneCorrectionHours, integerDay1, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var nmLocalDateMonth = paMacros.universalTime_LocalCivilMonth(utOfNewMoonHours, 0, 0, daylightSaving, zoneCorrectionHours, integerDay1, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var nmLocalDateYear = paMacros.universalTime_LocalCivilYear(utOfNewMoonHours, 0, 0, daylightSaving, zoneCorrectionHours, integerDay1, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var fmLocalTimeHour = paMacros.decimalHoursHour(lctOfFullMoonHours);
+    var fmLocalTimeMin = paMacros.decimalHoursMinute(lctOfFullMoonHours);
+    var fmLocalDateDay = paMacros.universalTime_LocalCivilDay(utOfFullMoonHours, 0, 0, daylightSaving, zoneCorrectionHours, integerDay2, gDateOfFullMoonMonth, gDateOfFullMoonYear);
+    var fmLocalDateMonth = paMacros.universalTime_LocalCivilMonth(utOfFullMoonHours, 0, 0, daylightSaving, zoneCorrectionHours, integerDay2, gDateOfFullMoonMonth, gDateOfFullMoonYear);
+    var fmLocalDateYear = paMacros.universalTime_LocalCivilYear(utOfFullMoonHours, 0, 0, daylightSaving, zoneCorrectionHours, integerDay2, gDateOfFullMoonMonth, gDateOfFullMoonYear);
+
+    return [nmLocalTimeHour, nmLocalTimeMin, nmLocalDateDay, nmLocalDateMonth, nmLocalDateYear, fmLocalTimeHour, fmLocalTimeMin, fmLocalDateDay, fmLocalDateMonth, fmLocalDateYear];
+}
+
 
 module.exports = {
     approximatePositionOfMoon,
     precisePositionOfMoon,
-    moonPhase
+    moonPhase,
+    timesOfNewMoonAndFullMoon
 };

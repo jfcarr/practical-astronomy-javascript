@@ -101,7 +101,7 @@ Result:
 
 - [x] Calculate -> Approximate and precise position of Moon
 - [x] Calculate -> Moon phase and position angle of bright limb
-- [ ] Calculate -> Times of new Moon and full Moon
+- [x] Calculate -> Times of new Moon and full Moon
 - [ ] Calculate -> Moon's distance, angular diameter, and horizontal parallax
 - [ ] Calculate -> Local moonrise and moonset
 
