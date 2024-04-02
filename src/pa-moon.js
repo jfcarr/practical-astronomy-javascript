@@ -152,10 +152,31 @@ function timesOfNewMoonAndFullMoon(isDaylightSaving, zoneCorrectionHours, localD
     return [nmLocalTimeHour, nmLocalTimeMin, nmLocalDateDay, nmLocalDateMonth, nmLocalDateYear, fmLocalTimeHour, fmLocalTimeMin, fmLocalDateDay, fmLocalDateMonth, fmLocalDateYear];
 }
 
+/**
+ * Calculate Moon's distance, angular diameter, and horizontal parallax.
+ */
+function moonDistAngDiamHorParallax(lctHour, lctMin, lctSec, isDaylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var moonDistance = paMacros.moonDist(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var moonAngularDiameter = paMacros.moonSize(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var moonHorizontalParallax = paMacros.moonHP(lctHour, lctMin, lctSec, daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+
+    var earthMoonDist = paUtils.round(moonDistance, 0);
+    var angDiameterDeg = paMacros.decimalDegreesDegrees(moonAngularDiameter + 0.008333);
+    var angDiameterMin = paMacros.decimalDegreesMinutes(moonAngularDiameter + 0.008333);
+    var horParallaxDeg = paMacros.decimalDegreesDegrees(moonHorizontalParallax);
+    var horParallaxMin = paMacros.decimalDegreesMinutes(moonHorizontalParallax);
+    var horParallaxSec = paMacros.decimalDegreesSeconds(moonHorizontalParallax);
+
+    return [earthMoonDist, angDiameterDeg, angDiameterMin, horParallaxDeg, horParallaxMin, horParallaxSec];
+}
+
 
 module.exports = {
     approximatePositionOfMoon,
     precisePositionOfMoon,
     moonPhase,
-    timesOfNewMoonAndFullMoon
+    timesOfNewMoonAndFullMoon,
+    moonDistAngDiamHorParallax
 };

@@ -16,3 +16,7 @@ test('Moon Phase', () => {
 test('Times of New Moon and Full Moon', () => {
     expect(paMoon.timesOfNewMoonAndFullMoon(false, 0, 1, 9, 2003)).toStrictEqual([17, 27, 27, 8, 2003, 16, 36, 10, 9, 2003]);
 });
+
+test('Moon distance, angular diameter, and horizontal parallax', () => {
+    expect(paMoon.moonDistAngDiamHorParallax(0, 0, 0, false, 0, 1, 9, 2003)).toStrictEqual([367964, 0, 32, 0, 59, 35.49]);
+});

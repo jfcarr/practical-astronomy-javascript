@@ -1251,6 +1251,31 @@ function moonHP(lh, lm, ls, ds, zc, dy, mn, yr) {
 }
 
 /**
+ * Calculate distance from the Earth to the Moon (km)
+ * 
+ * Original macro name: MoonDist
+ */
+function moonDist(lh, lm, ls, ds, zc, dy, mn, yr) {
+  var hp = paUtils.degreesToRadians(moonHP(lh, lm, ls, ds, zc, dy, mn, yr));
+  var r = 6378.14 / Math.sin(hp);
+
+  return r;
+}
+
+/**
+ * Calculate the Moon's angular diameter (degrees)
+ * 
+ * Original macro name: MoonSize
+ */
+function moonSize(lh, lm, ls, ds, zc, dy, mn, yr) {
+  var hp = paUtils.degreesToRadians(moonHP(lh, lm, ls, ds, zc, dy, mn, yr));
+  var r = 6378.14 / Math.sin(hp);
+  var th = 384401.0 * 0.5181 / r;
+
+  return th;
+}
+
+/**
  * Convert angle in radians to equivalent angle in degrees.
  * 
  * Original macro name: Unwind
@@ -3440,5 +3465,7 @@ module.exports = {
   sign,
   universalTime_LocalCivilDay,
   universalTime_LocalCivilMonth,
-  universalTime_LocalCivilYear
+  universalTime_LocalCivilYear,
+  moonDist,
+  moonSize
 };
