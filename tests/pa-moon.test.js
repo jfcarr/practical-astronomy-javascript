@@ -12,3 +12,7 @@ test('Precise Position of Moon', () => {
 test('Moon Phase', () => {
     expect(paMoon.moonPhase(0, 0, 0, false, 0, 1, 9, 2003, paTypes.AccuracyLevel.Approximate)).toStrictEqual([0.22, -71.58]);
 });
+
+test('Times of New Moon and Full Moon', () => {
+    expect(paMoon.timesOfNewMoonAndFullMoon(false, 0, 1, 9, 2003)).toStrictEqual([17, 27, 27, 8, 2003, 16, 36, 10, 9, 2003]);
+});

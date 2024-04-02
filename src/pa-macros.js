@@ -3172,6 +3172,174 @@ function moonMeanAnomaly(lh, lm, ls, ds, zc, dy, mn, yr) {
   return paUtils.degreesToRadians(md);
 }
 
+/**
+ * Calculate Julian date of New Moon.
+ * 
+ * Original macro name: NewMoon
+ */
+function newMoon(ds, zc, dy, mn, yr) {
+  var d0 = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var m0 = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var y0 = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+
+  var j0 = civilDateToJulianDate(0.0, 1, y0) - 2415020.0;
+  var dj = civilDateToJulianDate(d0, m0, y0) - 2415020.0;
+  var k = lint(((y0 - 1900.0 + ((dj - j0) / 365.0)) * 12.3685) + 0.5);
+  var tn = k / 1236.85;
+  var tf = (k + 0.5) / 1236.85;
+  var t = tn;
+  var [nf1_a, nf1_b, nf1_f] = newMoonFullMoon_L6855(k, t);
+  var ni = nf1_a;
+  var nf = nf1_b;
+  t = tf;
+  k = k + 0.5;
+
+  return ni + 2415020.0 + nf;
+}
+
+/**
+ * Calculate Julian date of Full Moon.
+ * 
+ * Original macro name: FullMoon
+ */
+function fullMoon(ds, zc, dy, mn, yr) {
+  var d0 = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var m0 = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var y0 = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+
+  var j0 = civilDateToJulianDate(0.0, 1, y0) - 2415020.0;
+  var dj = civilDateToJulianDate(d0, m0, y0) - 2415020.0;
+  var k = lint(((y0 - 1900.0 + ((dj - j0) / 365.0)) * 12.3685) + 0.5);
+  var tn = k / 1236.85;
+  var tf = (k + 0.5) / 1236.85;
+  var t = tn;
+  t = tf;
+  k = k + 0.5;
+  var [nf2_a, nf2_b, nf2_f] = newMoonFullMoon_L6855(k, t);
+  var fi = nf2_a;
+  var ff = nf2_b;
+
+  return fi + 2415020.0 + ff;
+}
+
+/**
+ * Helper function for new_moon() and full_moon() """
+ */
+function newMoonFullMoon_L6855(k, t) {
+  var t2 = t * t;
+  var e = 29.53 * k;
+  var c = 166.56 + (132.87 - 0.009173 * t) * t;
+  c = paUtils.degreesToRadians(c);
+  var b = 0.00058868 * k + (0.0001178 - 0.000000155 * t) * t2;
+  b = b + 0.00033 * Math.sin(c) + 0.75933;
+  var a = k / 12.36886;
+  var a1 = 359.2242 + 360.0 * fract(a) - (0.0000333 + 0.00000347 * t) * t2;
+  var a2 = 306.0253 + 360.0 * fract(k / 0.9330851);
+  a2 = a2 + (0.0107306 + 0.00001236 * t) * t2;
+  a = k / 0.9214926;
+  var f = 21.2964 + 360.0 * fract(a) - (0.0016528 + 0.00000239 * t) * t2;
+  a1 = unwindDeg(a1);
+  a2 = unwindDeg(a2);
+  f = unwindDeg(f);
+  a1 = paUtils.degreesToRadians(a1);
+  a2 = paUtils.degreesToRadians(a2);
+  f = paUtils.degreesToRadians(f);
+
+  var dd = (0.1734 - 0.000393 * t) * Math.sin(a1) + 0.0021 * Math.sin(2.0 * a1);
+  dd = dd - 0.4068 * Math.sin(a2) + 0.0161 * Math.sin(2.0 * a2) - 0.0004 * Math.sin(3.0 * a2);
+  dd = dd + 0.0104 * Math.sin(2.0 * f) - 0.0051 * Math.sin(a1 + a2);
+  dd = dd - 0.0074 * Math.sin(a1 - a2) + 0.0004 * Math.sin(2.0 * f + a1);
+  dd = dd - 0.0004 * Math.sin(2.0 * f - a1) - 0.0006 * Math.sin(2.0 * f + a2) + 0.001 * Math.sin(2.0 * f - a2);
+  dd = dd + 0.0005 * Math.sin(a1 + 2.0 * a2);
+  var e1 = Math.floor(e);
+  b = b + dd + (e - e1);
+  var b1 = Math.floor(b);
+  a = e1 + b1;
+  b = b - b1;
+
+  return [a, b, f];
+}
+
+/**
+ * Original macro name: FRACT
+ */
+function fract(w) {
+  return w - lint(w);
+}
+
+/**
+ * Original macro name: LINT
+ */
+function lint(w) {
+  return iInt(w) + iInt(((1.0 * sign(w)) - 1.0) / 2.0);
+}
+
+/**
+ * Original macro name: IINT
+ */
+function iInt(w) {
+  return sign(w) * Math.floor(Math.abs(w));
+}
+
+/**
+ * Calculate sign of number.
+ */
+function sign(numberToCheck) {
+  var signValue = 0.0;
+
+  if (numberToCheck < 0.0)
+    signValue = -1.0;
+
+  if (numberToCheck > 0.0)
+    signValue = 1.0;
+
+  return signValue;
+}
+
+/**
+ * Get Local Civil Day for Universal Time
+ * 
+ * Original macro name: UTLcDay
+ */
+function universalTime_LocalCivilDay(uHours, uMinutes, uSeconds, daylightSaving, zoneCorrection, greenwichDay, greenwichMonth, greenwichYear) {
+  var a = HMStoDH(uHours, uMinutes, uSeconds);
+  var b = a + zoneCorrection;
+  var c = b + daylightSaving;
+  var d = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear) + (c / 24.0);
+  var e = julianDateDay(d);
+  var e1 = Math.floor(e);
+
+  return e1;
+}
+
+/**
+ * Get Local Civil Month for Universal Time
+ * 
+ * Original macro name: UTLcMonth
+ */
+function universalTime_LocalCivilMonth(uHours, uMinutes, uSeconds, daylightSaving, zoneCorrection, greenwichDay, greenwichMonth, greenwichYear) {
+  var a = HMStoDH(uHours, uMinutes, uSeconds);
+  var b = a + zoneCorrection;
+  var c = b + daylightSaving;
+  var d = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear) + (c / 24.0);
+
+  return julianDateMonth(d);
+}
+
+/**
+ * Get Local Civil Year for Universal Time
+ * 
+ * Original macro name: UTLcYear
+ */
+function universalTime_LocalCivilYear(uHours, uMinutes, uSeconds, daylightSaving, zoneCorrection, greenwichDay, greenwichMonth, greenwichYear) {
+  var a = HMStoDH(uHours, uMinutes, uSeconds);
+  var b = a + zoneCorrection;
+  var c = b + daylightSaving;
+  var d = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear) + (c / 24.0);
+
+  return julianDateYear(d);
+}
+
 
 module.exports = {
   HMStoDH,
@@ -3262,5 +3430,15 @@ module.exports = {
   pCometLongLatDist,
   moonLongLatHP,
   moonPhase,
-  moonMeanAnomaly
+  moonMeanAnomaly,
+  newMoon,
+  fullMoon,
+  newMoonFullMoon_L6855,
+  fract,
+  lint,
+  iInt,
+  sign,
+  universalTime_LocalCivilDay,
+  universalTime_LocalCivilMonth,
+  universalTime_LocalCivilYear
 };
