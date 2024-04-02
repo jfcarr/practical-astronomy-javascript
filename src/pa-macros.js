@@ -3322,6 +3322,30 @@ function sign(numberToCheck) {
 }
 
 /**
+ * Original macro name: UTDayAdjust
+ */
+function utDayAdjust(ut, g1) {
+  var returnValue = ut;
+
+  if ((ut - g1) < -6.0)
+    returnValue = ut + 24.0;
+
+  if ((ut - g1) > 6.0)
+    returnValue = ut - 24.0;
+
+  return returnValue;
+}
+
+/**
+ * Original macro name: Fpart
+ */
+/// <summary>
+/// </summary>
+function fPart(w) {
+  return w - lint(w);
+}
+
+/**
  * Get Local Civil Day for Universal Time
  * 
  * Original macro name: UTLcDay
@@ -3363,6 +3387,651 @@ function universalTime_LocalCivilYear(uHours, uMinutes, uSeconds, daylightSaving
   var d = civilDateToJulianDate(greenwichDay, greenwichMonth, greenwichYear) + (c / 24.0);
 
   return julianDateYear(d);
+}
+
+/**
+ * Local time of moonrise.
+ * 
+ * Original macro name: MoonRiseLCT
+ */
+function moonRiseLCT(dy, mn, yr, ds, zc, gLong, gLat) {
+  var gdy = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gmn = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gyr = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var lct = 12.0;
+  var dy1 = dy;
+  var mn1 = mn;
+  var yr1 = yr;
+
+  var [lct6700result1_mm, lct6700result1_bm, lct6700result1_pm, lct6700result1_dp, lct6700result1_th, lct6700result1_di, lct6700result1_p, lct6700result1_q, lct6700result1_lu, lct6700result1_lct] = moonRiseLCT_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+  var lu = lct6700result1_lu;
+  lct = lct6700result1_lct;
+
+  if (lct == -99.0)
+    return lct;
+
+  var la = lu;
+
+  var x;
+  var ut;
+  var g1 = 0.0;
+  var gu = 0.0;
+
+  for (let k = 1; k < 9; k++) {
+    x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+    ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+    g1 = (k == 1) ? ut : gu;
+
+    gu = ut;
+    ut = gu;
+
+    var [lct6680result_ut, lct6680result_lct, lct6680result_dy1, lct6680result_mn1, lct6680result_yr1, lct6680result_gdy, lct6680result_gmn, lct6680result_gyr] = moonRiseLCT_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut);
+    lct = lct6680result_lct;
+    dy1 = lct6680result_dy1;
+    mn1 = lct6680result_mn1;
+    yr1 = lct6680result_yr1;
+    gdy = lct6680result_gdy;
+    gmn = lct6680result_gmn;
+    gyr = lct6680result_gyr;
+
+    var [lct6700result2_mm, lct6700result2_bm, lct6700result2_pm, lct6700result2_dp, lct6700result2_th, lct6700result2_di, lct6700result2_p, lct6700result2_q, lct6700result2_lu, lct6700result2_lct] = moonRiseLCT_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+    lu = lct6700result2_lu;
+    lct = lct6700result2_lct;
+
+    if (lct == -99.0)
+      return lct;
+
+    la = lu;
+  }
+
+  x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+  ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+
+  return lct;
+}
+
+/**
+ * Helper function for MoonRiseLCT
+ */
+function moonRiseLCT_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut) {
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  var lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  gdy = localCivilTimeGreenwichDay(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gmn = localCivilTimeGreenwichMonth(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gyr = localCivilTimeGreenwichYear(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  ut = ut - 24.0 * Math.floor(ut / 24.0);
+
+  return [ut, lct, dy1, mn1, yr1, gdy, gmn, gyr];
+}
+
+/**
+ * Helper function for MoonRiseLCT
+ */
+function moonRiseLCT_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat) {
+  var mm = moonLong(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var bm = moonLat(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var pm = paUtils.degreesToRadians(moonHP(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1));
+  var dp = nutatLong(gdy, gmn, gyr);
+  var th = 0.27249 * Math.sin(pm);
+  var di = th + 0.0098902 - pm;
+  var p = decimalDegreesToDegreeHours(ecRA(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr));
+  var q = ecDec(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr);
+  var lu = riseSetLocalSiderealTimeRise(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+
+  if (eRS(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat) != paTypes.WarningFlag.OK)
+    lct = -99.0;
+
+  return [mm, bm, pm, dp, th, di, p, q, lu, lct];
+}
+
+/**
+ * Local date of moonrise.
+ * 
+ * Original macro names: MoonRiseLcDay, MoonRiseLcMonth, MoonRiseLcYear
+ */
+function moonRiseLcDMY(dy, mn, yr, ds, zc, gLong, gLat) {
+  var gdy = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gmn = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gyr = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var lct = 12.0;
+  var dy1 = dy;
+  var mn1 = mn;
+  var yr1 = yr;
+
+  var [lct6700result1_mm, lct6700result1_bm, lct6700result1_pm, lct6700result1_dp, lct6700result1_th, lct6700result1_di, lct6700result1_p, lct6700result1_q, lct6700result1_lu, lct6700result1_lct] = moonRiseLcDMY_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+  var lu = lct6700result1_lu;
+  lct = lct6700result1_lct;
+
+  if (lct == -99.0)
+    return [lct, lct, lct];
+
+  var la = lu;
+
+  var x;
+  var ut;
+  var g1 = 0.0;
+  var gu = 0.0;
+  for (let k = 1; k < 9; k++) {
+    x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+    ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+    g1 = (k == 1) ? ut : gu;
+
+    gu = ut;
+    ut = gu;
+
+    var [lct6680result1_ut, lct6680result1_lct, lct6680result1_dy1, lct6680result1_mn1, lct6680result1_yr1, lct6680result1_gdy, lct6680result1_gmn, lct6680result1_gyr] = moonRiseLcDMY_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut);
+    lct = lct6680result1_lct;
+    dy1 = lct6680result1_dy1;
+    mn1 = lct6680result1_mn1;
+    yr1 = lct6680result1_yr1;
+    gdy = lct6680result1_gdy;
+    gmn = lct6680result1_gmn;
+    gyr = lct6680result1_gyr;
+
+    var [lct6700result2_mm, lct6700result2_bm, lct6700result2_pm, lct6700result2_dp, lct6700result2_th, lct6700result2_di, lct6700result2_p, lct6700result2_q, lct6700result2_lu, lct6700result2_lct] = moonRiseLcDMY_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+
+    lu = lct6700result2_lu;
+    lct = lct6700result2_lct;
+
+    if (lct == -99.0)
+      return [lct, lct, lct];
+
+    la = lu;
+  }
+
+  x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+  ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+
+  return [dy1, mn1, yr1];
+}
+
+/**
+ * Helper function for MoonRiseLcDMY
+ */
+function moonRiseLcDMY_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut) {
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  var lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  gdy = localCivilTimeGreenwichDay(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gmn = localCivilTimeGreenwichMonth(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gyr = localCivilTimeGreenwichYear(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  ut = ut - 24.0 * Math.floor(ut / 24.0);
+
+  return [ut, lct, dy1, mn1, yr1, gdy, gmn, gyr];
+}
+
+/**
+ * Helper function for MoonRiseLcDMY
+ */
+function moonRiseLcDMY_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat) {
+  var mm = moonLong(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var bm = moonLat(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var pm = paUtils.degreesToRadians(moonHP(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1));
+  var dp = nutatLong(gdy, gmn, gyr);
+  var th = 0.27249 * Math.sin(pm);
+  var di = th + 0.0098902 - pm;
+  var p = decimalDegreesToDegreeHours(ecRA(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr));
+  var q = ecDec(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr);
+  var lu = riseSetLocalSiderealTimeRise(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+
+  return [mm, bm, pm, dp, th, di, p, q, lu, lct];
+}
+
+/**
+ * Local azimuth of moonrise.
+ * 
+ * Original macro name: MoonRiseAz
+ */
+function moonRiseAz(dy, mn, yr, ds, zc, gLong, gLat) {
+  var gdy = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gmn = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gyr = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var lct = 12.0;
+  var dy1 = dy;
+  var mn1 = mn;
+  var yr1 = yr;
+
+  var [az6700result1_mm, az6700result1_bm, az6700result1_pm, az6700result1_dp, az6700result1_th, az6700result1_di, az6700result1_p, az6700result1_q, az6700result1_lu, az6700result1_lct, az6700result1_au] = moonRiseAz_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+  var lu = az6700result1_lu;
+  lct = az6700result1_lct;
+
+  var au;
+
+  if (lct == -99.0)
+    return lct;
+
+  var la = lu;
+
+  var x;
+  var ut;
+  var g1;
+  var gu = 0.0;
+  var aa = 0.0;
+  for (let k = 1; k < 9; k++) {
+    x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+    ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+    g1 = (k == 1) ? ut : gu;
+
+    gu = ut;
+    ut = gu;
+
+    var [az6680result1_ut, az6680result1_lct, az6680result1_dy1, az6680result1_mn1, az6680result1_yr1, az6680result1_gdy, az6680result1_gmn, az6680result1_gyr] = moonRiseAz_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut);
+    lct = az6680result1_lct;
+    dy1 = az6680result1_dy1;
+    mn1 = az6680result1_mn1;
+    yr1 = az6680result1_yr1;
+    gdy = az6680result1_gdy;
+    gmn = az6680result1_gmn;
+    gyr = az6680result1_gyr;
+
+    var [az6700result2_mm, az6700result2_bm, az6700result2_pm, az6700result2_dp, az6700result2_th, az6700result2_di, az6700result2_p, az6700result2_q, az6700result2_lu, az6700result2_lct, az6700result2_au] = moonRiseAz_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+    lu = az6700result2_lu;
+    lct = az6700result2_lct;
+    au = az6700result2_au;
+
+    if (lct == -99.0)
+      return lct;
+
+    la = lu;
+    aa = au;
+  }
+
+  au = aa;
+
+  return au;
+}
+
+/**
+ * Helper function for MoonRiseAz
+ */
+function moonRiseAz_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut) {
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  var lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  gdy = localCivilTimeGreenwichDay(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gmn = localCivilTimeGreenwichMonth(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gyr = localCivilTimeGreenwichYear(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  ut = ut - 24.0 * Math.floor(ut / 24.0);
+
+  return [ut, lct, dy1, mn1, yr1, gdy, gmn, gyr];
+}
+
+/**
+ * Helper function for MoonRiseAz
+ */
+function moonRiseAz_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat) {
+  var mm = moonLong(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var bm = moonLat(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var pm = paUtils.degreesToRadians(moonHP(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1));
+  var dp = nutatLong(gdy, gmn, gyr);
+  var th = 0.27249 * Math.sin(pm);
+  var di = th + 0.0098902 - pm;
+  var p = decimalDegreesToDegreeHours(ecRA(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr));
+  var q = ecDec(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr);
+  var lu = riseSetLocalSiderealTimeRise(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+  var au = riseSetAzimuthRise(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+
+  return [mm, bm, pm, dp, th, di, p, q, lu, lct, au];
+}
+
+/**
+ * Local time of moonset.
+ * 
+ * Original macro name: MoonSetLCT
+ */
+function moonSetLCT(dy, mn, yr, ds, zc, gLong, gLat) {
+  var gdy = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gmn = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gyr = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var lct = 12.0;
+  var dy1 = dy;
+  var mn1 = mn;
+  var yr1 = yr;
+
+  var [lct6700result1_mm, lct6700result1_bm, lct6700result1_pm, lct6700result1_dp, lct6700result1_th, lct6700result1_di, lct6700result1_p, lct6700result1_q, lct6700result1_lu, lct6700result1_lct] = moonSetLCT_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+  var lu = lct6700result1_lu;
+  lct = lct6700result1_lct;
+
+  if (lct == -99.0)
+    return lct;
+
+  var la = lu;
+
+  var x;
+  var ut;
+  var g1 = 0.0;
+  var gu = 0.0;
+  for (let k = 1; k < 9; k++) {
+    x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+    ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+    g1 = (k == 1) ? ut : gu;
+
+    gu = ut;
+    ut = gu;
+
+    var [lct6680result1_ut, lct6680result1_lct, lct6680result1_dy1, lct6680result1_mn1, lct6680result1_yr1, lct6680result1_gdy, lct6680result1_gmn, lct6680result1_gyr] = moonSetLCT_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut);
+    lct = lct6680result1_lct;
+    dy1 = lct6680result1_dy1;
+    mn1 = lct6680result1_mn1;
+    yr1 = lct6680result1_yr1;
+    gdy = lct6680result1_gdy;
+    gmn = lct6680result1_gmn;
+    gyr = lct6680result1_gyr;
+
+    var [lct6700result2_mm, lct6700result2_bm, lct6700result2_pm, lct6700result2_dp, lct6700result2_th, lct6700result2_di, lct6700result2_p, lct6700result2_q, lct6700result2_lu, lct6700result2_lct] = moonSetLCT_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+    lu = lct6700result2_lu;
+    lct = lct6700result2_lct;
+
+    if (lct == -99.0)
+      return lct;
+
+    la = lu;
+  }
+
+  x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+  ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+
+  return lct;
+}
+
+/**
+ * Helper function for MoonSetLCT
+ */
+function moonSetLCT_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut) {
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  var lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  gdy = localCivilTimeGreenwichDay(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gmn = localCivilTimeGreenwichMonth(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gyr = localCivilTimeGreenwichYear(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  ut = ut - 24.0 * Math.floor(ut / 24.0);
+
+  return [ut, lct, dy1, mn1, yr1, gdy, gmn, gyr];
+}
+
+/**
+ * Helper function for MoonSetLCT
+ */
+function moonSetLCT_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat) {
+  var mm = moonLong(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var bm = moonLat(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var pm = paUtils.degreesToRadians(moonHP(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1));
+  var dp = nutatLong(gdy, gmn, gyr);
+  var th = 0.27249 * Math.sin(pm);
+  var di = th + 0.0098902 - pm;
+  var p = decimalDegreesToDegreeHours(ecRA(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr));
+  var q = ecDec(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr);
+  var lu = riseSetLocalSiderealTimeSet(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+
+  if (eRS(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat) != paTypes.WarningFlag.OK)
+    lct = -99.0;
+
+  return [mm, bm, pm, dp, th, di, p, q, lu, lct];
+}
+
+/**
+ * Local date of moonset.
+ * 
+ * Original macro names: MoonSetLcDay, MoonSetLcMonth, MoonSetLcYear
+ */
+function moonSetLcDMY(dy, mn, yr, ds, zc, gLong, gLat) {
+  var gdy = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gmn = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gyr = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var lct = 12.0;
+  var dy1 = dy;
+  var mn1 = mn;
+  var yr1 = yr;
+
+  var [dmy6700result1_mm, dmy6700result1_bm, dmy6700result1_pm, dmy6700result1_dp, dmy6700result1_th, dmy6700result1_di, dmy6700result1_p, dmy6700result1_q, dmy6700result1_lu, dmy6700result1_lct] = moonSetLcDMY_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+  var lu = dmy6700result1_lu;
+  lct = dmy6700result1_lct;
+
+  if (lct == -99.0)
+    return [lct, lct, lct];
+
+  var la = lu;
+
+  var x;
+  var ut;
+  var g1 = 0.0;
+  var gu = 0.0;
+  for (let k = 1; k < 9; k++) {
+    x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+    ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+    g1 = (k == 1) ? ut : gu;
+
+    gu = ut;
+    ut = gu;
+
+    var [dmy6680result1_ut, dmy6680result1_lct, dmy6680result1_dy1, dmy6680result1_mn1, dmy6680result1_yr1, dmy6680result1_gdy, dmy6680result1_gmn, dmy6680result1_gyr] = moonSetLcDMY_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut);
+    lct = dmy6680result1_lct;
+    dy1 = dmy6680result1_dy1;
+    mn1 = dmy6680result1_mn1;
+    yr1 = dmy6680result1_yr1;
+    gdy = dmy6680result1_gdy;
+    gmn = dmy6680result1_gmn;
+    gyr = dmy6680result1_gyr;
+
+    var [dmy6700result2_mm, dmy6700result2_bm, dmy6700result2_pm, dmy6700result2_dp, dmy6700result2_th, dmy6700result2_di, dmy6700result2_p, dmy6700result2_q, dmy6700result2_lu, dmy6700result2_lct] = moonSetLcDMY_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+    lu = dmy6700result2_lu;
+    lct = dmy6700result2_lct;
+
+    if (lct == -99.0)
+      return [lct, lct, lct];
+
+    la = lu;
+  }
+
+  x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+  ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+
+  return [dy1, mn1, yr1];
+}
+
+/**
+ * Helper function for MoonSetLcDMY
+ */
+function moonSetLcDMY_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut) {
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  var lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  gdy = localCivilTimeGreenwichDay(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gmn = localCivilTimeGreenwichMonth(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gyr = localCivilTimeGreenwichYear(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  ut = ut - 24.0 * Math.floor(ut / 24.0);
+
+  return [ut, lct, dy1, mn1, yr1, gdy, gmn, gyr];
+}
+
+/**
+ * Helper function for MoonSetLcDMY
+ */
+function moonSetLcDMY_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat) {
+  var mm = moonLong(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var bm = moonLat(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var pm = paUtils.degreesToRadians(moonHP(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1));
+  var dp = nutatLong(gdy, gmn, gyr);
+  var th = 0.27249 * Math.sin(pm);
+  var di = th + 0.0098902 - pm;
+  var p = decimalDegreesToDegreeHours(ecRA(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr));
+  var q = ecDec(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr);
+  var lu = riseSetLocalSiderealTimeSet(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+
+  return [mm, bm, pm, dp, th, di, p, q, lu, lct];
+}
+
+/**
+ * Local azimuth of moonset.
+ * 
+ * Original macro name: MoonSetAz
+ */
+function moonSetAz(dy, mn, yr, ds, zc, gLong, gLat) {
+  var gdy = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gmn = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var gyr = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var lct = 12.0;
+  var dy1 = dy;
+  var mn1 = mn;
+  var yr1 = yr;
+
+  var [az6700result1_mm, az6700result1_bm, az6700result1_pm, az6700result1_dp, az6700result1_th, az6700result1_di, az6700result1_p, az6700result1_q, az6700result1_lu, az6700result1_lct, az6700result1_au] = moonSetAz_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+  var lu = az6700result1_lu;
+  lct = az6700result1_lct;
+
+  var au;
+
+  if (lct == -99.0)
+    return lct;
+
+  var la = lu;
+
+  var x;
+  var ut;
+  var g1;
+  var gu = 0.0;
+  var aa = 0.0;
+  for (let k = 1; k < 9; k++) {
+    x = localSiderealTimeToGreenwichSiderealTime(la, 0.0, 0.0, gLong);
+    ut = greenwichSiderealTimeToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr);
+
+    g1 = (k == 1) ? ut : gu;
+
+    gu = ut;
+    ut = gu;
+
+    var [az6680result1_ut, az6680result1_lct, az6680result1_dy1, az6680result1_mn1, az6680result1_yr1, az6680result1_gdy, az6680result1_gmn, az6680result1_gyr] = moonSetAz_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut);
+    lct = az6680result1_lct;
+    dy1 = az6680result1_dy1;
+    mn1 = az6680result1_mn1;
+    yr1 = az6680result1_yr1;
+    gdy = az6680result1_gdy;
+    gmn = az6680result1_gmn;
+    gyr = az6680result1_gyr;
+
+    var [az6700result2_mm, az6700result2_bm, az6700result2_pm, az6700result2_dp, az6700result2_th, az6700result2_di, az6700result2_p, az6700result2_q, az6700result2_lu, az6700result2_lct, az6700result2_au] = moonSetAz_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat);
+    lu = az6700result2_lu;
+    lct = az6700result2_lct;
+    au = az6700result2_au;
+
+    if (lct == -99.0)
+      return lct;
+
+    la = lu;
+    aa = au;
+  }
+
+  au = aa;
+
+  return au;
+}
+
+/**
+ * Helper function for moon_set_az
+ */
+function moonSetAz_L6680(x, ds, zc, gdy, gmn, gyr, g1, ut) {
+  if (eGreenwichSiderealToUniversalTime(x, 0.0, 0.0, gdy, gmn, gyr) != paTypes.WarningFlag.OK)
+    if (Math.abs(g1 - ut) > 0.5)
+      ut = ut + 23.93447;
+
+  ut = utDayAdjust(ut, g1);
+  var lct = universalTimeToLocalCivilTime(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var dy1 = universalTime_LocalCivilDay(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var mn1 = universalTime_LocalCivilMonth(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  var yr1 = universalTime_LocalCivilYear(ut, 0.0, 0.0, ds, zc, gdy, gmn, gyr);
+  gdy = localCivilTimeGreenwichDay(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gmn = localCivilTimeGreenwichMonth(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  gyr = localCivilTimeGreenwichYear(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  ut = ut - 24.0 * Math.floor(ut / 24.0);
+
+  return [ut, lct, dy1, mn1, yr1, gdy, gmn, gyr];
+}
+
+/**
+ * Helper function for moon_set_az
+ */
+function moonSetAz_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat) {
+  var mm = moonLong(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var bm = moonLat(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1);
+  var pm = paUtils.degreesToRadians(moonHP(lct, 0.0, 0.0, ds, zc, dy1, mn1, yr1));
+  var dp = nutatLong(gdy, gmn, gyr);
+  var th = 0.27249 * Math.sin(pm);
+  var di = th + 0.0098902 - pm;
+  var p = decimalDegreesToDegreeHours(ecRA(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr));
+  var q = ecDec(mm + dp, 0.0, 0.0, bm, 0.0, 0.0, gdy, gmn, gyr);
+  var lu = riseSetLocalSiderealTimeSet(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+  var au = riseSetAzimuthSet(p, 0.0, 0.0, q, 0.0, 0.0, degrees(di), gLat);
+
+  return [mm, bm, pm, dp, th, di, p, q, lu, lct, au];
 }
 
 
@@ -3467,5 +4136,25 @@ module.exports = {
   universalTime_LocalCivilMonth,
   universalTime_LocalCivilYear,
   moonDist,
-  moonSize
+  moonSize,
+  moonRiseLCT,
+  moonRiseLCT_L6680,
+  moonRiseLCT_L6700,
+  utDayAdjust,
+  fPart,
+  moonRiseLcDMY,
+  moonRiseLcDMY_L6680,
+  moonRiseLcDMY_L6700,
+  moonRiseAz,
+  moonRiseAz_L6680,
+  moonRiseAz_L6700,
+  moonSetLCT,
+  moonSetLCT_L6680,
+  moonSetLCT_L6700,
+  moonSetLcDMY,
+  moonSetLcDMY_L6680,
+  moonSetLcDMY_L6700,
+  moonSetAz,
+  moonSetAz_L6680,
+  moonSetAz_L6700
 };

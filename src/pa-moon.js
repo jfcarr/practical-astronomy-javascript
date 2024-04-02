@@ -172,11 +172,42 @@ function moonDistAngDiamHorParallax(lctHour, lctMin, lctSec, isDaylightSaving, z
     return [earthMoonDist, angDiameterDeg, angDiameterMin, horParallaxDeg, horParallaxMin, horParallaxSec];
 }
 
+/**
+ * Calculate date/time of local moonrise and moonset.
+ */
+function moonriseAndMoonset(localDateDay, localDateMonth, localDateYear, isDaylightSaving, zoneCorrectionHours, geogLongDeg, geogLatDeg) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var localTimeOfMoonriseHours = paMacros.moonRiseLCT(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongDeg, geogLatDeg);
+    var [moonRiseLCResult_dy1, moonRiseLCResult_mn1, moonRiseLCResult_yr1] = paMacros.moonRiseLcDMY(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongDeg, geogLatDeg);
+    var localAzimuthDeg1 = paMacros.moonRiseAz(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongDeg, geogLatDeg);
+
+    var localTimeOfMoonsetHours = paMacros.moonSetLCT(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongDeg, geogLatDeg);
+    var [moonSetLCResult_dy1, moonSetLCResult_mn1, moonSetLCResult_yr1] = paMacros.moonSetLcDMY(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongDeg, geogLatDeg);
+    var localAzimuthDeg2 = paMacros.moonSetAz(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongDeg, geogLatDeg);
+
+    var mrLTHour = paMacros.decimalHoursHour(localTimeOfMoonriseHours + 0.008333);
+    var mrLTMin = paMacros.decimalHoursMinute(localTimeOfMoonriseHours + 0.008333);
+    var mrLocalDateDay = moonRiseLCResult_dy1;
+    var mrLocalDateMonth = moonRiseLCResult_mn1;
+    var mrLocalDateYear = moonRiseLCResult_yr1;
+    var mrAzimuthDeg = paUtils.round(localAzimuthDeg1, 2);
+    var msLTHour = paMacros.decimalHoursHour(localTimeOfMoonsetHours + 0.008333);
+    var msLTMin = paMacros.decimalHoursMinute(localTimeOfMoonsetHours + 0.008333);
+    var msLocalDateDay = moonSetLCResult_dy1;
+    var msLocalDateMonth = moonSetLCResult_mn1;
+    var msLocalDateYear = moonSetLCResult_yr1;
+    var msAzimuthDeg = paUtils.round(localAzimuthDeg2, 2);
+
+    return [mrLTHour, mrLTMin, mrLocalDateDay, mrLocalDateMonth, mrLocalDateYear, mrAzimuthDeg, msLTHour, msLTMin, msLocalDateDay, msLocalDateMonth, msLocalDateYear, msAzimuthDeg];
+}
+
 
 module.exports = {
     approximatePositionOfMoon,
     precisePositionOfMoon,
     moonPhase,
     timesOfNewMoonAndFullMoon,
-    moonDistAngDiamHorParallax
+    moonDistAngDiamHorParallax,
+    moonriseAndMoonset
 };
