@@ -4034,6 +4034,772 @@ function moonSetAz_L6700(lct, ds, zc, dy1, mn1, yr1, gdy, gmn, gyr, gLat) {
   return [mm, bm, pm, dp, th, di, p, q, lu, lct, au];
 }
 
+/**
+ * Determine if a lunar eclipse is likely to occur.
+ * 
+ * Original macro name: LEOccurrence
+ */
+function lunarEclipseOccurrence(ds, zc, dy, mn, yr) {
+  var d0 = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var m0 = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var y0 = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+
+  var j0 = civilDateToJulianDate(0.0, 1, y0);
+  var dj = civilDateToJulianDate(d0, m0, y0);
+  var k = (y0 - 1900.0 + ((dj - j0) * 1.0 / 365.0)) * 12.3685;
+  k = lint(k + 0.5);
+  var tn = k / 1236.85;
+  var tf = (k + 0.5) / 1236.85;
+  var t = tn;
+  var [l6855result1_f, l6855result1_dd, l6855result1_e1, l6855result1_b1, l6855result1_a, l6855result1_b] = lunarEclipseOccurrence_L6855(t, k);
+  t = tf;
+  k = k + 0.5;
+  var [l6855result2_f, l6855result2_dd, l6855result2_e1, l6855result2_b1, l6855result2_a, l6855result2_b] = lunarEclipseOccurrence_L6855(t, k);
+  var fb = l6855result2_f;
+
+  var df = Math.abs(fb - 3.141592654 * lint(fb / 3.141592654));
+
+  if (df > 0.37)
+    df = 3.141592654 - df;
+
+  var s = paTypes.LunarEclipseOccurrence.Certain;
+  if (df >= 0.242600766) {
+    s = paTypes.LunarEclipseOccurrence.Possible;
+
+    if (df > 0.37)
+      s = paTypes.LunarEclipseOccurrence.None;
+  }
+
+  return s;
+}
+
+/**
+ * Helper function for lunar_eclipse_occurrence
+ */
+function lunarEclipseOccurrence_L6855(t, k) {
+  var t2 = t * t;
+  var e = 29.53 * k;
+  var c = 166.56 + (132.87 - 0.009173 * t) * t;
+  c = paUtils.degreesToRadians(c);
+  var b = 0.00058868 * k + (0.0001178 - 0.000000155 * t) * t2;
+  b = b + 0.00033 * Math.sin(c) + 0.75933;
+  var a = k / 12.36886;
+  var a1 = 359.2242 + 360.0 * fPart(a) - (0.0000333 + 0.00000347 * t) * t2;
+  var a2 = 306.0253 + 360.0 * fPart(k / 0.9330851);
+  a2 = a2 + (0.0107306 + 0.00001236 * t) * t2;
+  a = k / 0.9214926;
+  var f = 21.2964 + 360.0 * fPart(a) - (0.0016528 + 0.00000239 * t) * t2;
+  a1 = unwindDeg(a1);
+  a2 = unwindDeg(a2);
+  f = unwindDeg(f);
+  a1 = paUtils.degreesToRadians(a1);
+  a2 = paUtils.degreesToRadians(a2);
+  f = paUtils.degreesToRadians(f);
+
+  var dd = (0.1734 - 0.000393 * t) * Math.sin(a1) + 0.0021 * Math.sin(2.0 * a1);
+  dd = dd - 0.4068 * Math.sin(a2) + 0.0161 * Math.sin(2.0 * a2) - 0.0004 * Math.sin(3.0 * a2);
+  dd = dd + 0.0104 * Math.sin(2.0 * f) - 0.0051 * Math.sin(a1 + a2);
+  dd = dd - 0.0074 * Math.sin(a1 - a2) + 0.0004 * Math.sin(2.0 * f + a1);
+  dd = dd - 0.0004 * Math.sin(2.0 * f - a1) - 0.0006 * Math.sin(2.0 * f + a2) + 0.001 * Math.sin(2.0 * f - a2);
+  dd = dd + 0.0005 * Math.sin(a1 + 2.0 * a2);
+  var e1 = Math.floor(e);
+  b = b + dd + (e - e1);
+  var b1 = Math.floor(b);
+  a = e1 + b1;
+  b = b - b1;
+
+  return [f, dd, e1, b1, a, b];
+}
+
+/**
+ * Calculate time of maximum shadow for lunar eclipse (UT)
+ * 
+ * Original macro name: UTMaxLunarEclipse
+ */
+function utMaxLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var rp = (hd + rn + ps) * 1.02;
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  return z1;
+}
+
+/**
+ * Calculate time of first shadow contact for lunar eclipse (UT)
+ * 
+ * Original macro name: UTFirstContactLunarEclipse
+ */
+function utFirstContactLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var rp = (hd + rn + ps) * 1.02;
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z6 = z1 - zd;
+
+  if (z6 < 0.0)
+    z6 = z6 + 24.0;
+
+  return z6;
+}
+
+/**
+ * Calculate time of last shadow contact for lunar eclipse (UT)
+ */
+function utLastContactLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var rp = (hd + rn + ps) * 1.02;
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z7 = z1 + zd - lint((z1 + zd) / 24.0) * 24.0;
+
+  return z7;
+}
+
+/**
+ * Calculate start time of umbra phase of lunar eclipse (UT)
+ * 
+ * Original macro name: UTStartUmbraLunarEclipse
+ */
+function utStartUmbraLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var ru = (hd - rn + ps) * 1.02;
+  var rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z6 = z1 - zd;
+
+  r = rm + ru;
+  dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  zd = Math.sqrt(dd);
+  var z8 = z1 - zd;
+
+  if (z8 < 0.0)
+    z8 = z8 + 24.0;
+
+  return z8;
+}
+
+/**
+ * Calculate end time of umbra phase of lunar eclipse (UT)
+ * 
+ * Original macro name: UTEndUmbraLunarEclipse
+ */
+function utEndUmbraLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var ru = (hd - rn + ps) * 1.02;
+  var rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z6 = z1 - zd;
+
+  r = rm + ru;
+  dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  zd = Math.sqrt(dd);
+  var z9 = z1 + zd - lint((z1 + zd) / 24.0) * 24.0;
+
+  return z9;
+}
+
+/**
+ * Calculate start time of total phase of lunar eclipse (UT)
+ * 
+ * Original macro name: UTStartTotalLunarEclipse
+ */
+function utStartTotalLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var ru = (hd - rn + ps) * 1.02;
+  var rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z6 = z1 - zd;
+
+  r = rm + ru;
+  dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  zd = Math.sqrt(dd);
+  var z8 = z1 - zd;
+
+  r = ru - rm;
+  dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  zd = Math.sqrt(dd);
+  var zcc = z1 - zd;
+
+  if (zcc < 0.0)
+    zcc = zc + 24.0;
+
+  return zcc;
+}
+
+/**
+ * Calculate end time of total phase of lunar eclipse (UT)
+ * 
+ * Original macro name: UTEndTotalLunarEclipse
+ */
+function utEndTotalLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var ru = (hd - rn + ps) * 1.02;
+  var rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z6 = z1 - zd;
+
+  r = rm + ru;
+  dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  zd = Math.sqrt(dd);
+  var z8 = z1 - zd;
+
+  r = ru - rm;
+  dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  zd = Math.sqrt(dd);
+  var zb = z1 + zd - lint((z1 + zd) / 24.0) * 24.0;
+
+  return zb;
+}
+
+/**
+ * Calculate magnitude of lunar eclipse.
+ * 
+ * Original macro name: MagLunarEclipse
+ */
+function magLunarEclipse(dy, mn, yr, ds, zc) {
+  var tp = 2.0 * Math.PI;
+
+  if (lunarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.LunarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = fullMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utfm = xi * 24.0;
+  var ut = utfm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utfm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utfm;
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var q = 0.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  sr = sr + Math.PI - lint((sr + Math.PI) / tp) * tp;
+  by = by - q;
+  bz = bz - q;
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var ru = (hd - rn + ps) * 1.02;
+  var rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rp;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z6 = z1 - zd;
+
+  r = rm + ru;
+  dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+  var mg = (rm + rp - pj) / (2.0 * rm);
+
+  if (dd < 0.0)
+    return mg;
+
+  zd = Math.sqrt(dd);
+  var z8 = z1 - zd;
+
+  r = ru - rm;
+  dd = z1 - x0;
+  mg = (rm + ru - pj) / (2.0 * rm);
+
+  return mg;
+}
+
 
 module.exports = {
   HMStoDH,
@@ -4156,5 +4922,14 @@ module.exports = {
   moonSetLcDMY_L6700,
   moonSetAz,
   moonSetAz_L6680,
-  moonSetAz_L6700
+  moonSetAz_L6700,
+  lunarEclipseOccurrence,
+  utMaxLunarEclipse,
+  utFirstContactLunarEclipse,
+  utLastContactLunarEclipse,
+  utStartUmbraLunarEclipse,
+  utEndUmbraLunarEclipse,
+  utStartTotalLunarEclipse,
+  utEndTotalLunarEclipse,
+  magLunarEclipse
 };

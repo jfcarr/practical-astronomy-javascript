@@ -107,5 +107,5 @@ Result:
 
 ### Eclipses
 
-- [ ] Calculate -> Lunar eclipse occurrence and circumstances
+- [x] Calculate -> Lunar eclipse occurrence and circumstances
 - [ ] Calculate -> Solar eclipse occurrence and circumstances
