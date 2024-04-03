@@ -30,37 +30,8 @@ function lunarEclipseOccurrence(localDateDay, localDateMonth, localDateYear, isD
     return [status, eventDateDay, eventDateMonth, eventDateYear];
 }
 
-/// <summary>
-/// </summary>
-/// <returns>
-/// </returns>
 /**
  * Calculate the circumstances of a lunar eclipse.
- *
- * @param {*} localDateDay 
- * @param {*} localDateMonth 
- * @param {*} localDateYear 
- * @param {*} isDaylightSaving 
- * @param {*} zoneCorrectionHours 
- * @returns 
- * lunarEclipseCertainDateDay -- Lunar eclipse date (day)
- * lunarEclipseCertainDateMonth -- Lunar eclipse date (month)
- * lunarEclipseCertainDateYear -- Lunar eclipse date (year)
- * utstartPenPhaseHour -- Start of penumbral phase (hour)
- * utStartPenPhaseMinutes -- Start of penumbral phase (minutes)
- * utStartUmbralPhaseHour -- Start of umbral phase (hour)
- * utStartUmbralPhaseMinutes -- Start of umbral phase (minutes)
- * utStartTotalPhaseHour -- Start of total phase (hour)
- * utStartTotalPhaseMinutes -- Start of total phase (minutes)
- * utMidEclipseHour -- Mid-eclipse (hour)
- * utMidEclipseMinutes -- Mid-eclipse (minutes)
- * utEndTotalPhaseHour -- End of total phase (hour)
- * utEndTotalPhaseMinutes -- End of total phase (minutes)
- * utEndUmbralPhaseHour -- End of umbral phase (hour)
- * utEndUmbralPhaseMinutes -- End of umbral phase (minutes)
- * utEndPenPhaseHour -- End of penumbral phase (hour)
- * utEndPenPhaseMinutes -- End of penumbral phase (minutes)
- * eclipseMagnitude -- Eclipse magnitude
  */
 function lunarEclipseCircumstances(localDateDay, localDateMonth, localDateYear, isDaylightSaving, zoneCorrectionHours) {
     var daylightSaving = (isDaylightSaving) ? 1 : 0;
@@ -116,8 +87,76 @@ function lunarEclipseCircumstances(localDateDay, localDateMonth, localDateYear, 
     return [lunarEclipseCertainDateDay, lunarEclipseCertainDateMonth, lunarEclipseCertainDateYear, utStartPenPhaseHour, utStartPenPhaseMinutes, utStartUmbralPhaseHour, utStartUmbralPhaseMinutes, utStartTotalPhaseHour, utStartTotalPhaseMinutes, utMidEclipseHour, utMidEclipseMinutes, utEndTotalPhaseHour, utEndTotalPhaseMinutes, utEndUmbralPhaseHour, utEndUmbralPhaseMinutes, utEndPenPhaseHour, utEndPenPhaseMinutes, eclipseMagnitude];
 }
 
+/**
+ * Determine if a solar eclipse is likely to occur.
+ */
+function solarEclipseOccurrence(localDateDay, localDateMonth, localDateYear, isDaylightSaving, zoneCorrectionHours) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var julianDateOfNewMoon = paMacros.newMoon(daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var gDateOfNewMoonDay = paMacros.julianDateDay(julianDateOfNewMoon);
+    var integerDay = Math.floor(gDateOfNewMoonDay);
+    var gDateOfNewMoonMonth = paMacros.julianDateMonth(julianDateOfNewMoon);
+    var gDateOfNewMoonYear = paMacros.julianDateYear(julianDateOfNewMoon);
+    var utOfNewMoonHours = gDateOfNewMoonDay - integerDay;
+
+    var localCivilDateDay = paMacros.universalTime_LocalCivilDay(utOfNewMoonHours, 0.0, 0.0, daylightSaving, zoneCorrectionHours, integerDay, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var localCivilDateMonth = paMacros.universalTime_LocalCivilMonth(utOfNewMoonHours, 0.0, 0.0, daylightSaving, zoneCorrectionHours, integerDay, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var localCivilDateYear = paMacros.universalTime_LocalCivilYear(utOfNewMoonHours, 0.0, 0.0, daylightSaving, zoneCorrectionHours, integerDay, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+
+    var eclipseOccurrence = paMacros.solarEclipseOccurrence(daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+
+    var status = eclipseOccurrence;
+    var eventDateDay = localCivilDateDay;
+    var eventDateMonth = localCivilDateMonth;
+    var eventDateYear = localCivilDateYear;
+
+    return [status, eventDateDay, eventDateMonth, eventDateYear];
+}
+
+/**
+   * Calculate the circumstances of a solar eclipse.
+ */
+function solarEclipseCircumstances(localDateDay, localDateMonth, localDateYear, isDaylightSaving, zoneCorrectionHours, geogLongitudeDeg, geogLatitudeDeg) {
+    var daylightSaving = (isDaylightSaving) ? 1 : 0;
+
+    var julianDateOfNewMoon = paMacros.newMoon(daylightSaving, zoneCorrectionHours, localDateDay, localDateMonth, localDateYear);
+    var gDateOfNewMoonDay = paMacros.julianDateDay(julianDateOfNewMoon);
+    var integerDay = Math.floor(gDateOfNewMoonDay);
+    var gDateOfNewMoonMonth = paMacros.julianDateMonth(julianDateOfNewMoon);
+    var gDateOfNewMoonYear = paMacros.julianDateYear(julianDateOfNewMoon);
+    var utOfNewMoonHours = gDateOfNewMoonDay - integerDay;
+    var localCivilDateDay = paMacros.universalTime_LocalCivilDay(utOfNewMoonHours, 0.0, 0.0, daylightSaving, zoneCorrectionHours, integerDay, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var localCivilDateMonth = paMacros.universalTime_LocalCivilMonth(utOfNewMoonHours, 0.0, 0.0, daylightSaving, zoneCorrectionHours, integerDay, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+    var localCivilDateYear = paMacros.universalTime_LocalCivilYear(utOfNewMoonHours, 0.0, 0.0, daylightSaving, zoneCorrectionHours, integerDay, gDateOfNewMoonMonth, gDateOfNewMoonYear);
+
+    var utMaxEclipse = paMacros.utMaxSolarEclipse(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongitudeDeg, geogLatitudeDeg);
+    var utFirstContact = paMacros.utFirstContactSolarEclipse(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongitudeDeg, geogLatitudeDeg);
+    var utLastContact = paMacros.utLastContactSolarEclipse(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongitudeDeg, geogLatitudeDeg);
+    var magnitude = paMacros.magSolarEclipse(localDateDay, localDateMonth, localDateYear, daylightSaving, zoneCorrectionHours, geogLongitudeDeg, geogLatitudeDeg);
+
+    var solarEclipseCertainDateDay = localCivilDateDay;
+    var solarEclipseCertainDateMonth = localCivilDateMonth;
+    var solarEclipseCertainDateYear = localCivilDateYear;
+
+    var utFirstContactHour = (utFirstContact == -99.0) ? -99.0 : paMacros.decimalHoursHour(utFirstContact + 0.008333);
+    var utFirstContactMinutes = (utFirstContact == -99.0) ? -99.0 : paMacros.decimalHoursMinute(utFirstContact + 0.008333);
+
+    var utMidEclipseHour = (utMaxEclipse == -99.0) ? -99.0 : paMacros.decimalHoursHour(utMaxEclipse + 0.008333);
+    var utMidEclipseMinutes = (utMaxEclipse == -99.0) ? -99.0 : paMacros.decimalHoursMinute(utMaxEclipse + 0.008333);
+
+    var utLastContactHour = (utLastContact == -99.0) ? -99.0 : paMacros.decimalHoursHour(utLastContact + 0.008333);
+    var utLastContactMinutes = (utLastContact == -99.0) ? -99.0 : paMacros.decimalHoursMinute(utLastContact + 0.008333);
+
+    var eclipseMagnitude = (magnitude == -99.0) ? -99.0 : paUtils.round(magnitude, 3);
+
+    return [solarEclipseCertainDateDay, solarEclipseCertainDateMonth, solarEclipseCertainDateYear, utFirstContactHour, utFirstContactMinutes, utMidEclipseHour, utMidEclipseMinutes, utLastContactHour, utLastContactMinutes, eclipseMagnitude];
+}
+
 
 module.exports = {
     lunarEclipseOccurrence,
-    lunarEclipseCircumstances
+    lunarEclipseCircumstances,
+    solarEclipseOccurrence,
+    solarEclipseCircumstances
 };

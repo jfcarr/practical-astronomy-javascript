@@ -33,6 +33,12 @@ const RiseSetStatus = {
     Circumpolar: 'Circumpolar'
 };
 
+const SolarEclipseOccurrence = {
+    None: "No solar eclipse",
+    Possible: "Solar eclipse possible",
+    Certain: "Solar eclipse certain"
+};
+
 const TwilightStatus = {
     OK: 'OK',
     AllNight: 'Lasts all night',
@@ -61,6 +67,7 @@ module.exports = {
     LunarEclipseOccurrence,
     RiseSetCalcStatus,
     RiseSetStatus,
+    SolarEclipseOccurrence,
     TwilightStatus,
     TwilightType,
     WarningFlag

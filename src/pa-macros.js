@@ -3346,6 +3346,32 @@ function fPart(w) {
 }
 
 /**
+ * Original macro name: EQElat
+ */
+function eqeLat(rah, ram, ras, dd, dm, ds, gd, gm, gy) {
+  var a = paUtils.degreesToRadians(degreeHoursToDecimalDegrees(HMStoDH(rah, ram, ras)));
+  var b = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var c = paUtils.degreesToRadians(obliq(gd, gm, gy));
+  var d = Math.sin(b) * Math.cos(c) - Math.cos(b) * Math.sin(c) * Math.sin(a);
+
+  return degrees(Math.asin(d));
+}
+
+/**
+ * Original macro name: EQElong
+ */
+function eqeLong(rah, ram, ras, dd, dm, ds, gd, gm, gy) {
+  var a = paUtils.degreesToRadians(degreeHoursToDecimalDegrees(HMStoDH(rah, ram, ras)));
+  var b = paUtils.degreesToRadians(degreesMinutesSecondsToDecimalDegrees(dd, dm, ds));
+  var c = paUtils.degreesToRadians(obliq(gd, gm, gy));
+  var d = Math.sin(a) * Math.cos(c) + Math.tan(b) * Math.sin(c);
+  var e = Math.cos(a);
+  var f = degrees(Math.atan2(d, e));
+
+  return f - 360.0 * Math.floor(f / 360.0);
+}
+
+/**
  * Get Local Civil Day for Universal Time
  * 
  * Original macro name: UTLcDay
@@ -4800,6 +4826,532 @@ function magLunarEclipse(dy, mn, yr, ds, zc) {
   return mg;
 }
 
+/**
+ * Determine if a solar eclipse is likely to occur.
+ * 
+ * Original macro name: SEOccurrence
+ */
+function solarEclipseOccurrence(ds, zc, dy, mn, yr) {
+  var d0 = localCivilTimeGreenwichDay(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var m0 = localCivilTimeGreenwichMonth(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+  var y0 = localCivilTimeGreenwichYear(12.0, 0.0, 0.0, ds, zc, dy, mn, yr);
+
+  var j0 = civilDateToJulianDate(0.0, 1, y0);
+  var dj = civilDateToJulianDate(d0, m0, y0);
+  var k = (y0 - 1900.0 + ((dj - j0) * 1.0 / 365.0)) * 12.3685;
+  k = lint(k + 0.5);
+  var tn = k / 1236.85;
+  var tf = (k + 0.5) / 1236.85;
+  var t = tn;
+  var [l6855result1_f, l6855result1_dd, l6855result1_e1, l6855result1_b1, l6855result1_a, l6855result1_b] = solarEclipseOccurrence_L6855(t, k);
+  var nb = l6855result1_f;
+  t = tf;
+  k = k + 0.5;
+
+  var df = Math.abs(nb - 3.141592654 * lint(nb / 3.141592654));
+
+  if (df > 0.37)
+    df = 3.141592654 - df;
+
+  var s = paTypes.SolarEclipseOccurrence.Certain;
+  if (df >= 0.242600766) {
+    s = paTypes.SolarEclipseOccurrence.Possible;
+    if (df > 0.37)
+      s = paTypes.SolarEclipseOccurrence.None;
+  }
+
+  return s;
+}
+
+/**
+ * Helper function for SolarEclipseOccurrence
+ */
+function solarEclipseOccurrence_L6855(t, k) {
+  var t2 = t * t;
+  var e = 29.53 * k;
+  var c = 166.56 + (132.87 - 0.009173 * t) * t;
+  c = paUtils.degreesToRadians(c);
+  var b = 0.00058868 * k + (0.0001178 - 0.000000155 * t) * t2;
+  b = b + 0.00033 * Math.sin(c) + 0.75933;
+  var a = k / 12.36886;
+  var a1 = 359.2242 + 360.0 * fPart(a) - (0.0000333 + 0.00000347 * t) * t2;
+  var a2 = 306.0253 + 360.0 * fPart(k / 0.9330851);
+  a2 = a2 + (0.0107306 + 0.00001236 * t) * t2;
+  a = k / 0.9214926;
+  var f = 21.2964 + 360.0 * fPart(a) - (0.0016528 + 0.00000239 * t) * t2;
+  a1 = unwindDeg(a1);
+  a2 = unwindDeg(a2);
+  f = unwindDeg(f);
+  a1 = paUtils.degreesToRadians(a1);
+  a2 = paUtils.degreesToRadians(a2);
+  f = paUtils.degreesToRadians(f);
+
+  var dd = (0.1734 - 0.000393 * t) * Math.sin(a1) + 0.0021 * Math.sin(2.0 * a1);
+  dd = dd - 0.4068 * Math.sin(a2) + 0.0161 * Math.sin(2.0 * a2) - 0.0004 * Math.sin(3.0 * a2);
+  dd = dd + 0.0104 * Math.sin(2.0 * f) - 0.0051 * Math.sin(a1 + a2);
+  dd = dd - 0.0074 * Math.sin(a1 - a2) + 0.0004 * Math.sin(2.0 * f + a1);
+  dd = dd - 0.0004 * Math.sin(2.0 * f - a1) - 0.0006 * Math.sin(2.0 * f + a2) + 0.001 * Math.sin(2.0 * f - a2);
+  dd = dd + 0.0005 * Math.sin(a1 + 2.0 * a2);
+  var e1 = Math.floor(e);
+  b = b + dd + (e - e1);
+  var b1 = Math.floor(b);
+  a = e1 + b1;
+  b = b - b1;
+
+  return [f, dd, e1, b1, a, b];
+}
+
+/**
+ * Calculate time of maximum shadow for solar eclipse (UT)
+ * 
+ * Original macro name: UTMaxSolarEclipse
+ */
+function utMaxSolarEclipse(dy, mn, yr, ds, zc, glong, glat) {
+  var tp = 2.0 * Math.PI;
+
+  if (solarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.SolarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = newMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utnm = xi * 24.0;
+  var ut = utnm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utnm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utnm;
+  var x = my;
+  var y = by;
+  var tm = xh - 1.0;
+  var hp = hy;
+  var [l7390result1_paa, l7390result1_qaa, l7390result1_xaa, l7390result1_pbb, l7390result1_qbb, l7390result1_xbb, l7390result1_p, l7390result1_q] = utMaxSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  my = Number(l7390result1_p);
+  by = Number(l7390result1_q);
+  x = mz;
+  y = bz;
+  tm = xh + 1.0;
+  hp = hz;
+  var [l7390result2_paa, l7390result2_qaa, l7390result2_xaa, l7390result2_pbb, l7390result2_qbb, l7390result2_xbb, l7390result2_p, l7390result2_q] = utMaxSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  mz = Number(l7390result2_p);
+  bz = Number(l7390result2_q);
+
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  x = sr;
+  y = 0.0;
+  tm = ut;
+  hp = 0.00004263452 / rr;
+  var [l7390result3_paa, l7390result3_qaa, l7390result3_xaa, l7390result3_pbb, l7390result3_qbb, l7390result3_xbb, l7390result3_p, l7390result3_q] = utMaxSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  sr = Number(l7390result3_p);
+  by = by - Number(l7390result3_q);
+  bz = bz - Number(l7390result3_q);
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var _ru = (hd - rn + ps) * 1.02;
+  var _rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rn;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+
+  return z1;
+}
+
+/**
+ * Helper function for ut_max_solar_eclipse
+ */
+function utMaxSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp) {
+  var paa = ecRA(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var qaa = ecDec(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var xaa = rightAscensionToHourAngle(decimalDegreesToDegreeHours(paa), 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var pbb = parallaxHA(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var qbb = parallaxDec(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var xbb = hourAngleToRightAscension(pbb, 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var p = paUtils.degreesToRadians(eqeLong(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+  var q = paUtils.degreesToRadians(eqeLat(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+
+  return [paa, qaa, xaa, pbb, qbb, xbb, p, q];
+}
+
+/**
+ * Calculate time of first contact for solar eclipse (UT)
+ * 
+ * Original macro name: UTFirstContactSolarEclipse
+ */
+function utFirstContactSolarEclipse(dy, mn, yr, ds, zc, glong, glat) {
+  var tp = 2.0 * Math.PI;
+
+  if (solarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.SolarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = newMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utnm = xi * 24.0;
+  var ut = utnm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utnm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utnm;
+  var x = my;
+  var y = by;
+  var tm = xh - 1.0;
+  var hp = hy;
+  var [l7390result1_paa, l7390result1_qaa, l7390result1_xaa, l7390result1_pbb, l7390result1_qbb, l7390result1_xbb, l7390result1_p, l7390result1_q] = utFirstContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  my = Number(l7390result1_p);
+  by = Number(l7390result1_q);
+  x = mz;
+  y = bz;
+  tm = xh + 1.0;
+  hp = hz;
+  var [l7390result2_paa, l7390result2_qaa, l7390result2_xaa, l7390result2_pbb, l7390result2_qbb, l7390result2_xbb, l7390result2_p, l7390result2_q] = utFirstContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  mz = Number(l7390result2_p);
+  bz = Number(l7390result2_q);
+
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  x = sr;
+  y = 0.0;
+  tm = ut;
+  hp = 0.00004263452 / rr;
+  var [l7390result3_paa, l7390result3_qaa, l7390result3_xaa, l7390result3_pbb, l7390result3_qbb, l7390result3_xbb, l7390result3_p, l7390result3_q] = utFirstContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  sr = Number(l7390result3_p);
+  by = by - Number(l7390result3_q);
+  bz = bz - Number(l7390result3_q);
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var _ru = (hd - rn + ps) * 1.02;
+  var _rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rn;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z6 = z1 - zd;
+
+  if (z6 < 0.0)
+    z6 = z6 + 24.0;
+
+  return z6;
+}
+
+/**
+ * Helper function for UTFirstContactSolarEclipse
+ */
+function utFirstContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp) {
+  var paa = ecRA(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var qaa = ecDec(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var xaa = rightAscensionToHourAngle(decimalDegreesToDegreeHours(paa), 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var pbb = parallaxHA(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var qbb = parallaxDec(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var xbb = hourAngleToRightAscension(pbb, 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var p = paUtils.degreesToRadians(eqeLong(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+  var q = paUtils.degreesToRadians(eqeLat(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+
+  return [paa, qaa, xaa, pbb, qbb, xbb, p, q];
+}
+
+/**
+ * Calculate time of last contact for solar eclipse (UT)
+ * 
+ * Original macro name: UTLastContactSolarEclipse
+ */
+function utLastContactSolarEclipse(dy, mn, yr, ds, zc, glong, glat) {
+  var tp = 2.0 * Math.PI;
+
+  if (solarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.SolarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = newMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utnm = xi * 24.0;
+  var ut = utnm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utnm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utnm;
+  var x = my;
+  var y = by;
+  var tm = xh - 1.0;
+  var hp = hy;
+  var [l7390result1_paa, l7390result1_qaa, l7390result1_xaa, l7390result1_pbb, l7390result1_qbb, l7390result1_xbb, l7390result1_p, l7390result1_q] = utLastContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  my = Number(l7390result1_p);
+  by = Number(l7390result1_q);
+  x = mz;
+  y = bz;
+  tm = xh + 1.0;
+  hp = hz;
+  var [l7390result2_paa, l7390result2_qaa, l7390result2_xaa, l7390result2_pbb, l7390result2_qbb, l7390result2_xbb, l7390result2_p, l7390result2_q] = utLastContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  mz = Number(l7390result2_p);
+  bz = Number(l7390result2_q);
+
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  x = sr;
+  y = 0.0;
+  tm = ut;
+  hp = 0.00004263452 / rr;
+  var [l7390result3_paa, l7390result3_qaa, l7390result3_xaa, l7390result3_pbb, l7390result3_qbb, l7390result3_xbb, l7390result3_p, l7390result3_q] = utLastContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  sr = Number(l7390result3_p);
+  by = by - Number(l7390result3_q);
+  bz = bz - Number(l7390result3_q);
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var _ru = (hd - rn + ps) * 1.02;
+  var _rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rn;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+  var z7 = z1 + zd - lint((z1 + zd) / 24.0) * 24.0;
+
+  return z7;
+}
+
+/**
+ * Helper function for ut_last_contact_solar_eclipse
+ */
+function utLastContactSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp) {
+  var paa = ecRA(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var qaa = ecDec(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var xaa = rightAscensionToHourAngle(decimalDegreesToDegreeHours(paa), 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var pbb = parallaxHA(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var qbb = parallaxDec(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var xbb = hourAngleToRightAscension(pbb, 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var p = paUtils.degreesToRadians(eqeLong(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+  var q = paUtils.degreesToRadians(eqeLat(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+
+  return [paa, qaa, xaa, pbb, qbb, xbb, p, q];
+}
+
+/**
+ * Calculate magnitude of solar eclipse.
+ * 
+ * Original macro name: MagSolarEclipse
+ */
+function magSolarEclipse(dy, mn, yr, ds, zc, glong, glat) {
+  var tp = 2.0 * Math.PI;
+
+  if (solarEclipseOccurrence(ds, zc, dy, mn, yr) == paTypes.SolarEclipseOccurrence.None)
+    return -99.0;
+
+  var dj = newMoon(ds, zc, dy, mn, yr);
+  var gday = julianDateDay(dj);
+  var gmonth = julianDateMonth(dj);
+  var gyear = julianDateYear(dj);
+  var igday = Math.floor(gday);
+  var xi = gday - igday;
+  var utnm = xi * 24.0;
+  var ut = utnm - 1.0;
+  var ly = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var my = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var by = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hy = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  ut = utnm + 1.0;
+  var sb = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear)) - ly;
+  var mz = paUtils.degreesToRadians(moonLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var bz = paUtils.degreesToRadians(moonLat(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  var hz = paUtils.degreesToRadians(moonHP(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+
+  if (sb < 0.0)
+    sb = sb + tp;
+
+  var xh = utnm;
+  var x = my;
+  var y = by;
+  var tm = xh - 1.0;
+  var hp = hy;
+  var [l7390result1_paa, l7390result1_qaa, l7390result1_xaa, l7390result1_pbb, l7390result1_qbb, l7390result1_xbb, l7390result1_p, l7390result1_q] = magSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  my = Number(l7390result1_p);
+  by = Number(l7390result1_q);
+  x = mz;
+  y = bz;
+  tm = xh + 1.0;
+  hp = hz;
+  var [l7390result2_paa, l7390result2_qaa, l7390result2_xaa, l7390result2_pbb, l7390result2_qbb, l7390result2_xbb, l7390result2_p, l7390result2_q] = magSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  mz = Number(l7390result2_p);
+  bz = Number(l7390result2_q);
+
+  var x0 = xh + 1.0 - (2.0 * bz / (bz - by));
+  var dm = mz - my;
+
+  if (dm < 0.0)
+    dm = dm + tp;
+
+  var lj = (dm - sb) / 2.0;
+  var mr = my + (dm * (x0 - xh + 1.0) / 2.0);
+  ut = x0 - 0.13851852;
+  var rr = sunDist(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear);
+  var sr = paUtils.degreesToRadians(sunLong(ut, 0.0, 0.0, 0, 0, igday, gmonth, gyear));
+  sr = sr + paUtils.degreesToRadians(nutatLong(igday, gmonth, gyear) - 0.00569);
+  x = sr;
+  y = 0.0;
+  tm = ut;
+  hp = 0.00004263452 / rr;
+  var [l7390result3_paa, l7390result3_qaa, l7390result3_xaa, l7390result3_pbb, l7390result3_qbb, l7390result3_xbb, l7390result3_p, l7390result3_q] = magSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp);
+  sr = Number(l7390result3_p);
+  by = by - Number(l7390result3_q);
+  bz = bz - Number(l7390result3_q);
+  var p3 = 0.00004263;
+  var zh = (sr - mr) / lj;
+  var tc = x0 + zh;
+  var sh = (((bz - by) * (tc - xh - 1.0) / 2.0) + bz) / lj;
+  var s2 = sh * sh;
+  var z2 = zh * zh;
+  var ps = p3 / (rr * lj);
+  var z1 = (zh * z2 / (z2 + s2)) + x0;
+  var h0 = (hy + hz) / (2.0 * lj);
+  var rm = 0.272446 * h0;
+  var rn = 0.00465242 / (lj * rr);
+  var hd = h0 * 0.99834;
+  var _ru = (hd - rn + ps) * 1.02;
+  var _rp = (hd + rn + ps) * 1.02;
+  var pj = Math.abs(sh * zh / Math.sqrt(s2 + z2));
+  var r = rm + rn;
+  var dd = z1 - x0;
+  dd = dd * dd - ((z2 - (r * r)) * dd / zh);
+
+  if (dd < 0.0)
+    return -99.0;
+
+  var zd = Math.sqrt(dd);
+
+  var mg = (rm + rn - pj) / (2.0 * rn);
+
+  return mg;
+}
+
+/**
+ * Helper function for mag_solar_eclipse
+ */
+function magSolarEclipse_L7390(x, y, igday, gmonth, gyear, tm, glong, glat, hp) {
+  var paa = ecRA(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var qaa = ecDec(degrees(x), 0.0, 0.0, degrees(y), 0.0, 0.0, igday, gmonth, gyear);
+  var xaa = rightAscensionToHourAngle(decimalDegreesToDegreeHours(paa), 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var pbb = parallaxHA(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var qbb = parallaxDec(xaa, 0.0, 0.0, qaa, 0.0, 0.0, paTypes.CoordinateType.True, glat, 0.0, degrees(hp));
+  var xbb = hourAngleToRightAscension(pbb, 0.0, 0.0, tm, 0.0, 0.0, 0, 0, igday, gmonth, gyear, glong);
+  var p = paUtils.degreesToRadians(eqeLong(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+  var q = paUtils.degreesToRadians(eqeLat(xbb, 0.0, 0.0, qbb, 0.0, 0.0, igday, gmonth, gyear));
+
+  return [paa, qaa, xaa, pbb, qbb, xbb, p, q];
+}
+
 
 module.exports = {
   HMStoDH,
@@ -4908,6 +5460,8 @@ module.exports = {
   moonRiseLCT_L6700,
   utDayAdjust,
   fPart,
+  eqeLat,
+  eqeLong,
   moonRiseLcDMY,
   moonRiseLcDMY_L6680,
   moonRiseLcDMY_L6700,
@@ -4931,5 +5485,15 @@ module.exports = {
   utEndUmbraLunarEclipse,
   utStartTotalLunarEclipse,
   utEndTotalLunarEclipse,
-  magLunarEclipse
+  magLunarEclipse,
+  solarEclipseOccurrence,
+  solarEclipseOccurrence_L6855,
+  utMaxSolarEclipse,
+  utMaxSolarEclipse_L7390,
+  utFirstContactSolarEclipse,
+  utFirstContactSolarEclipse_L7390,
+  utLastContactSolarEclipse,
+  utLastContactSolarEclipse_L7390,
+  magSolarEclipse,
+  magSolarEclipse_L7390
 };
