@@ -16,6 +16,12 @@ const CoordinateType = {
     Apparent: 'Apparent'
 };
 
+const LunarEclipseOccurrence = {
+    None: "No lunar eclipse",
+    Possible: "Lunar eclipse possible",
+    Certain: "Lunar eclipse certain"
+};
+
 const RiseSetCalcStatus = {
     OK: 'OK',
     ConversionWarning: 'GST to UT conversion warning'
@@ -52,6 +58,7 @@ module.exports = {
     AccuracyLevel,
     AngleMeasure,
     CoordinateType,
+    LunarEclipseOccurrence,
     RiseSetCalcStatus,
     RiseSetStatus,
     TwilightStatus,
