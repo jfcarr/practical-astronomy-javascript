@@ -1,6 +1,6 @@
 {
   "name": "practical-astronomy-javascript",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Implementation of algorithms from Practical Astronomy For Your Calculator or Spreadsheet",
   "main": "src/index.js",
   "scripts": {
