@@ -12,7 +12,7 @@ npm install practical-astronomy-javascript
 
 ## Usage
 
-Example: Calculate date of Easter for 2024.
+### Example 1: Calculate date of Easter for 2024.
 
 Create client.js:
 
@@ -32,6 +32,52 @@ Result:
 
 ```
 [ 3, 31, 2024 ]
+```
+
+### Example 2: Get detailed information about the April 8 solar eclipse, for West Alexandria, Ohio
+
+Create client.js:
+
+```javascript
+const pa = require('practical-astronomy-javascript');
+
+// Information about the observer location
+var monthOfObservation = 4;
+var dayOfObservation = 8;
+var yearOfObservation = 2024;
+var isDaylightSavings = true;
+var zoneCorrectionHours = 5;
+var observerLatitude = 39.74722;
+var observerLongitude = -84.53639;
+
+var [solarEclipseCertainDateDay, solarEclipseCertainDateMonth, solarEclipseCertainDateYear, utFirstContactHour, utFirstContactMinutes, utMidEclipseHour, utMidEclipseMinutes, utLastContactHour, utLastContactMinutes, eclipseMagnitude] = pa.paEclipses.solarEclipseCircumstances(dayOfObservation, monthOfObservation, yearOfObservation, isDaylightSavings, zoneCorrectionHours, observerLongitude, observerLatitude);
+
+// Results are in universal time, so adjust them for the observer's time zone
+utFirstContactHour = utFirstContactHour - ((isDaylightSavings) ? zoneCorrectionHours - 1 : zoneCorrectionHours);
+utMidEclipseHour = utMidEclipseHour - ((isDaylightSavings) ? zoneCorrectionHours - 1 : zoneCorrectionHours);
+utLastContactHour = utLastContactHour - ((isDaylightSavings) ? zoneCorrectionHours - 1 : zoneCorrectionHours);
+
+console.log(`Date of eclipse:        ${solarEclipseCertainDateMonth}/${solarEclipseCertainDateDay}/${solarEclipseCertainDateYear}`);
+console.log(`First contact:          ${utFirstContactHour}:${utFirstContactMinutes}`);
+console.log(`Mid-eclipse (totality): ${utMidEclipseHour}:${utMidEclipseMinutes}`);
+console.log(`Last contact:           ${utLastContactHour}:${utLastContactMinutes}`);
+console.log(`Magnitude of eclipse:   ${eclipseMagnitude}`);
+```
+
+Run it:
+
+```bash
+node client.js
+```
+
+Result:
+
+```
+Date of eclipse:        4/8/2024
+First contact:          13:55
+Mid-eclipse (totality): 15:11
+Last contact:           16:27
+Magnitude of eclipse:   1.006
 ```
 
 ## Links
